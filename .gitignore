@@ -1,0 +1,88 @@
+############################################################
+# Generic .gitignore (no stack-specific rules)
+# Focus: OS artifacts and IDE/editor files
+############################################################
+
+# ------------------------------
+# macOS system files
+# ------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fseventsd
+*.icloud
+
+# ------------------------------
+# Windows system files
+# ------------------------------
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+System Volume Information/
+
+# ------------------------------
+# Common IDEs and editors
+# ------------------------------
+# VS Code
+.vscode/
+.vscode-test/
+*.code-workspace
+
+# JetBrains / IntelliJ / WebStorm / PyCharm, etc.
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse / CDT
+.project
+.classpath
+.settings/
+.cproject
+
+# Xcode (project-local user settings)
+*.xcuserdatad/
+*.xcscmblueprint
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Neovim
+*.swp
+*.swo
+.vim/
+
+# Emacs
+*~
+\#*\#
+.emacs.d/
+
+# Other editor/OS backups and temp files
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
+*.backup
+~$*
+
+# ------------------------------
+# Logs (generic)
+# ------------------------------
+*.log
+logs/
+log/
+
+# ------------------------------
+# Archives (generic)
+# ------------------------------
+*.zip
+*.tar
+*.gz
+*.tgz
+
