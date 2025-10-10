@@ -59,3 +59,32 @@ Die Entwicklung erfolgt auf *Feature-Branches*, die jeweils einem bestimmten Iss
 
 Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem Rückfragen, Abstimmungen und Diskussionen zu Aufgaben stattfinden. So bleibt die Zusammenarbeit strukturiert, und alle Teammitglieder können jederzeit den aktuellen Stand einsehen.
 
+### Funktionale Anforderungen
+
+- Benutzer können persönliche Aufgaben erstellen, bearbeiten, löschen und kategorisieren.
+- Aufgaben können mit Titel, Frist, Priorität und Notizen versehen werden.
+- Nutzer können parallel mehrere Lernziele verwalten und deren Fortschritt überblicken.
+- Unterstützung individueller und Gruppen-Aufgabenverwaltung: persönliche Aufgaben planen und in kleinen Studiengruppen zusammenarbeiten.
+- Nutzer können Gruppen erstellen, beitreten, Mitglieder einladen und Aufgaben zuweisen.
+- Rollen- und Rechteverwaltung zur Unterscheidung von Mitgliedern und Administratoren mit klarer Aufgabenverteilung und Gruppenmoderation.
+- Aufgabenbezogene Kommunikation: Kommentarfunktionen und Messaging zur engen Verzahnung von Diskussion und Arbeit.
+- Aufgaben und Gruppenaktivitäten sind an bestimmte Termine gebunden mit Hervorhebung von anstehenden und überfälligen Fristen.
+- Unterstützende, nicht aufdringliche Erinnerungen und Benachrichtigungen.
+- Export von Aufgabenplänen und Zeitplänen als PDF oder Kalenderdatei (ICS).
+- Zugriff und Nutzung über Webbrowser auf verschiedenen Endgeräten (PC, Tablet, Smartphone) sowie mobile Nutzung.
+- Fortschrittsstatus für Aufgaben (offen, in Bearbeitung, erledigt) zur Unterstützung von Priorisierung und Zeitmanagement.
+- Gamification-Elemente wie Fortschrittspunkte oder Abzeichen zur Motivation, ohne vom Lernziel abzulenken.
+
+### Nicht-funktionale Anforderungen
+
+- **Simplicity and Usability:** Intuitive, logische Benutzeroberfläche, die schnelle, einfache Bedienung ohne Schulungsbedarf ermöglicht.
+- **Accessibility:** Plattformübergreifende Zugänglichkeit auf Web, Mobile und potenziell Desktop, inklusive Barrierefreiheit.
+- **Reliability:** Hohe Verfügbarkeit und Stabilität, mit Fehlertoleranz und Verlässlichkeit im Betrieb.
+- **Maintainability:** Modularer Designansatz für erweiterbare und wartbare Architektur.
+- **Performance:** Schnelle Ladezeiten und reaktionsfähige Bedienung, auch bei höheren Benutzerzahlen.
+- **Security:** Schutz der Nutzerdaten sowie sichere Authentifizierung und Zugriffskontrolle.
+- **Testability:** Klare Modulgrenzen und Schnittstellen zur einfachen Testdurchführung.
+- **Portability:** Plattformübergreifende Nutzbarkeit sowie leichte Integration in bestehende Lern-Workflows durch Exportisierung.
+- **Integration:** Unterstützung zukünftiger Integration mit externen Lernplattformen und institutionellen Systemen.
+  
+
