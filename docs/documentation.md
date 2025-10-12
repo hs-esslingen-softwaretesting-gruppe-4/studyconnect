@@ -88,3 +88,10 @@ Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem R�
 - **Integration:** Unterstützung zukünftiger Integration mit externen Lernplattformen und institutionellen Systemen.
   
 
+### Systemkontext-Diagramm
+Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem StudyConnect-System und anderen Systemen oder Akteuren dar.
+
+![System context diagramm](images/system-context.drawio.png)
+<p align="center">
+  <em>Systemkontext-Diagramm</em>
+</p>
