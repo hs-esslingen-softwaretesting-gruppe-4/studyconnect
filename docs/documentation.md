@@ -95,3 +95,41 @@ Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem Stu
 <p align="center">
   <em>Systemkontext-Diagramm</em>
 </p>
+
+### Quality Model
+
+#### 4 major Quality apsects
+
+- Usability
+
+![System context diagramm](images/Usability-model.drawio.png)
+<p align="center">
+  <em>Usability quality model</em>
+</p>
+
+- Security
+
+![System context diagramm](images/Security-model.drawio.png)
+<p align="center">
+  <em>Security quality model</em>
+</p>
+
+- Portability
+
+![System context diagramm](images/Portability-model.drawio.png)
+<p align="center">
+  <em>Portability quality model</em>
+</p>
+
+- Efficiency
+
+![System context diagramm](images/Efficiency-model.drawio.png)
+<p align="center">
+  <em>Efficiency quality model</em>
+</p>v
+
+
+#### Quality aspect of testability
+
+- Wie einfach kann man die Requirements testen.
+- Lassen sich die Tests automtisieren oder sind sie aufwändig.
