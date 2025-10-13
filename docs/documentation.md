@@ -86,19 +86,10 @@ Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem R�
 - **Testability:** Klare Modulgrenzen und Schnittstellen zur einfachen Testdurchführung.
 - **Portability:** Plattformübergreifende Nutzbarkeit sowie leichte Integration in bestehende Lern-Workflows durch Exportisierung.
 - **Integration:** Unterstützung zukünftiger Integration mit externen Lernplattformen und institutionellen Systemen.
-  
-
-### Systemkontext-Diagramm
-Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem StudyConnect-System und anderen Systemen oder Akteuren dar.
-
-![System context diagramm](images/system-context.drawio.png)
-<p align="center">
-  <em>Systemkontext-Diagramm</em>
-</p>
-
+ 
 ### Quality Model
 
-#### 4 major Quality apsects
+#### 4 major Quality aspects
 
 - Usability
 
@@ -126,10 +117,19 @@ Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem Stu
 ![System context diagramm](images/Efficiency-model.drawio.png)
 <p align="center">
   <em>Efficiency quality model</em>
-</p>v
+</p>
 
 
 #### Quality aspect of testability
 
-- Wie einfach kann man die Requirements testen.
-- Lassen sich die Tests automtisieren oder sind sie aufwändig.
+- Tests von Anfang an mit in den Code einbringen.
+- Kritische Funktionen auf Testbarkeit prüfen und für bessere Testbarkeit modifizieren falls möglich.
+- Lauffähige Applikations-Versionen während der Entwicklung starten und testen.
+
+### Systemkontext-Diagramm
+Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem StudyConnect-System und anderen Systemen oder Akteuren dar.
+
+![System context diagramm](images/system-context.drawio.png)
+<p align="center">
+  <em>Systemkontext-Diagramm</em>
+</p>
