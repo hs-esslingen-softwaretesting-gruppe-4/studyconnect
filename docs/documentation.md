@@ -133,3 +133,13 @@ Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem Stu
 <p align="center">
   <em>Systemkontext-Diagramm</em>
 </p>
+
+### Use-Case-Diagramm
+Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zur visuellen Veranschaulichung dargestellt. 
+
+![Uce-Case-Diagramm: task-management](images/Use-case-Task-Management.png)
+<p align="center">
+  <em>Use-case-Diagramm</em>
+</p>
+
+Die Use-Case Beschreibung für dieses Diagramm kann unter dem Ordner use-cases gefunden werden.
