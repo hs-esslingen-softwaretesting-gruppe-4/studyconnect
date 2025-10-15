@@ -14,7 +14,7 @@
 
 ### Triggering Event:
 
-    Der Aktuer öffnet eine bestehende Aufgabe und wählt eine Option zur Statusänderung.
+    Der Benutzer öffnet eine bestehende Aufgabe und wählt eine Option zur Statusänderung.
 
 ### Inputs:
 
@@ -30,9 +30,9 @@
 
 ### Process Description:
 
-    1. Der Aktuer navigiert sich zur Detailsicht der Aufgabe, das system zeigt den aktuellen Status der Aufgabe an.
-    2. Der Aktuer ändert den Fortschrittsstatus auf den gewünschten neuen Wert und das System validiert den neuen Status.
-    3.Der Aktuer bestätigt die Statusänderung, das System aktualisiert den Fortschrittsstatus der Aufgabe im Aufgabendatensatz.
+    1. Der Benutzer navigiert sich zur Detailsicht der Aufgabe, das system zeigt den aktuellen Status der Aufgabe an.
+    2. Der Benutzer ändert den Fortschrittsstatus auf den gewünschten neuen Wert und das System validiert den neuen Status.
+    3.Der Benutzer bestätigt die Statusänderung, das System aktualisiert den Fortschrittsstatus der Aufgabe im Aufgabendatensatz.
     4. Das Systemm bestätigt die erfolgreiche Aktualisierung und zeigt den neuen Status an.
 
 ### Exceptions:
