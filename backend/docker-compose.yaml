@@ -1,6 +1,6 @@
 services:
   postgres_dev:
-    container_name: 'postgres-studyconnect-dev'
+    container_name: 'postgres-studyconnect-prod'
     image: 'postgres:latest'
     environment:
       - POSTGRES_DB=${POSTGRES_DB}

@@ -143,3 +143,121 @@ Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zu
 </p>
 
 Die Use-Case Beschreibung für dieses Diagramm kann unter dem Ordner use-cases gefunden werden.
+
+### Die Anwendung starten
+
+#### Installation der erforderlichen Voraussetzungen für das Backend
+
+Kurzübersicht — Was installiert werden sollte
+
+- Java Development Kit (JDK) 21
+- Apache Maven (alternativ: Maven Wrapper, siehe weiter unten)
+- Docker CLI und Docker Compose (empfohlen, erleichtert das Aufsetzen einer lokalen Datenbank)
+
+Hinweis: Statt Docker kann auch eine bestehende Datenbank verwendet werden, dann müssen jedoch manuelle Anpassungen an der Konfiguration vorgenommen werden (siehe Abschnitt „Alternative: eigene Datenbank verwenden“). Diese Option wird nicht empfohlen.
+
+Schritte (high-level)
+
+1. JDK 21 installieren
+
+  - Installieren Sie ein Java Development Kit in der Version 21 (z. B. Temurin, OpenJDK, Azul). Stellen Sie sicher, dass es sich um ein JDK (nicht nur eine JRE) handelt.
+  - Setzen Sie anschließend die Umgebungsvariable `JAVA_HOME` auf den Installationspfad und fügen Sie die `bin`-Unterordner zum `PATH` hinzu (Windows: Systemeigenschaften → Umgebungsvariablen).
+
+2. Apache Maven (oder Maven Wrapper)
+
+  - Installieren Sie Apache Maven, oder verwenden Sie den im Projekt vorhandenen Maven Wrapper. Der Wrapper (`mvnw` / `mvnw.cmd`) erlaubt es, das Projekt zu bauen, ohne Maven systemweit zu installieren.
+
+3. Docker (empfohlen)
+
+  - Installieren Sie die Docker-CLI und Docker Compose (unter Windows typischerweise über Docker Desktop). Das ist empfohlen, da das Projekt eine PostgreSQL-Datenbank benötigt und Docker-Compose das lokale Starten einer Datenbank stark vereinfacht.
+
+4. Projekt-Ordner und Build
+
+  - Öffnen Sie eine Eingabeaufforderung oder PowerShell und wechseln Sie in das Verzeichnis `backend`, in dem sich die `pom.xml` befindet.
+  - Führen Sie dort einen Build aus, z. B. mit dem Maven Wrapper oder Ihrer systemweiten Maven-Installation:
+
+    - Auf Windows mit Wrapper: `mvnw.cmd install`
+    - Oder mit installiertem Maven: `mvn install`
+
+Alternative: eigene Datenbank verwenden (nicht empfohlen)
+
+- Falls Sie Docker nicht verwenden möchten, können Sie eine externe PostgreSQL-Datenbank zur Verfügung stellen. In diesem Fall müssen Sie die Datenbankverbindungsdaten (URL, Benutzername, Passwort) in der Anwendung konfigurieren.
+- Passen Sie die `.env`-Datei im Ordner backend an, sowie gegebenenfalls die Datei(en) `src/main/resources/application.properties` (oder `application-dev.properties`), damit die Anwendung die richtige Datenbank erreicht. Achten Sie auf die korrekten JDBC-URL-Formate und auf die Übereinstimmung der verwendeten Ports.
+
+Kurze Hinweise / Best Practices
+
+- Verwenden Sie den Maven Wrapper (`mvnw` / `mvnw.cmd`) wenn möglich — dann ist keine separate Maven-Installation nötig.
+- Docker Desktop für Windows enthält sowohl die Docker-Engine als auch Compose-Unterstützung und ist die einfachste Möglichkeit, eine lokale PostgreSQL-Instanz zu betreiben.
+- Stellen Sie sicher, dass `JAVA_HOME` auf JDK 21 zeigt; sonst kann es beim Kompilieren und Starten zu Inkompatibilitäten kommen.
+
+#### Starten des Backends
+
+Führen Sie die folgenden Schritte im Verzeichnis `backend` aus, nachdem Sie die Voraussetzungen installiert haben:
+
+1. Kopieren Sie die Beispieldatei `.env.example` und legen Sie eine lokale `.env`-Datei an (diese enthält Umgebungsvariablen und kann bei Bedarf angepasst werden).
+
+   - Beispiel (PowerShell):
+
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+
+   - Beispiel (Unix / Bash):
+
+     ```sh
+     cp .env.example .env
+     ```
+
+2. Starten Sie die Anwendung mit Maven:
+
+   - Mit installiertem Maven:
+
+     ```sh
+     mvn spring-boot:run
+     ```
+
+   - Oder mit dem Projekt-Maven-Wrapper (Windows):
+
+     ```powershell
+     .\mvnw.cmd spring-boot:run
+     ```
+
+Hinweis: Beim ersten Start lädt Maven die benötigten Abhängigkeiten herunter; falls Sie Docker verwenden, werden auch die benötigten Images gezogen. Der erste Start kann deshalb mehrere Minuten dauern. Warten Sie, bis in den Logs steht, dass die Anwendung erfolgreich gestartet wurde (z. B. eine Zeile mit "Started StudyconnectApplication").
+
+Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie zunächst:
+
+- Ob Docker Desktop (bei Verwendung von Docker) läuft und die DB-Container gestartet sind.
+- Ob die Einstellungen in der `.env`-Datei und gegebenenfalls in `src/main/resources/application.properties` korrekt sind (JDBC-URL, Benutzer, Passwort, Ports).
+
+#### Starten von Tests im Backend
+
+Bevor Sie die Tests ausführen, bitte beachten Sie die folgende wichtige Warnung:
+
+- Die Maven-Surefire-Phase **startet keine Docker-Container**. Stellen Sie sicher, dass eine PostgreSQL-Datenbank läuft und die Zugangsdaten mit Ihrer `.env`-Datei übereinstimmen, sonst schlagen die Tests wegen fehlender Datenbankverbindung fehl.
+
+  - Dafür können Sie entweder die Datenbank-Container per Docker Compose im `backend`-Ordner starten:
+
+    ```sh
+    docker compose up -d
+    ```
+  
+  - Oder Sie starten die Anwendung vorab, das erstellt die nötigen Docker-Container:
+
+    ```sh
+    mvn spring-boot:run
+    ```
+
+   
+
+Tests ausführen
+
+- Führen Sie die Tests mit Maven aus:
+
+  ```sh
+  mvn test
+  ```
+
+- Hinweis: Stellen Sie sicher, dass die Datenbank erreichbar ist, bevor Sie `mvn test` starten. Andernfalls werden Integrationstests fehlschlagen.
+
+
+
