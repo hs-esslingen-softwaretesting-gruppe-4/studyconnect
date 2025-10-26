@@ -184,12 +184,6 @@ Alternative: eigene Datenbank verwenden (nicht empfohlen)
 - Falls Sie Docker nicht verwenden möchten, können Sie eine externe PostgreSQL-Datenbank zur Verfügung stellen. In diesem Fall müssen Sie die Datenbankverbindungsdaten (URL, Benutzername, Passwort) in der Anwendung konfigurieren.
 - Passen Sie die `.env`-Datei im Ordner backend an, sowie gegebenenfalls die Datei(en) `src/main/resources/application.properties` (oder `application-dev.properties`), damit die Anwendung die richtige Datenbank erreicht. Achten Sie auf die korrekten JDBC-URL-Formate und auf die Übereinstimmung der verwendeten Ports.
 
-Kurze Hinweise / Best Practices
-
-- Verwenden Sie den Maven Wrapper (`mvnw` / `mvnw.cmd`) wenn möglich — dann ist keine separate Maven-Installation nötig.
-- Docker Desktop für Windows enthält sowohl die Docker-Engine als auch Compose-Unterstützung und ist die einfachste Möglichkeit, eine lokale PostgreSQL-Instanz zu betreiben.
-- Stellen Sie sicher, dass `JAVA_HOME` auf JDK 21 zeigt; sonst kann es beim Kompilieren und Starten zu Inkompatibilitäten kommen.
-
 #### Starten des Backends
 
 Führen Sie die folgenden Schritte im Verzeichnis `backend` aus, nachdem Sie die Voraussetzungen installiert haben:
@@ -258,6 +252,3 @@ Tests ausführen
   ```
 
 - Hinweis: Stellen Sie sicher, dass die Datenbank erreichbar ist, bevor Sie `mvn test` starten. Andernfalls werden Integrationstests fehlschlagen.
-
-
-
