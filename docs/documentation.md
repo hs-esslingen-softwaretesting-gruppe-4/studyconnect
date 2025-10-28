@@ -244,6 +244,16 @@ Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserReposit
 
 Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene.
 
+
+
+
+
+
+
+
+
+
+
 #### `TaskRepositoryTest` (Kurzbeschreibung)
 
 Die Klasse `TaskRepositoryTest` enthält mehrere JPA-Tests für die `Task`-Entity und das zugehörige `TaskRepository`.
