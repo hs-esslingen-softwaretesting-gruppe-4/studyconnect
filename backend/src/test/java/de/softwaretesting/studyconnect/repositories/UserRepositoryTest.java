@@ -21,10 +21,10 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Test
     /**
      * Tests that a User with valid data can be created and saved successfully.
      */
+    @Test
     void shouldCreateAndSaveUserWithValidData() {
 
         // Arrange & Act
@@ -43,10 +43,10 @@ class UserRepositoryTest {
         assertEquals("Doe", saved.getLastname());
     }
 
-    @Test
     /**
      * Tests that saving a User with a null email field fails due to the not-null constraint.
      */
+    @Test
     void shouldFailToSaveUserWhenEmailIsNull() {
         // Arrange
         User user = new User();
@@ -60,10 +60,10 @@ class UserRepositoryTest {
                 () -> userRepository.saveAndFlush(user));
     }
 
-    @Test
     /**
      * Tests that saving a User with a null surname field fails due to the not-null constraint.
      */
+    @Test
     void shouldFailToSaveUserWhenSurnameIsNull() {
         // Arrange
         User user = new User();
@@ -77,10 +77,10 @@ class UserRepositoryTest {
                 () -> userRepository.saveAndFlush(user));
     }
 
-    @Test
     /**
      * Tests that saving a User with a null lastname field fails due to the not-null constraint.
      */
+    @Test
     void shouldFailToSaveUserWhenLastnameIsNull() {
         // Arrange
         User user = new User();
@@ -94,10 +94,10 @@ class UserRepositoryTest {
                 () -> userRepository.saveAndFlush(user));
     }
 
-    @Test
     /**
      * Tests that saving a User with a null createdAt field fails due to the not-null constraint.
      */
+    @Test
     void shouldFailToSaveUserWhenCreatedAtIsNull() {
         // Arrange
         User user = new User();
@@ -112,10 +112,10 @@ class UserRepositoryTest {
                 () -> userRepository.saveAndFlush(user));
     }
 
-    @Test
     /**
      * Tests that saving a User with a duplicate Keycloak UUID fails due to the unique constraint.
      */
+    @Test
     void shouldFailToSaveUserWithDuplicateKeycloakUUID() {
         User user1 = new User();
         user1.setEmail("user1@example.com");
