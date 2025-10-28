@@ -244,4 +244,12 @@ Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserReposit
 
 Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene.
 
+#### `GroupRepositoryTest` (Kurzbeschreibung)
 
+Die Klasse `GroupRepositoryTest` enthält mehrere JPA-Tests für die `GroupRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
+
+- `shouldCreateAndSaveGroupWithValidData` — prüft, dass eine gültige Group gespeichert werden kann und dass Felder wie `id`, `name`, `visibility`, `createdBy`, `createdAt`, `updatedAt`, `admin` und `members` korrekt gesetzt sind.
+- `shouldFailToSaveGroupWhenNameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn name null ist (NOT NULL Constraint).
+- `shouldFailToSaveGroupWhenVisibilityIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `visibility` null ist.
+- `shouldFailToSaveGroupWhenCreatedOrUpdatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` oder `updatedAt` null ist.
+- `shouldNotExceedMaxMembers` — prüft die `addMember`-Logik und stellt sicher, dass die Anzahl der Mitglieder nicht automatisch das `maxMembers`-Limit überschreitet, wenn Mitglieder manuell hinzugefügt werden. Dieser Test zeigt, dass die Begrenzung auf Entitätsebene programmgesteuert durchgesetzt werden muss und nicht automatisch von der Datenbank kommt.
