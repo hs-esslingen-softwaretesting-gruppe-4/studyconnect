@@ -184,12 +184,6 @@ Alternative: eigene Datenbank verwenden (nicht empfohlen)
 - Falls Sie Docker nicht verwenden möchten, können Sie eine externe PostgreSQL-Datenbank zur Verfügung stellen. In diesem Fall müssen Sie die Datenbankverbindungsdaten (URL, Benutzername, Passwort) in der Anwendung konfigurieren.
 - Passen Sie die `.env`-Datei im Ordner backend an, sowie gegebenenfalls die Datei(en) `src/main/resources/application.properties` (oder `application-dev.properties`), damit die Anwendung die richtige Datenbank erreicht. Achten Sie auf die korrekten JDBC-URL-Formate und auf die Übereinstimmung der verwendeten Ports.
 
-Kurze Hinweise / Best Practices
-
-- Verwenden Sie den Maven Wrapper (`mvnw` / `mvnw.cmd`) wenn möglich — dann ist keine separate Maven-Installation nötig.
-- Docker Desktop für Windows enthält sowohl die Docker-Engine als auch Compose-Unterstützung und ist die einfachste Möglichkeit, eine lokale PostgreSQL-Instanz zu betreiben.
-- Stellen Sie sicher, dass `JAVA_HOME` auf JDK 21 zeigt; sonst kann es beim Kompilieren und Starten zu Inkompatibilitäten kommen.
-
 #### Starten des Backends
 
 Führen Sie die folgenden Schritte im Verzeichnis `backend` aus, nachdem Sie die Voraussetzungen installiert haben:
@@ -229,35 +223,25 @@ Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie 
 - Ob Docker Desktop (bei Verwendung von Docker) läuft und die DB-Container gestartet sind.
 - Ob die Einstellungen in der `.env`-Datei und gegebenenfalls in `src/main/resources/application.properties` korrekt sind (JDBC-URL, Benutzer, Passwort, Ports).
 
-#### Starten von Tests im Backend
+### Starten von Tests im Backend
 
-Bevor Sie die Tests ausführen, bitte beachten Sie die folgende wichtige Warnung:
+Die Tests laufen lokal standardmäßig gegen eine H2 In-Memory-Datenbank. Die Konfiguration befindet sich in `backend/src/main/resources/application-test.properties`.
 
-- Die Maven-Surefire-Phase **startet keine Docker-Container**. Stellen Sie sicher, dass eine PostgreSQL-Datenbank läuft und die Zugangsdaten mit Ihrer `.env`-Datei übereinstimmen, sonst schlagen die Tests wegen fehlender Datenbankverbindung fehl.
+Führen Sie alle implementierten Tests mit `mvn test` aus, alternativ mit `.\mvnw.cmd test`.
 
-  - Dafür können Sie entweder die Datenbank-Container per Docker Compose im `backend`-Ordner starten:
+### Test-Cases
 
-    ```sh
-    docker compose up -d
-    ```
-  
-  - Oder Sie starten die Anwendung vorab, das erstellt die nötigen Docker-Container:
+#### `UserRepositoryTest` (Kurzbeschreibung)
 
-    ```sh
-    mvn spring-boot:run
-    ```
+Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
 
-   
+- `shouldCreateAndSaveUserWithValidData` — prüft, dass ein gültiger `User` gespeichert werden kann und dass Felder wie `id`, `email`, `surname` und `lastname` korrekt gesetzt sind.
+- `shouldFailToSaveUserWhenEmailIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `email` null ist (NOT NULL Constraint).
+- `shouldFailToSaveUserWhenSurnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `surname` null ist.
+- `shouldFailToSaveUserWhenLastnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `lastname` null ist.
+- `shouldFailToSaveUserWhenCreatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` null ist.
+- `shouldFailToSaveUserWithDuplicateKeycloakUUID` — legt einen User mit einer `keycloakUUID` an und prüft, dass das Anlegen eines zweiten Users mit derselben UUID aufgrund der Unique-Constraint fehlschlägt.
 
-Tests ausführen
-
-- Führen Sie die Tests mit Maven aus:
-
-  ```sh
-  mvn test
-  ```
-
-- Hinweis: Stellen Sie sicher, dass die Datenbank erreichbar ist, bevor Sie `mvn test` starten. Andernfalls werden Integrationstests fehlschlagen.
-
+Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene.
 
 
