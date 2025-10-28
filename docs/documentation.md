@@ -223,32 +223,25 @@ Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie 
 - Ob Docker Desktop (bei Verwendung von Docker) läuft und die DB-Container gestartet sind.
 - Ob die Einstellungen in der `.env`-Datei und gegebenenfalls in `src/main/resources/application.properties` korrekt sind (JDBC-URL, Benutzer, Passwort, Ports).
 
-#### Starten von Tests im Backend
+### Starten von Tests im Backend
 
-Bevor Sie die Tests ausführen, bitte beachten Sie die folgende wichtige Warnung:
+Die Tests laufen lokal standardmäßig gegen eine H2 In-Memory-Datenbank. Die Konfiguration befindet sich in `backend/src/main/resources/application-test.properties`.
 
-- Die Maven-Surefire-Phase **startet keine Docker-Container**. Stellen Sie sicher, dass eine PostgreSQL-Datenbank läuft und die Zugangsdaten mit Ihrer `.env`-Datei übereinstimmen, sonst schlagen die Tests wegen fehlender Datenbankverbindung fehl.
+Führen Sie alle implementierten Tests mit `mvn test` aus, alternativ mit `.\mvnw.cmd test`.
 
-  - Dafür können Sie entweder die Datenbank-Container per Docker Compose im `backend`-Ordner starten:
+### Test-Cases
 
-    ```sh
-    docker compose up -d
-    ```
-  
-  - Oder Sie starten die Anwendung vorab, das erstellt die nötigen Docker-Container:
+#### `UserRepositoryTest` (Kurzbeschreibung)
 
-    ```sh
-    mvn spring-boot:run
-    ```
+Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
 
-   
+- `shouldCreateAndSaveUserWithValidData` — prüft, dass ein gültiger `User` gespeichert werden kann und dass Felder wie `id`, `email`, `surname` und `lastname` korrekt gesetzt sind.
+- `shouldFailToSaveUserWhenEmailIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `email` null ist (NOT NULL Constraint).
+- `shouldFailToSaveUserWhenSurnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `surname` null ist.
+- `shouldFailToSaveUserWhenLastnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `lastname` null ist.
+- `shouldFailToSaveUserWhenCreatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` null ist.
+- `shouldFailToSaveUserWithDuplicateKeycloakUUID` — legt einen User mit einer `keycloakUUID` an und prüft, dass das Anlegen eines zweiten Users mit derselben UUID aufgrund der Unique-Constraint fehlschlägt.
 
-Tests ausführen
+Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene.
 
-- Führen Sie die Tests mit Maven aus:
 
-  ```sh
-  mvn test
-  ```
-
-- Hinweis: Stellen Sie sicher, dass die Datenbank erreichbar ist, bevor Sie `mvn test` starten. Andernfalls werden Integrationstests fehlschlagen.
