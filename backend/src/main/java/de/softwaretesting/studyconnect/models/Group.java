@@ -12,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,11 +36,11 @@ public class Group {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "visibility", nullable = false)
-    private String visibility; // "PRIVATE" oder "PUBLIC"
-
     @Column(name = "max_members", nullable = false)
     private Integer maxMembers = 20;
+
+    @Column(name = "visibility", nullable = false)
+    private String visibility; // "PRIVATE" oder "PUBLIC"
 
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
@@ -60,4 +62,22 @@ public class Group {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private User admin;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean addMember(User user) {
+        if (this.members.size() >= this.maxMembers) {
+            return false;
+        }
+        return this.members.add(user);
+    }
 }
