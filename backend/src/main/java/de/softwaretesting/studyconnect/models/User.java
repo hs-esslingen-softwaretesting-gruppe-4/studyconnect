@@ -1,5 +1,7 @@
 package de.softwaretesting.studyconnect.models;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,4 +33,8 @@ public class User {
 
     @Column(name = "lastname", nullable = false)
     private String lastname;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
 }
