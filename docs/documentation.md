@@ -254,6 +254,19 @@ Die Klasse `GroupRepositoryTest` enthält mehrere JPA-Tests für die `GroupRepos
 - `shouldFailToSaveGroupWhenCreatedOrUpdatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` oder `updatedAt` null ist.
 - `shouldNotExceedMaxMembers` — prüft die `addMember`-Logik und stellt sicher, dass die Anzahl der Mitglieder nicht automatisch das `maxMembers`-Limit überschreitet, wenn Mitglieder manuell hinzugefügt werden. Dieser Test zeigt, dass die Begrenzung auf Entitätsebene programmgesteuert durchgesetzt werden muss und nicht automatisch von der Datenbank kommt.
 
+#### `TaskRepositoryTest` (Kurzbeschreibung)
+
+Die Klasse `TaskRepositoryTest` enthält mehrere JPA-Tests für die `Task`-Entity und das zugehörige `TaskRepository`.
+Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
+
+- `shouldCreateAndSaveTaskWithValidData` — prüft, dass eine gültige `Task`-Instanz gespeichert werden kann; Validierung von Default-Feldern wie `priority` (MEDIUM) und `status` (OPEN) sowie automatische `createdAt`-Setzung durch JPA-Lifecycle-Callbacks.
+- `shouldEnforceTitleNotNull` — erwartet eine `DataIntegrityViolationException`, wenn `title` null ist (NOT NULL Constraint für die Task-Titelspalte).
+- `shouldManageAssigneesAndTagsAndRelationships` — prüft die `@ManyToOne`-Beziehung `createdBy` zum `User`, die `@ManyToMany`-Beziehung `assignees` sowie die `@ElementCollection` `tags`. Testet zusätzlich die Helper-Methoden `addAssignee`, `removeAssignee`, `addTag`, `removeTag`.
+- `shouldSupportStatusTransitionAndMarkComplete` — prüft die Statusübergänge, insbesondere die Helper-Methode `markComplete()` und die Aktualisierung von `updatedAt`.
+- `shouldDetectOverdue` — validiert die Geschäftslogik `isOverdue()` für überfällige Aufgaben (vor/nach dem Abschluss) anhand von in der Vergangenheit liegenden `dueDate`-Werten.
+- `shouldManagePriorityDefaultAndUpdates` — überprüft, dass der Standardwert für Priorität `MEDIUM` ist und dass Prioritätsänderungen (z. B. auf `HIGH`) korrekt persistiert werden.
+
+Diese Tests dokumentieren die erwarteten Verhalten der `Task`-Entity (Persistenz, Constraints, Beziehungen und Domänenlogik) und dienen als Referenz für spätere Integrationstests und Implementierungen der Service/Controller-Schicht.
 
 #### `CommentRepositoryTest` (Kurzbeschreibung)
 
