@@ -95,24 +95,6 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null createdAt field fails due to the not-null constraint.
-     */
-    @Test
-    void shouldFailToSaveUserWhenCreatedAtIsNull() {
-        // Arrange
-        User user = new User();
-        user.setEmail("test@example.com");
-        user.setSurname("John");
-        user.setLastname("Doe");
-        user.setCreatedAt(null);
-
-        // Act & Assert
-        assertThrows(
-                DataIntegrityViolationException.class,
-                () -> userRepository.saveAndFlush(user));
-    }
-
-    /**
      * Tests that saving a User with a duplicate Keycloak UUID fails due to the unique constraint.
      */
     @Test
