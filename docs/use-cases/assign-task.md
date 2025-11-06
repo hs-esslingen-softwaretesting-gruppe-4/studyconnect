@@ -14,7 +14,7 @@
 
 ### Triggering Event:
 
-    Der Gruppenadministrator wählt in der Detailsicht einer Gruppenaufgabe die Option zum "Zuweisen" oder "Verantwortlicheen festlegen".
+    Der Gruppenadministrator wählt in der Detailsicht einer Gruppenaufgabe die Option zum "Zuweisen" oder "Verantwortlichen festlegen".
 
 ### Inputs:
 
