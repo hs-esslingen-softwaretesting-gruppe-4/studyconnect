@@ -11,8 +11,7 @@ Feature: Updating task progress
         And can view the new status
 
     Scenario: Undefined status
-        When the user enters the status in the task detail view
-        And the status entered is not defined
+        When the user enters an invalid status in the task detail view
         Then the user gets an error message with defined statuses
 
     Scenario: Error when changing status

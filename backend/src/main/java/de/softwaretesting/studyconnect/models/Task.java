@@ -116,6 +116,11 @@ public class Task {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void setInProgress() {
+        this.status = Status.IN_PROGRESS;
+        this.onUpdate();
+    }
+
     public boolean isOverdue() {
         if (dueDate == null) return false;
         return status != Status.COMPLETED && dueDate.isBefore(LocalDateTime.now());
