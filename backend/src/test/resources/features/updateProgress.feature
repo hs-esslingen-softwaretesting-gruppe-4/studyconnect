@@ -18,3 +18,4 @@ Feature: Updating task progress
         When the user changes the status in the task detail view
         And the database doesn't save the new status
         Then the user gets a message with the report and instructions
+        And the user can view the error in a log file

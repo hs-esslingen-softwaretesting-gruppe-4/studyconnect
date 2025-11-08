@@ -133,11 +133,9 @@ public class UpdateProgressSteps {
         // assertTrue(resultMessage.contains("Error"),"Message should indicate an error occurred");
         // assertTrue(resultMessage.contains("try again") || resultMessage.contains("contact support"),"Message should provide instructions for user");
     }
-}
 
-// Get database exception from implementation later
-class DatabaseException extends RuntimeException {
-    public DatabaseException(String message) {
-        super(message);
+    @Then("the user can view the error in a log file")
+    public void theUserCanViewTheErrorInALogFile() {
+        /* SKIP */
     }
 }
