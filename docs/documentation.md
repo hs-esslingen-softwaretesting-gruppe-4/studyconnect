@@ -161,7 +161,10 @@ Schritte (high-level)
 1. JDK 21 installieren
 
   - Installieren Sie ein Java Development Kit in der Version 21 (z. B. Temurin, OpenJDK, Azul). Stellen Sie sicher, dass es sich um ein JDK (nicht nur eine JRE) handelt.
-  - Setzen Sie anschließend die Umgebungsvariable `JAVA_HOME` auf den Installationspfad und fügen Sie die `bin`-Unterordner zum `PATH` hinzu (Windows: Systemeigenschaften → Umgebungsvariablen).
+  - Setzen Sie anschließend die Umgebungsvariable `JAVA_HOME` auf den Installationspfad und fügen Sie die `bin`-Unterordner zum `PATH` hinzu (Windows: Systemeigenschaften → Umgebungsvariablen)
+  (Ubuntu: in /etc/profile oder als `.sh` file unter /etc/profile.d/ mit z.B. folgenden Befehlen einrichten:
+   export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+   export PATH=$PATH:$JAVA_HOME/bin).
 
 2. Apache Maven (oder Maven Wrapper)
 
@@ -177,6 +180,7 @@ Schritte (high-level)
   - Führen Sie dort einen Build aus, z. B. mit dem Maven Wrapper oder Ihrer systemweiten Maven-Installation:
 
     - Auf Windows mit Wrapper: `mvnw.cmd install`
+    - Auf Unix mit Wrapper: `./mvnw install`
     - Oder mit installiertem Maven: `mvn install`
 
 Alternative: eigene Datenbank verwenden (nicht empfohlen)
@@ -279,3 +283,25 @@ Die Klasse `CommentRepositoryTest` enthält mehrere JPA-Tests für die `CommentR
 - `shouldFailToSaveCommentWhenUpdatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `updatedAt` null ist.
 
 Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraint (NOT NULL) auf Repository-Ebene.
+
+### Tests from Gherkin Syntax with Cucumber
+
+Die Gherkin Syntax wird aus User Stories abgeleitet und unter /backend/src/test/resources/features/ abgelegt.
+Diese dient als Vorlage für Steps-Dokumente, welche die lauffähigen Test enthalten und die Bibliotheken Cucumber und Junit5 benötigen, diese wurden in der pom hinzugfügt.
+Die Steps finden sich bei /backend/src/test/java/de/.../steps/ und arbeiten mit den Schlüsselwörtern `Given`, `When`, `Then` um die Umgebung zu definieren, den genauen Testfall zu erzeugen und das erwartete Ergebnis zu prüfen. Das Ergebnis wird mit Junit5 `assert` abfragen geprüft.
+
+#### `UpdateProgressTest` (Kurzbeschreibung)
+
+Die Klasse `UpdateProgressSteps` enthält die in updateProgress.feature enthaltenen Szenarien aus der User Story update-progress.
+
+**Setup**:
+Zuerst wird in `Given the user is logged in`, `Gien the user has a task assigned` und `Given the user has the rights to change the task status` die benötigten Objekte User und Task erzeugt und ein Task dem User zugeordnet.
+
+**Tests**:
+Ertes Szenario `Change Status`. Wird der Status einer Task geändert (`When the user chagnges the status in the task detail view`), so soll der user darüber benachrichtigt werden (`Then the user gets a message of successfully changing the status`) und diese einsehen können (`Then can view the new status`).
+
+Im zweiten Szenario `Undefined Status` wird, falls der User einen invaliden Status eingibt (`When the user enters an invalid status in the task detail view`), soll er eine Fehlermeldung angezeigt bekommen (`Then the user gets an error message with defined statuses`).
+
+Szenario drei testet, dass falls bei dem ändern des Status (`When the user changes the status in the task detail view`) dies in der Datenbank nicht gespeichert wird (`When the database doesn't save the new status`), eine Fehlermeldung anezeigt wird (`Then the user gets a message with the report and instructions`) und der Fehler wird vom System protokolliert (`Then the user can view the error in a log file`).
+
+Die Tests dokumentieren die erfolgreiche Umsetzung der Features aus den Userstories. Und stellen sicher ob alle für die Userstory relevanten Funktionen richtig implementiert sind. 
