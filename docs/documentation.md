@@ -304,4 +304,70 @@ Im zweiten Szenario `Undefined Status` wird, falls der User einen invaliden Stat
 
 Szenario drei testet, dass falls bei dem ändern des Status (`When the user changes the status in the task detail view`) dies in der Datenbank nicht gespeichert wird (`When the database doesn't save the new status`), eine Fehlermeldung anezeigt wird (`Then the user gets a message with the report and instructions`) und der Fehler wird vom System protokolliert (`Then the user can view the error in a log file`).
 
-Die Tests dokumentieren die erfolgreiche Umsetzung der Features aus den Userstories. Und stellen sicher ob alle für die Userstory relevanten Funktionen richtig implementiert sind. 
+Die Tests dokumentieren die erfolgreiche Umsetzung der Features aus den Userstories. Und stellen sicher ob alle für die Userstory relevanten Funktionen richtig implementiert sind.
+
+#### `CreateTaskSteps` (Kurzbeschreibung)
+
+Die Klasse `CreateTaskStepDefinitions` enthält die in create-task.feature definierten Szenarien aus der User Story create-task.
+
+**Setup**:
+In den `Given`-Steps wird die Testumgebung vorbereitet: Ein User wird eingeloggt (`Given the user is logged in as a student`), die Systemverfügbarkeit wird geprüft (`Given the system is operational and connected to the database`), und die Task-Erstellungsseite wird aufgerufen (`Given the user navigates to the task creation page`). Für Gruppentasks wird zusätzlich die Gruppenmitgliedschaft simuliert (`Given the user is a member of the study group`).
+
+**Tests**:
+Erstes Szenario `Successfully create a personal task with only title`. Der User gibt einen Titel ein (`When the user enters "Complete assignment 3" as the task title`) und sendet das Formular ab (`When the user submits the task form`). Das System erstellt einen neuen Task in der Datenbank (`Then the system creates a new task in the database`), zeigt eine Erfolgsmeldung an (`Then the system confirms the task creation with a success message`), leitet zur Übersichtsseite weiter (`Then the user is redirected to the task overview page`), und der Task erscheint in der Liste des Users (`Then the new task "Complete assignment 3" appears in the user's task list`).
+
+Im zweiten Szenario `Successfully create a task with all details` werden alle Task-Details über eine DataTable eingegeben (`When the user enters the following task details`). Nach dem Absenden wird geprüft, dass der Task mit allen Eigenschaften korrekt gespeichert wurde (`Then the new task has the following properties`).
+
+Szenario drei `Attempt to create a task without a title` testet die Validierung. Wenn das Titel-Feld leer bleibt (`When the user leaves the title field empty`) und das Formular abgesendet wird, zeigt das System eine Fehlermeldung an (`Then the system displays an error message indicating "Title is required"`), hält das Formular zur Korrektur offen (`Then the system keeps the form open for correction`), und es wird kein Task in der Datenbank erstellt (`Then no new task is created in the database`).
+
+Szenario vier `Attempt to create a task with invalid due date format` prüft die Datumsvalidierung. Bei einem ungültigen Datumsformat (`When the user enters "next Friday" as the due date`) wird eine Fehlermeldung angezeigt (`Then the system displays an error message indicating "Invalid date format"`) und der User zur Korrektur aufgefordert (`Then the system prompts the user to correct the due date`).
+
+Das fünfte Szenario `Create a task without specifying priority` validiert die Default-Werte. Wenn keine Priorität angegeben wird (`When the user does not specify a priority`), setzt das System automatisch die Priorität auf "Medium" (`Then the new task has priority set to "Medium" by default`) und den Status auf "Open" (`Then the new task has status set to "Open" by default`).
+
+Szenario sechs `Create a task and assign it to a study group` testet Gruppentasks. Der User wählt eine Gruppe aus (`When the user selects "Software Testing Team" as the associated group`), und nach dem Absenden wird geprüft, dass der Task mit der Gruppe verknüpft ist (`Then the task is linked to the group "Software Testing Team"`) und in der Gruppenliste erscheint (`Then the task appears in the group's shared task list`).
+
+Im siebten Szenario `System fails to save task due to database error` wird die Fehlerbehandlung bei Datenbankausfällen getestet. Wenn die Datenbankverbindung nicht verfügbar ist (`Given the database connection is temporarily unavailable`), protokolliert das System den Fehler (`Then the system logs the database error`), informiert den User über das technische Problem (`Then the system displays an error message informing the user of a technical issue`), und rät zu einem späteren Versuch (`Then the user is advised to try again later`).
+
+Szenario acht `Create a task with maximum length notes` prüft die Verarbeitung von Edge-Cases. Bei Notizen mit 1000 Zeichen (`When the user enters notes of 1000 characters`) wird sichergestellt, dass der vollständige Text korrekt gespeichert wird (`Then the full notes text is stored correctly`).
+
+Das neunte Szenario `User must have task management access rights` validiert die Berechtigungsprüfung. Wenn ein User ohne entsprechende Rechte versucht, auf die Task-Erstellungsseite zuzugreifen (`When the user attempts to navigate to the task creation page`), wird der Zugriff verweigert (`Then the system denies access`) und eine entsprechende Meldung angezeigt (`Then the system displays a message "You do not have permission to create tasks"`).
+
+Die Tests dokumentieren die erfolgreiche Implementierung der Task-Erstellungs-Funktionalität mit allen zugehörigen Validierungen, Fehlerbehandlungen und Edge-Cases aus der User Story create-task.
+
+### Test-Ausführungsstrategie: BDD vs Unit Tests
+
+#### Empfehlung: Unterschiedliche Ausführungsfrequenz
+
+BDD/Acceptance Tests sollten **weniger häufig** als Unit Tests ausgeführt werden.
+
+**Hauptgründe:**
+
+1. **Geschwindigkeit**
+   - Unit Tests (z.B. `TaskRepositoryTest`): < 1 Sekunde
+   - BDD Tests (`StudyconnectCucumberTest`): 18-27 Sekunden
+   - Bei gemeinsamer Ausführung verlieren Entwickler schnelles Feedback
+
+2. **Zweck**
+   - Unit Tests: Einzelne Komponenten isoliert testen
+   - BDD Tests: End-to-End User-Szenarien validieren
+
+3. **Test-Pyramide**
+   - 70% Unit Tests → ständig ausführen (bei jedem Build)
+   - 20% Integration → bei Commits
+   - 10% BDD/E2E → bei Pull Requests und Merges
+
+**Praktische Umsetzung:**
+
+```bash
+# Entwicklung (schnell, nur Unit Tests)
+mvn test -Dtest=*RepositoryTest
+
+# Vor Push (alle Tests)
+mvn test
+
+# CI/CD Pipeline
+- Pull Request: Alle Tests (Unit + BDD)
+- Main Branch: Alle Tests
+```
+
+**Fazit:** BDD-Tests seltener ausführen, um produktiv zu bleiben. Aber **immer vor Merge/Release**, um User Stories korrekt zu validieren und Regressionen zu vermeiden. 
