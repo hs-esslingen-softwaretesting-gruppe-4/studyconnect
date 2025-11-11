@@ -84,10 +84,10 @@ public class Task {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    // Optional group association (if groups implemented later)
-    @Column(name = "group_id")
-    private Long groupId;
+    
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     // Helper methods
 
