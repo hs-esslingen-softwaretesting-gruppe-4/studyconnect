@@ -49,3 +49,4 @@ Feature: Assigning tasks within a study group
     Examples:
       | member     |
       | Bob Member |
+ 

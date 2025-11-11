@@ -1,7 +1,9 @@
 package de.softwaretesting.studyconnect.steps;
 
+import de.softwaretesting.studyconnect.models.Group;
 import de.softwaretesting.studyconnect.models.Task;
 import de.softwaretesting.studyconnect.models.User;
+import de.softwaretesting.studyconnect.repositories.GroupRepository;
 import de.softwaretesting.studyconnect.repositories.TaskRepository;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import io.cucumber.datatable.DataTable;
@@ -11,7 +13,6 @@ import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,12 @@ public class CreateTaskStepDefinitions {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private GroupRepository groupRepository;
+
     private User currentUser;
     private Task currentTask;
+    private Group currentGroup;
     private String errorMessage;
     private boolean accessDenied;
     private boolean systemOperational = true;
@@ -70,6 +75,11 @@ public class CreateTaskStepDefinitions {
     public void the_user_is_a_member_of_the_study_group(String groupName) {
         // Simuliere Gruppenmitgliedschaft (würde später über Group-Entity laufen)
         assertThat(currentUser).isNotNull();
+        currentGroup = new Group();
+        currentGroup.setName(groupName);
+        currentGroup.setCreatedBy(currentUser.getId());
+        currentGroup.setVisibility("PRIVATE");
+        currentGroup = groupRepository.save(currentGroup);
     }
 
     @Given("the user is logged in but does not have task management permissions")
@@ -136,7 +146,7 @@ public class CreateTaskStepDefinitions {
     @When("the user selects {string} as the associated group")
     public void the_user_selects_as_the_associated_group(String groupName) {
         // Simuliere Group-ID (würde später echte Group-Entity nutzen)
-        currentTask.setGroupId(1L);
+        currentTask.setGroup(currentGroup);
     }
 
     @When("the user enters notes of {int} characters")
@@ -263,12 +273,24 @@ public class CreateTaskStepDefinitions {
 
     @Then("the task is linked to the group {string}")
     public void the_task_is_linked_to_the_group(String groupName) {
-        assertThat(currentTask.getGroupId()).isNotNull();
+        Group group = groupRepository.findByName(groupName).orElse(null);
+
+        // Ensure the task's group matches the expected group
+        assertThat(group).isNotNull();
+        assertThat(currentTask.getGroup()).isNotNull();
+        assertThat(currentTask.getGroup().getId()).isEqualTo(group.getId());
     }
 
     @Then("the task appears in the group's shared task list")
     public void the_task_appears_in_the_group_s_shared_task_list() {
-        assertThat(currentTask.getGroupId()).isNotNull();
+        Group group = currentTask.getGroup();
+        assertThat(group).isNotNull();
+
+        // Verify via repository that the task is returned when querying tasks for the group
+    // Use repository method to fetch tasks for the group and match by id
+    boolean foundInGroupTasks = taskRepository.findByGroupId(group.getId()).stream()
+        .anyMatch(t -> t.getId().equals(currentTask.getId()));
+    assertThat(foundInGroupTasks).isTrue();
     }
 
     @Then("the system logs the database error")

@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -74,9 +77,7 @@ public class Task {
     private User createdBy;
 
     @ManyToMany
-    @JoinTable(name = "task_assignees",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JoinTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> assignees = new HashSet<>();
 
     @Column(name = "created_at", nullable = false)
@@ -84,30 +85,35 @@ public class Task {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
+    @JsonBackReference
     private Group group;
 
     // Helper methods
 
     public void addAssignee(User user) {
-        if (user == null) return;
+        if (user == null)
+            return;
         assignees.add(user);
     }
 
     public void removeAssignee(User user) {
-        if (user == null) return;
+        if (user == null)
+            return;
         assignees.remove(user);
     }
 
     public void addTag(String tag) {
-        if (tag == null || tag.isBlank()) return;
+        if (tag == null || tag.isBlank())
+            return;
         tags.add(tag.trim());
     }
 
     public void removeTag(String tag) {
-        if (tag == null) return;
+        if (tag == null)
+            return;
         tags.remove(tag.trim());
     }
 
@@ -122,13 +128,19 @@ public class Task {
     }
 
     public boolean isOverdue() {
-        if (dueDate == null) return false;
+        if (dueDate == null)
+            return false;
         return status != Status.COMPLETED && dueDate.isBefore(LocalDateTime.now());
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 
     @PrePersist
     void onCreate() {
-        if (this.createdAt == null) this.createdAt = LocalDateTime.now();
+        if (this.createdAt == null)
+            this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }
 

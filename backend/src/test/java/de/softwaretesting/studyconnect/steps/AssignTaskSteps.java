@@ -201,8 +201,8 @@ public class AssignTaskSteps {
             User member = userOpt.get();
             // fetch member ids for this group without initializing the group's members
             // collection
-            List<Long> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
-            boolean isMember = memberIds.contains(member.getId());
+            Optional<List<Long>> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
+            boolean isMember = memberIds.map(ids -> ids.contains(member.getId())).orElse(false);
             if (!isMember) {
                 lastMessage = "Selected user is not a group member";
                 return;
