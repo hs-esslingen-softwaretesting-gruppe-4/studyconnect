@@ -6,7 +6,7 @@ Feature: Updating task progress
         And the user has the rights to change the tasks status
 
     Scenario: Change status
-        When the user chagnges the status in the task detail view
+        When the user changes the status in the task detail view
         Then the user gets a message of successfully changing the status
         And can view the new status
 

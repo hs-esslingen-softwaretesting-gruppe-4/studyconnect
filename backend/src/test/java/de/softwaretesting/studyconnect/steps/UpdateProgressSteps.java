@@ -60,8 +60,7 @@ public class UpdateProgressSteps {
     /*
      * Scenario: Change Status
      */
-
-    @When("the user chagnges the status in the task detail view")
+    @When("the user changes the status in the task detail view")
     public void theUserChangesTheStatusInTheTaskDetailView() {
             task.setInProgress();
     }
@@ -110,7 +109,7 @@ public class UpdateProgressSteps {
      * Scenario: Error when changing status
      */
 
-    @When("the user changes the status in the task detail view")
+    @When("the user changes the status in the task detail view to complete")
     public void theUserChangesTheStatusInTaskDetailView() {
         task.markComplete();
     }
