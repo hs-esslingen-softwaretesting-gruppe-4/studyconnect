@@ -2,7 +2,7 @@ package de.softwaretesting.studyconnect.runner;
 
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
-import org.junit.platform.suite.api.SelectPackages;
+import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
 
 /**
@@ -11,7 +11,7 @@ import org.junit.platform.suite.api.Suite;
  */
 @Suite
 @IncludeEngines("cucumber")
-@SelectPackages("de.softwaretesting.studyconnect.features")
+@SelectClasspathResource("features")
 @ConfigurationParameter(key = "cucumber.glue", value = "de.softwaretesting.studyconnect")
 @ConfigurationParameter(key = "cucumber.plugin", value = "pretty")
 public class StudyconnectCucumberIT {

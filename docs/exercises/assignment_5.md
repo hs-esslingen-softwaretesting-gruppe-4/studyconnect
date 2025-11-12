@@ -1,17 +1,17 @@
 ## Exercise 5
 
 ### Task 5.1
-- Use-case descriptions are placed under `/docs/use-cases/*`.
-- Their corresponding feature files are placed under `/backend/src/test/ressources/features/*`
+- Use-case descriptions are placed [here](../use-cases/), their user stories [here](../user-stories/).
+- The corresponding feature files are placed [here](../../backend/src/test/resources/features/)
 
 ### Task 5.2
-- Implementation of the scenarios and steps located under /backend/test/java/de/softwaretesting/studyconnect/steps/*Steps.java
+- Implementation of the scenarios and steps located are [here](../../backend/src/test/java/de/softwaretesting/studyconnect/steps/)
 
-- All *Steps.java files are documented in `/docs/documentation.md` under the headline `BDD/Integration Tests mit Cucumber`
+- All *Steps.java files are documented in the [documentation](../documentation.md#updateprogresstest-kurzbeschreibung)
 
 ### Task 5.3
-- The configuration setup is documented in `/docs/documentation.md` under the headline `BDD/Integration Tests mit Cucumber`.
-- Answer to the question  is in the same file under the headline `Test-Ausführungsstrategie: BDD vs Unit Tests`.
+- The configuration setup is documented in [documentation](../documentation.md#aufbau--setup-der-bdd-integrationstests)
+- Answer to the question  is in the same file located [here](../documentation.md#test-ausführungsstrategie-bdd-vs-unit-tests).
 
 
 

@@ -297,8 +297,8 @@ Integrationstests sind Tests, die einzelne Features auf ihre Funktion überprüf
 
 Die BDD-Tests in diesem Projekt sind so eingerichtet, dass sie sich gut in den Maven‑Lifecycle einfügen und lokal schnell ausführbar bleiben:
 
-- Features: Alle Gherkin‑Feature‑Dateien liegen unter `backend/src/test/resources/features/`.
-- Schritt‑Implementierungen (Step Definitions): Java‑Klassen mit Cucumber‑Annotationen (`@Given`, `@When`, `@Then`) befinden sich unter `backend/src/test/java/de/softwaretesting/studyconnect/steps/`.
+- Features: Alle Gherkin‑Feature‑Dateien [hier](../backend/src/test/resources/features/).
+- Schritt‑Implementierungen (Step Definitions): Java‑Klassen mit Cucumber‑Annotationen (`@Given`, `@When`, `@Then`) befinden sich [hier](../backend/src/test/java/de/softwaretesting/studyconnect/steps/).
 - Runner / Test‑Suite: Für die Integrationstests gibt es eine JUnit‑Platform‑Suite `StudyconnectCucumberIT` im Paket `de.softwaretesting.studyconnect.runner`. Diese Datei endet auf `IT`, damit der Maven‑Failsafe‑Plugin sie während der Phase `verify` entdeckt und ausführt.
 - Maven‑Konfiguration: Damit die Cucumber‑Junit‑Platform‑Engine nur bei `mvn verify` geladen wird, ist die Engine als Plugin‑Dependency des `maven-failsafe-plugin` konfiguriert. So bleiben die normalen Unit‑Tests (Surefire) schlank und die BDD‑Engine wird nur während der Integrationstest‑Phase benötigt. Die für die Kompilierung notwendigen Cucumber‑Bibliotheken verbleiben im `test`‑Scope, damit die Step‑Definitionen weiter kompilieren.
 - Spring‑Integration: Step‑Definitionen können `cucumber-spring` bzw. `@SpringBootTest` verwenden, um einen Spring‑Kontext zu laden; lokal laufen die Tests gegen die in `application-test.properties` konfigurierte H2‑InMemory‑Datenbank.
@@ -310,7 +310,7 @@ Die BDD-Tests in diesem Projekt sind so eingerichtet, dass sie sich gut in den M
 
 ##### **`UpdateProgressTest` (Kurzbeschreibung)**
 
-Die Klasse `UpdateProgressSteps` enthält die in updateProgress.feature enthaltenen Szenarien aus der User Story update-progress.
+Die Klasse [UpdateProgressSteps](../backend/src/test/java/de/softwaretesting/studyconnect/steps/UpdateProgressSteps.java) enthält die in updateProgress.feature enthaltenen Szenarien aus der User Story update-progress.
 
 **Setup**:
 Zuerst wird in `Given the user is logged in`, `Given the user has a task assigned` und `Given the user has the rights to change the task status` die benötigten Objekte User und Task erzeugt und ein Task dem User zugeordnet.
@@ -326,7 +326,7 @@ Die Tests dokumentieren die erfolgreiche Umsetzung der Features aus den Userstor
 
 ##### **`CreateTaskSteps` (Kurzbeschreibung)**
 
-Die Klasse `CreateTaskStepDefinitions` enthält die in create-task.feature definierten Szenarien aus der User Story create-task.
+Die Klasse [CreateTaskStepDefinitions](../backend/src/test/java/de/softwaretesting/studyconnect/steps/CreateTaskStepDefinitions.java) enthält die in create-task.feature definierten Szenarien aus der User Story create-task.
 
 **Setup**:
 In den `Given`-Steps wird die Testumgebung vorbereitet: Ein User wird eingeloggt (`Given the user is logged in as a student`), die Systemverfügbarkeit wird geprüft (`Given the system is operational and connected to the database`), und die Task-Erstellungsseite wird aufgerufen (`Given the user navigates to the task creation page`). Für Gruppentasks wird zusätzlich die Gruppenmitgliedschaft simuliert (`Given the user is a member of the study group`).
@@ -353,7 +353,7 @@ Das neunte Szenario `User must have task management access rights` validiert die
 Die Tests dokumentieren die erfolgreiche Implementierung der Task-Erstellungs-Funktionalität mit allen zugehörigen Validierungen, Fehlerbehandlungen und Edge-Cases aus der User Story create-task. <br> <br>
 
 #### **`AssignTaskSteps.java` (Kurzbeschreibung)**
-Die Klasse `AssignTaskSteps` implementiert die BDD‑Schrittdefinitionen für das Feature `assign-task.feature` (Pfad: `backend/src/test/resources/features/assign-task.feature`). Sie kapselt die typischen Use‑Cases rund um das Zuweisen von Aufgaben innerhalb einer Gruppe und enthält sowohl happy‑path‑Szenarien als auch Fehlerfälle (z. B. Berechtigungsfehler oder Persistenzfehler).
+Die Klasse [AssignTaskSteps](../backend/src/test/java/de/softwaretesting/studyconnect/steps/AssignTaskSteps.java) implementiert die BDD‑Schrittdefinitionen für das Feature `assign-task.feature` (Pfad: `backend/src/test/resources/features/assign-task.feature`). Sie kapselt die typischen Use‑Cases rund um das Zuweisen von Aufgaben innerhalb einer Gruppe und enthält sowohl happy‑path‑Szenarien als auch Fehlerfälle (z. B. Berechtigungsfehler oder Persistenzfehler).
 
 Wichtige Punkte zur Implementierung:
 
