@@ -10,7 +10,5 @@ class StudyconnectApplicationTests {
 
 	@Test
 	void contextLoads() {
-
 	}
-
 }

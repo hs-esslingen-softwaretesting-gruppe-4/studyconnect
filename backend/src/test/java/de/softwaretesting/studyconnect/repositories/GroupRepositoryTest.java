@@ -13,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import de.softwaretesting.studyconnect.models.Group;
 import de.softwaretesting.studyconnect.models.User;
+import de.softwaretesting.studyconnect.models.Task;
+import de.softwaretesting.studyconnect.repositories.TaskRepository;
+import java.util.List;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -23,6 +26,9 @@ class GroupRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     /**
      * Test creating and saving a group with valid data.
@@ -65,6 +71,60 @@ class GroupRepositoryTest {
         assertNotNull(saved.getUpdatedAt(), "updatedAt should be auto-set");
         assertEquals(savedAdmin.getId(), saved.getAdmin().getId());
         assertTrue(saved.getMembers().contains(savedAdmin));
+    }
+
+    /**
+     * Test that adding a Task to a Group persists the task via cascade
+     * and that removing the Task from the Group deletes it (orphanRemoval).
+     */
+    @Test
+    void shouldAddAndRemoveTaskFromGroup() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("taskadmin@example.com");
+        admin.setSurname("Task");
+        admin.setLastname("Admin");
+        admin.setCreatedAt(LocalDateTime.now());
+        User savedAdmin = userRepository.save(admin);
+
+        // Arrange: create a new group
+        Group group = new Group();
+        group.setName("Task Group");
+        group.setDescription("Group for task tests");
+        group.setVisibility("PRIVATE");
+        group.setMaxMembers(10);
+        group.setCreatedBy(savedAdmin.getId());
+        group.setAdmin(savedAdmin);
+
+        // Arrange: create a new task and add to group (bi-directional helper)
+        Task task = new Task();
+        task.setTitle("Test Task");
+        task.setDescription("A task to test add/remove behavior");
+        // do not explicitly set group on task; use addTask helper
+        group.addTask(task);
+
+        // Act: save the group which should cascade-persist the task
+        Group savedGroup = groupRepository.saveAndFlush(group);
+
+    // After save, the task should have been persisted and linked to the saved group
+    List<Task> groupTasks = taskRepository.findByGroupId(savedGroup.getId());
+    assertFalse(groupTasks.isEmpty(), "There should be at least one task persisted for the group");
+
+    // Get persisted task and verify linkage
+    Task persisted = groupTasks.stream()
+        .filter(t -> t.getTitle().equals("Test Task"))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Persisted task not found in group tasks"));
+    assertNotNull(persisted.getGroup(), "Persisted task should reference its group");
+    assertEquals(savedGroup.getId(), persisted.getGroup().getId());
+
+        // Act: remove the task from the group and flush
+        savedGroup.removeTask(persisted);
+        groupRepository.saveAndFlush(savedGroup);
+
+    // Assert: because Group.tasks is configured with orphanRemoval=true,
+    // the task should be deleted from the database
+    assertTrue(taskRepository.findById(persisted.getId()).isEmpty(), "Task should be removed from DB after orphanRemoval");
     }
 
     /**

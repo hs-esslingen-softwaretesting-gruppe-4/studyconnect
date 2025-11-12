@@ -4,13 +4,13 @@ Feature: Assigning tasks within a study group
   So that responsibilities inside the study group are clear
 
   Background:
-    Given a group "Software Testing"
+    Given a group "Babagruppe"
       And the following members exist in the group:
         | name          | keycloakUUID                         | role    |
         | Dominik Admin | 00000000-0000-0000-0000-000000000001 | admin   |
         | Bob Member    | 00000000-0000-0000-0000-000000000002 | member  |
         | Carol Member  | 00000000-0000-0000-0000-000000000003 | member  |
-  And the task "Prepare test report" exists for group "Software Testing"
+  And the task "Prepare test report" exists for group "Babagruppe"
   And I am logged in as "Dominik Admin " with keycloakUUID "00000000-0000-0000-0000-000000000001"
 
   Scenario: Administrator assigns a task to multiple members

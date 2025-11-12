@@ -231,11 +231,15 @@ Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie 
 
 Die Tests laufen lokal standardmäßig gegen eine H2 In-Memory-Datenbank. Die Konfiguration befindet sich in `backend/src/main/resources/application-test.properties`.
 
-Führen Sie alle implementierten Tests mit `mvn test` aus, alternativ mit `.\mvnw.cmd test`.
+Implementierte Unit Tests können mit `mvn test` ausgeführt werden. Führen Sie alle implementierten Tests mit `mvn verify` aus, alternativ mit `.\mvnw.cmd verify`.
 
 ### Test-Cases
 
-#### `UserRepositoryTest` (Kurzbeschreibung)
+#### Unit-Tests
+
+Unit Tests testen einzelne Klassen oder Methoden auf ihre Funktion. Sie können mit `mvn test` bzw. `.\mvnw.cmd verify`ausgeführt werden. <br> <br>
+
+##### **`UserRepositoryTest` (Kurzbeschreibung)**
 
 Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
 
@@ -246,9 +250,9 @@ Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserReposit
 - `shouldFailToSaveUserWhenCreatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` null ist.
 - `shouldFailToSaveUserWithDuplicateKeycloakUUID` — legt einen User mit einer `keycloakUUID` an und prüft, dass das Anlegen eines zweiten Users mit derselben UUID aufgrund der Unique-Constraint fehlschlägt.
 
-Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene.
+Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraints (NOT NULL, UNIQUE) auf Repository-Ebene. <br> <br>
 
-#### `GroupRepositoryTest` (Kurzbeschreibung)
+##### **`GroupRepositoryTest` (Kurzbeschreibung)**
 
 Die Klasse `GroupRepositoryTest` enthält mehrere JPA-Tests für die `GroupRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
 
@@ -256,9 +260,9 @@ Die Klasse `GroupRepositoryTest` enthält mehrere JPA-Tests für die `GroupRepos
 - `shouldFailToSaveGroupWhenNameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn name null ist (NOT NULL Constraint).
 - `shouldFailToSaveGroupWhenVisibilityIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `visibility` null ist.
 - `shouldFailToSaveGroupWhenCreatedOrUpdatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` oder `updatedAt` null ist.
-- `shouldNotExceedMaxMembers` — prüft die `addMember`-Logik und stellt sicher, dass die Anzahl der Mitglieder nicht automatisch das `maxMembers`-Limit überschreitet, wenn Mitglieder manuell hinzugefügt werden. Dieser Test zeigt, dass die Begrenzung auf Entitätsebene programmgesteuert durchgesetzt werden muss und nicht automatisch von der Datenbank kommt.
+- `shouldNotExceedMaxMembers` — prüft die `addMember`-Logik und stellt sicher, dass die Anzahl der Mitglieder nicht automatisch das `maxMembers`-Limit überschreitet, wenn Mitglieder manuell hinzugefügt werden. Dieser Test zeigt, dass die Begrenzung auf Entitätsebene programmgesteuert durchgesetzt werden muss und nicht automatisch von der Datenbank kommt. <br> <br>
 
-#### `TaskRepositoryTest` (Kurzbeschreibung)
+##### **`TaskRepositoryTest` (Kurzbeschreibung)**
 
 Die Klasse `TaskRepositoryTest` enthält mehrere JPA-Tests für die `Task`-Entity und das zugehörige `TaskRepository`.
 Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
@@ -272,7 +276,7 @@ Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `
 
 Diese Tests dokumentieren die erwarteten Verhalten der `Task`-Entity (Persistenz, Constraints, Beziehungen und Domänenlogik) und dienen als Referenz für spätere Integrationstests und Implementierungen der Service/Controller-Schicht.
 
-#### `CommentRepositoryTest` (Kurzbeschreibung)
+##### **`CommentRepositoryTest` (Kurzbeschreibung)**
 
 Die Klasse `CommentRepositoryTest` enthält mehrere JPA-Tests für die `CommentRepository`-Schnittstelle.
 
@@ -282,23 +286,37 @@ Die Klasse `CommentRepositoryTest` enthält mehrere JPA-Tests für die `CommentR
 - `shouldFailToSaveCommentWhenCreatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` null ist.
 - `shouldFailToSaveCommentWhenUpdatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `updatedAt` null ist.
 
-Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraint (NOT NULL) auf Repository-Ebene.
+Diese Tests verifizieren sowohl erfolgreiche Persistenz als auch Datenbank-Constraint (NOT NULL) auf Repository-Ebene. <br><br><br>
 
-### Tests from Gherkin Syntax with Cucumber
 
-Die Gherkin Syntax wird aus User Stories abgeleitet und unter /backend/src/test/resources/features/ abgelegt.
-Diese dient als Vorlage für Steps-Dokumente, welche die lauffähigen Test enthalten und die Bibliotheken Cucumber und Junit5 benötigen, diese wurden in der pom hinzugfügt.
-Die Steps finden sich bei /backend/src/test/java/de/.../steps/ und arbeiten mit den Schlüsselwörtern `Given`, `When`, `Then` um die Umgebung zu definieren, den genauen Testfall zu erzeugen und das erwartete Ergebnis zu prüfen. Das Ergebnis wird mit Junit5 `assert` abfragen geprüft.
+#### BDD/Integration Tests mit Cucumber
 
-#### `UpdateProgressTest` (Kurzbeschreibung)
+Integrationstests sind Tests, die einzelne Features auf ihre Funktion überprüfen. Die BDD-Tests sind in Gherkin Syntax formuliert und werden aus User Stories abgeleitet und unter /backend/src/test/resources/features/ abgelegt. <br> <br>
 
-Die Klasse `UpdateProgressSteps` enthält die in updateProgress.feature enthaltenen Szenarien aus der User Story update-progress.
+##### **Aufbau / Setup der BDD-Integrationstests**
+
+Die BDD-Tests in diesem Projekt sind so eingerichtet, dass sie sich gut in den Maven‑Lifecycle einfügen und lokal schnell ausführbar bleiben:
+
+- Features: Alle Gherkin‑Feature‑Dateien [hier](../backend/src/test/resources/features/).
+- Schritt‑Implementierungen (Step Definitions): Java‑Klassen mit Cucumber‑Annotationen (`@Given`, `@When`, `@Then`) befinden sich [hier](../backend/src/test/java/de/softwaretesting/studyconnect/steps/).
+- Runner / Test‑Suite: Für die Integrationstests gibt es eine JUnit‑Platform‑Suite `StudyconnectCucumberIT` im Paket `de.softwaretesting.studyconnect.runner`. Diese Datei endet auf `IT`, damit der Maven‑Failsafe‑Plugin sie während der Phase `verify` entdeckt und ausführt.
+- Maven‑Konfiguration: Damit die Cucumber‑Junit‑Platform‑Engine nur bei `mvn verify` geladen wird, ist die Engine als Plugin‑Dependency des `maven-failsafe-plugin` konfiguriert. So bleiben die normalen Unit‑Tests (Surefire) schlank und die BDD‑Engine wird nur während der Integrationstest‑Phase benötigt. Die für die Kompilierung notwendigen Cucumber‑Bibliotheken verbleiben im `test`‑Scope, damit die Step‑Definitionen weiter kompilieren.
+- Spring‑Integration: Step‑Definitionen können `cucumber-spring` bzw. `@SpringBootTest` verwenden, um einen Spring‑Kontext zu laden; lokal laufen die Tests gegen die in `application-test.properties` konfigurierte H2‑InMemory‑Datenbank.
+- Ausführung:
+  - Nur Unit‑Tests (schnell): `mvn -f backend clean test`  — führt nur die Surefire‑Tests aus.
+  - Alle Tests / BDD (Integration): `mvn -f backend verify` — hier läuft zusätzlich Failsafe und führt die Cucumber‑ITs aus.
+- Reports und Logs: Failsafe legt Ergebnisse und ausführliche Logs unter `backend/target/failsafe-reports/` ab; Surefire nutzt `backend/target/surefire-reports/`.
+<br> <br>
+
+##### **`UpdateProgressTest` (Kurzbeschreibung)**
+
+Die Klasse [UpdateProgressSteps](../backend/src/test/java/de/softwaretesting/studyconnect/steps/UpdateProgressSteps.java) enthält die in updateProgress.feature enthaltenen Szenarien aus der User Story update-progress.
 
 **Setup**:
-Zuerst wird in `Given the user is logged in`, `Gien the user has a task assigned` und `Given the user has the rights to change the task status` die benötigten Objekte User und Task erzeugt und ein Task dem User zugeordnet.
+Zuerst wird in `Given the user is logged in`, `Given the user has a task assigned` und `Given the user has the rights to change the task status` die benötigten Objekte User und Task erzeugt und ein Task dem User zugeordnet.
 
 **Tests**:
-Ertes Szenario `Change Status`. Wird der Status einer Task geändert (`When the user chagnges the status in the task detail view`), so soll der user darüber benachrichtigt werden (`Then the user gets a message of successfully changing the status`) und diese einsehen können (`Then can view the new status`).
+Ertes Szenario `Change Status`. Wird der Status einer Task geändert (`When the user changes the status in the task detail view`), so soll der user darüber benachrichtigt werden (`Then the user gets a message of successfully changing the status`) und diese einsehen können (`Then can view the new status`).
 
 Im zweiten Szenario `Undefined Status` wird, falls der User einen invaliden Status eingibt (`When the user enters an invalid status in the task detail view`), soll er eine Fehlermeldung angezeigt bekommen (`Then the user gets an error message with defined statuses`).
 
@@ -306,9 +324,9 @@ Szenario drei testet, dass falls bei dem ändern des Status (`When the user chan
 
 Die Tests dokumentieren die erfolgreiche Umsetzung der Features aus den Userstories. Und stellen sicher ob alle für die Userstory relevanten Funktionen richtig implementiert sind.
 
-#### `CreateTaskSteps` (Kurzbeschreibung)
+##### **`CreateTaskSteps` (Kurzbeschreibung)**
 
-Die Klasse `CreateTaskStepDefinitions` enthält die in create-task.feature definierten Szenarien aus der User Story create-task.
+Die Klasse [CreateTaskStepDefinitions](../backend/src/test/java/de/softwaretesting/studyconnect/steps/CreateTaskStepDefinitions.java) enthält die in create-task.feature definierten Szenarien aus der User Story create-task.
 
 **Setup**:
 In den `Given`-Steps wird die Testumgebung vorbereitet: Ein User wird eingeloggt (`Given the user is logged in as a student`), die Systemverfügbarkeit wird geprüft (`Given the system is operational and connected to the database`), und die Task-Erstellungsseite wird aufgerufen (`Given the user navigates to the task creation page`). Für Gruppentasks wird zusätzlich die Gruppenmitgliedschaft simuliert (`Given the user is a member of the study group`).
@@ -332,26 +350,36 @@ Szenario acht `Create a task with maximum length notes` prüft die Verarbeitung 
 
 Das neunte Szenario `User must have task management access rights` validiert die Berechtigungsprüfung. Wenn ein User ohne entsprechende Rechte versucht, auf die Task-Erstellungsseite zuzugreifen (`When the user attempts to navigate to the task creation page`), wird der Zugriff verweigert (`Then the system denies access`) und eine entsprechende Meldung angezeigt (`Then the system displays a message "You do not have permission to create tasks"`).
 
-Die Tests dokumentieren die erfolgreiche Implementierung der Task-Erstellungs-Funktionalität mit allen zugehörigen Validierungen, Fehlerbehandlungen und Edge-Cases aus der User Story create-task.
+Die Tests dokumentieren die erfolgreiche Implementierung der Task-Erstellungs-Funktionalität mit allen zugehörigen Validierungen, Fehlerbehandlungen und Edge-Cases aus der User Story create-task. <br> <br>
 
-### Test-Ausführungsstrategie: BDD vs Unit Tests
+#### **`AssignTaskSteps.java` (Kurzbeschreibung)**
+Die Klasse [AssignTaskSteps](../backend/src/test/java/de/softwaretesting/studyconnect/steps/AssignTaskSteps.java) implementiert die BDD‑Schrittdefinitionen für das Feature `assign-task.feature` (Pfad: `backend/src/test/resources/features/assign-task.feature`). Sie kapselt die typischen Use‑Cases rund um das Zuweisen von Aufgaben innerhalb einer Gruppe und enthält sowohl happy‑path‑Szenarien als auch Fehlerfälle (z. B. Berechtigungsfehler oder Persistenzfehler).
 
-#### Empfehlung: Unterschiedliche Ausführungsfrequenz
+Wichtige Punkte zur Implementierung:
+
+- Repositories: Die Step‑Klasse nutzt `@Autowired` die Repositories `GroupRepository`, `UserRepository` und `TaskRepository`, um Testdaten zu erzeugen, zu lesen und zu persistieren.
+- Background / Setup: In den `Given`‑Steps werden Gruppe, Mitglieder und Aufgaben angelegt (`a group`, `the following members exist in the group:`, `the task "..." exists for group "..."`) und ein aktueller Benutzer für das Szenario als angemeldet gesetzt (`I am logged in as ...`).
+- Datenübergabe: Für wiederholbare Eingaben werden Cucumber‑DataTables genutzt (z. B. bei `I assign members to the task:`). Die Step‑Methoden wandeln die Tabellen in `List<Map<String,String>>` um und verarbeiten Zeile für Zeile.
+- Autorisierung & Validierung: Vor dem Zuweisen prüft die Implementierung, ob der ausgewählte Nutzer zur Gruppe gehört und ob der aktuell angemeldete Benutzer Admin‑Rechte besitzt. Bei fehlender Mitgliedschaft oder fehlender Berechtigung wird eine sprechende Fehlermeldung in `lastMessage` gesetzt und die Persistierung abgebrochen.
+- Snapshot & Rollback‑Verhalten: Vor dem Versuch, Assignees zu ändern, wird ein Snapshot der bisherigen Assignee‑IDs (`previousAssigneeIds`) angelegt. Dieses Snapshot wird später in Assertions verwendet, um sicherzustellen, dass bei einem simulierten Persistenzfehler keine Änderung dauerhaft gespeichert wurde.
+- Fehler‑Simulation: Für Tests, die Ausfallverhalten prüfen, bietet die Klasse die Möglichkeit, die Persistenz vorübergehend als nicht verfügbar zu markieren (`the persistence layer is temporarily unavailable`). In diesem Fall wird `simulatePersistenceFailure` gesetzt und die Methode speichert nicht, sondern liefert eine Fehlernachricht zurück.
+- Assertions / Then‑Steps: Es gibt konkrete Prüfmethoden, z. B. `the task "..." shows the following assignees:` (vergleicht erwartete und aktuelle Assignee‑Namen), `I should see an authorization error`, `no assignees should change for the task` und `I should see the message "The assignment could not be saved"`.
+- Notifications TODO: Die Methode `theAssigneesShouldReceiveANotificationAboutTheAssignment` ist als Platzhalter vorhanden — die Benachrichtigungsprüfung ist noch als `ToDo` markiert und kann später an ein echtes Notification‑Subsystem angebunden werden.
+
+
+#### Test-Ausführungsstrategie: BDD vs Unit Tests
 
 BDD/Acceptance Tests sollten **weniger häufig** als Unit Tests ausgeführt werden.
 
-**Hauptgründe:**
+- Da **Unit-Tests** nur isolierte Klassen oder Funktionen testen, werden sie sehr schnell ausgeführt, oft innerhalb weniger Millisekunden. Aus diesem Grund können Unit-Tests jederzeit im Entwicklungs-/Bereitstellungsprozess durchgeführt werden, beispielsweise vor jedem Push und Merge/Request, aber auch lokal vor jedem Commit.
 
-1. **Geschwindigkeit**
-   - Unit Tests (z.B. `TaskRepositoryTest`): < 1 Sekunde
-   - BDD Tests (`StudyconnectCucumberTest`): 18-27 Sekunden
-   - Bei gemeinsamer Ausführung verlieren Entwickler schnelles Feedback
+- **Behaviour driven development tests (BDD)** hingegen umfassen das Testen mehrerer Module der App und haben im Allgemeinen einen breiteren Testumfang, weshalb sie langsamer und fehleranfälliger sind. Sie werden verwendet, um zu überprüfen, ob eine Funktion korrekt implementiert wurde.  
+Daher ist es sinnvoll, diese Tests in einer CI/CD-Pipeline auszuführen, beispielsweise bei einem Pull-Request (dies ist am sinnvollsten, wenn in Feature-Branches gearbeitet wird) oder bei Bedarf von Entwickler oder der Qualitätssicherung ausgeführt werden, um zu überprüfen, ob eine Funktion vollständig implementiert wurde.
 
-2. **Zweck**
-   - Unit Tests: Einzelne Komponenten isoliert testen
-   - BDD Tests: End-to-End User-Szenarien validieren
+- **Akzeptanztests** überprüfen, ob die Software die Anforderungen erfüllt und für die Produktion bereit ist. Dies erfordert einen noch breiteren Testumfang als BDD-Tests, wodurch sie ressourcen- und zeitaufwändiger sind. Daher sollten diese Tests vor der Veröffentlichung durchgeführt werden, beispielsweise bei einem Pull-Request in main/master in einer CI/CD-Pipeline.
 
-3. **Test-Pyramide**
+
+- **Test-Pyramide**
    - 70% Unit Tests → ständig ausführen (bei jedem Build)
    - 20% Integration → bei Commits
    - 10% BDD/E2E → bei Pull Requests und Merges
@@ -360,10 +388,10 @@ BDD/Acceptance Tests sollten **weniger häufig** als Unit Tests ausgeführt werd
 
 ```bash
 # Entwicklung (schnell, nur Unit Tests)
-mvn test -Dtest=*RepositoryTest
+mvn test
 
 # Vor Push (alle Tests)
-mvn test
+mvn verify
 
 # CI/CD Pipeline
 - Pull Request: Alle Tests (Unit + BDD)
