@@ -8,7 +8,7 @@
 
     Completeness is very important. If a product is not complete, users may not benefit from or be able to use the product. If in Studyconnect key functions like a chat are implemented but everything else is missing users may use it as a messenger but it does not fulfill its purpose of making studying in groups easier than with any other messenger.
 
-3) Aktualität
+3) Aktualität (Actuality)
 
     If Studyconnect does not show current content like messages or task updates within a, as acceptable, specified time delay users will use other products that allow them to communicate within it.
 
@@ -34,7 +34,7 @@
     The loyalty aspect is more dependent on the product in its importance, because Studyconnect has similar competitors the key aspect of differentiation has to be significant for creating loyalty to it.
     When there is an original or new product loyalty is reached more easily because the user might has to leave his comfort zone to find other solutions to his problems.
 
-9) Intuitive Bedienung (intuitive handling)
+9) Intuitive Bedienung (Intuitive handling)
 
     While certainly not the most important, intuitive handling is a rising factor of experience which gained importance with the standardization of interaction fields. For example green buttons are generally associated with truth or acceptance while red buttons are generally associated with invalidity and rejection.
 
