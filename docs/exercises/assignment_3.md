@@ -1,15 +1,42 @@
 ### Task 3.1 (Most important core UX factors)
 
-- Bequemlichkeit
-- Vollständigkeit
-- Aktualität
-- Effizienz
-- Vertrauen
-- Übersichtlichkeit
-- Leichtigkeit
-- Verbundenheit
-- Intuitive Bedienung
+1) Bequemlichkeit (Convenience)
 
+    The most important factor is convenience. If a poduct is inconvenient it will not be used if there are ways around it. This means for study-connect, that common messanger apps might be used instead.
+
+2) Vollständigkeit (Completeness)
+
+    Completeness is very important. If a product is not complete, users may not benefit from or be able to use the product. If key functions like a chat is implemented in study-connect but everything else is missing users may use it as a messanger but it definitly does not fullfill its purpose of making studying easier.
+
+3) Aktualität
+
+    If study-connect does not show current content like messages or task updates within a, as acceptable, specified timedelay users will use other products that allow them to communicate within it.
+
+4) Effizienz (Efficiency)
+
+    The User Experience is dependant on the Effinciency of the product. While unefficient products also do the job. Study-connect should not need a several seconds to process and display its content or else users may find using it a hassle and search for better products on the market.
+
+5) Vertrauen (Trust)
+
+    Especially in digital products trust is important to gain longterm users. If users deem Study-connect to be untrustfull, may be because of a missing login or data encryption, they will look for other alternatives that may protect their personal data better.
+
+
+6) Übersichtlichkeit (Overview)
+
+    Reducing the visual Complexity of an application is important for a smooth handling of tasks. If the overview would be miserable users might not or need a lot of time to find specific features. In Study-connect, if finding your current tasks you are working on leads through several pages with ten or more options each, it would lead to distress and a bad image of the product.
+
+7) Leichtigkeit (Ease of use)
+
+    Similar to overview, ease of use is important while handling the product. While overview is mainly about complexity, ease of use is about making a step in the process easier like autofill functions do in search bars, especially when the search phrase is long.
+
+8) Verbundenheit (Loyalty)
+
+    The loyalty aspect is more dependent on the product in its importance, because studdy-connect has similar competitiors the key aspect of differentiation has to be significant for creating loyalty to it.
+    When there is an original or new product loyalty is reached more easily because the user might has to leave his comfortzone to find other solutions to his problems.
+
+9) Intuitive Bedienung (intuitive handling)
+
+    While certanly not the most important, intuitive handling is a rising factor of experience which gained importance with the standardisation of interaction fields. For example green buttons are generally associated with truth or acceptance while red buttons are generally associated with invalidity and rejection.
 
 ### Task 3.2 (List the corresponding UX factor for each sentence)
 
