@@ -6,7 +6,7 @@
 
 2) Vollständigkeit (Completeness)
 
-    Completeness is very important. If a product is not complete, users may not benefit from or be able to use the product. If in Studyconnect key functions like a chat are implemented but everything else is missing users may use it as a messenger but it definitely does not fulfill its purpose of making studying easier.
+    Completeness is very important. If a product is not complete, users may not benefit from or be able to use the product. If in Studyconnect key functions like a chat are implemented but everything else is missing users may use it as a messenger but it does not fulfill its purpose of making studying in groups easier than with any other messenger.
 
 3) Aktualität
 
@@ -23,7 +23,7 @@
 
 6) Übersichtlichkeit (Overview)
 
-    Reducing the visual complexity of an application is important for a smooth handling of tasks. If the overview would be miserable users might not or need a lot of time to find specific features. In Studyconnect, if finding your tasks you are working on needs navigating through several pages with ten or more options each, it would lead to distress and a bad image of the product.
+    Reducing the visual complexity of an application is important for a smooth handling of tasks. If the overview would be miserable users might not or need a lot of time to find specific features. In Studyconnect, if finding the tasks you are working on requires navigating through several pages, it would lead to distress and a bad image of the product.
 
 7) Leichtigkeit (Ease of use)
 
