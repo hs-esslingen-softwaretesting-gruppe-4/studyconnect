@@ -40,23 +40,25 @@ Below are the user experience factors our team considers most important for Stud
 
 ### Task 3.2 (List the corresponding UX factor for each sentence)
 
-| Emotional Reactions | UX Factor |
-|---------------------|-----------|
-|“That is exactly what I needed.”|Vollständigkeit|
-|“It makes life easier.”|Bequemlichkeit|
-|“I'm in control.” or “I am the boss.”|Anpassbarkeit|
-|“We know each other.”|Verbundenheit|
-|“Not being alone.”|Soziales|
-|“Wow.”|Neuartigkeit / Originalität|
-|“Something went wrong.”|Steuerbarkeit|
-|“I've never seen anything like this before.”|Neuartigkeit|
+### Task 3.2 (Mapping Emotional Reactions to UX Factors with Justifications)
 
-### Task 3.3
+| Emotional Reactions             | UX Factor              | Justification                                                                                         |
+|-------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|
+| “That is exactly what I needed.” | Completeness           | This reaction reflects satisfaction with the product’s ability to cover all needed functionalities without gaps, aligning with completeness.     |
+| “It makes life easier.”          | Convenience            | Relates directly to reduced user effort and friction, emphasizing the product’s facilitation of everyday tasks.                              |
+| “I'm in control.” or “I am the boss.” | Adaptability           | Reflects the user’s sense of authority and ability to customize or manage tasks and workflows effectively.                                   |
+| “We know each other.”            | Loyalty                | Denotes community and ongoing engagement that makes users feel connected within the app environment.                                       |
+| “Not being alone.”               | Social                 | Highlights the social collaboration capabilities, making users feel supported through interactions in groups.                             |
+| “Wow.”                         | Novelty / Originality  | Expresses surprise and delight, often triggered by innovative or unique features enhancing user experience.                               |
+| “Something went wrong.”          | Controllability        | Indicates importance of system feedback and error handling, giving users trust in managing unexpected situations.                        |
+| “I've never seen anything like this before.” | Novelty              | Highlights uniqueness and first-time use experiences, reinforcing product distinctiveness.                                                  |
 
-| UX Factor | Why is the factor important? | Designs or features to support this factor | What if the factor is ignored? |
-|----------|---|---|---|
-| Bequemlichkeit (Convenience) | Making common tasks in the Studyconnect app fast and effortless encourages regular use and reduces the mental overhead needed to plan, start, or update tasks. | Fast and easy task creation and handling. It should be possible to create a task with just a title and an optional deadline that can be changed later. A task status should be changeable with a single tap without opening details. Provide presets for deadlines (e.g., one week, two weeks, one month). | If adding or updating tasks feels slow and tedious, students will avoid the app. They may not recommend it to peers or may revert to existing options, effectively abandoning the app. |
-| Effizienz (Efficiency) | Students often have limited, fragmented study time. Efficient workflows let them plan or update tasks in short breaks. Frequent checks and updates are common. Slow or overloaded interfaces make interactions tedious. | Fast, responsive UI and optimistic updates. Show success immediately and synchronize the app in the background to make it feel instant. Implement recurring task templates (e.g., clone an existing task). | An inefficient app leads to user frustration; laggy interactions and long, unclear processes create negative perceptions of the app. |
-| Übersichtlichkeit (Clarity / Overview) | Being able to find and navigate the application quickly makes users more time-efficient and increases likelihood of continued use. | A simple user interface with minimal distractions gives users a clear overview of features. Use contrast, meaningful icons, and keywords to help users find what they need quickly. | A cluttered or overloaded application increases frustration and harms the product image; users may avoid engaging with it. |
-| Intuitive Bedienung (Intuitive operation) | Users should not need extra instructions to use the application. This supports efficiency and convenience. | The application design should use familiar icons and menu patterns and place features where users expect them based on common design guidelines and conventions. | If users can't find features where they expect them, convenience is reduced and they may seek better alternatives. |
-| Stimulation | When stimulated, users are more likely to engage with the product. | Add playful or motivational features that provide incentives beyond the main objective. | Without stimulating elements, the product may feel similar to many others on the market and fail to stand out; users might prefer competitors. |
+### Task 3.3 (Improved UX Factors Analysis with StudyConnect Focus)
+
+| UX Factor             | Why is the factor important?                                        | Designs or features to support this factor                          | What if the factor is ignored?                                               |
+|-----------------------|--------------------------------------------------------------------|--------------------------------------------------------------------|----------------------------------------------------------------------------|
+| Convenience           | Making common tasks in StudyConnect fast and effortless encourages regular use and reduces mental overhead needed for planning and updates. | Fast and easy task creation and handling format; allow task creation with minimal info, one-tap status updates, presets for deadlines.  | Slow and tedious operations reduce app usage and deter recommendations.    |
+| Efficiency            | Students have limited, fragmented time; efficient workflows maximize productivity during short breaks. | Fast UI responses, optimistic updates, support for task cloning and bulk actions. | Inefficient UI and slow processes frustrate users and reduce engagement.   |
+| Clarity / Overview    | Quick navigation and feature discovery increase user time-efficiency and usage likelihood.  | Simple UI with minimal distractions, meaningful icons, and keyword search. | Cluttered UI causes frustration and avoidance.                             |
+| Intuitive Operation   | Users should require minimal instructions, speeding learning and improving convenience.   | Familiar icons, predictable navigation, consistent affordances like color-coded buttons. | Poorly placed features lead to confusion and reduced convenience.         |
+| Stimulation           | Motivated users engage more deeply and repeatedly.                   | Add playful or motivational features such as badges, progress points, or rewards.  | Lack of stimulation leads to unremarkable product perception and churn.   |
