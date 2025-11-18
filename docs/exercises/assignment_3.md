@@ -40,16 +40,16 @@ Below are the user experience factors our team considers most important for Stud
 
 ### Task 3.2 (List the corresponding UX factor for each sentence)
 
-| Emotional Reactions | UX Factor |
-|---------------------|-----------|
-|“That is exactly what I needed.”|Vollständigkeit|
-|“It makes life easier.”|Bequemlichkeit|
-|“I'm in control.” or “I am the boss.”|Anpassbarkeit|
-|“We know each other.”|Verbundenheit|
-|“Not being alone.”|Soziales|
-|“Wow.”|Neuartigkeit / Originalität|
-|“Something went wrong.”|Steuerbarkeit|
-|“I've never seen anything like this before.”|Neuartigkeit|
+| Emotional Reactions | UX Factor | justification |
+|---------------------|-----------|-------------|
+|“That is exactly what I needed.”|Completeness| Emotional reaction of a user who feels that the solution fully meets their needs. It is an subjective view.|
+|“It makes life easier.”|Convenience| Emotional reaction of a user to a product that increases convenience. It is not classified as usefulness, because something useful does not necessarily make life easier. |
+|“I'm in control.” or “I am the boss.”|Customizability| Emotional reaction of a user who feels they can tailor or adapt the product to their personal preferences. This reflects customizability, as it emphasizes control over the product’s appearance or behavior. |
+|“We know each other.”|Loyality| Emotional reaction of a user who values a strong personal or social connection over purely product-related features. This reflects loyalty, as it emphasizes attachment and preference based on relationships rather than functionality. |
+|“Not being alone.”|Social| Emotional reaction of a user who feels connected to others through the product and can present themselves positively. This aligns with the social factor, emphasizing interaction and social presence.| 
+|“Wow.”| beauty |Emotional reaction of a user who perceives the product as visually appealing or aesthetically pleasing. This aligns with the beauty factor, emphasizing the product’s design and appearance|
+|“Something went wrong.”|Controllability|Emotional reaction of a user who expected a different response from the product. The product did not behave consistently, leading to frustration or surprise. |
+|“I've never seen anything like this before.”|novelty| Emotional reaction of a user who encounters a new and innovative product or features for the first time. This reflects the novelty factor, emphasizing uniqueness and originality. |
 
 ### Task 3.3
 
