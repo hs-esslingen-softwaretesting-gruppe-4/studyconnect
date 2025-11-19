@@ -40,18 +40,16 @@ Below are the user experience factors our team considers most important for Stud
 
 ### Task 3.2 (List the corresponding UX factor for each sentence)
 
-### Task 3.2 (Mapping Emotional Reactions to UX Factors with Justifications)
-
-| Emotional Reactions             | UX Factor              | Justification                                                                                         |
-|-------------------------------|-----------------------|----------------------------------------------------------------------------------------------------|
-| “That is exactly what I needed.” | Completeness           | This reaction reflects satisfaction with the product’s ability to cover all needed functionalities without gaps, aligning with completeness.     |
-| “It makes life easier.”          | Convenience            | Relates directly to reduced user effort and friction, emphasizing the product’s facilitation of everyday tasks.                              |
-| “I'm in control.” or “I am the boss.” | Adaptability           | Reflects the user’s sense of authority and ability to customize or manage tasks and workflows effectively.                                   |
-| “We know each other.”            | Loyalty                | Denotes community and ongoing engagement that makes users feel connected within the app environment.                                       |
-| “Not being alone.”               | Social                 | Highlights the social collaboration capabilities, making users feel supported through interactions in groups.                             |
-| “Wow.”                         | Novelty / Originality  | Expresses surprise and delight, often triggered by innovative or unique features enhancing user experience.                               |
-| “Something went wrong.”          | Controllability        | Indicates importance of system feedback and error handling, giving users trust in managing unexpected situations.                        |
-| “I've never seen anything like this before.” | Novelty              | Highlights uniqueness and first-time use experiences, reinforcing product distinctiveness.                                                  |
+| Emotional Reactions | UX Factor | justification |
+|---------------------|-----------|-------------|
+|“That is exactly what I needed.”|Completeness| Emotional reaction of a user who feels that the solution fully meets their needs. It is an subjective view.|
+|“It makes life easier.”|Convenience| Emotional reaction of a user to a product that increases convenience. It is not classified as usefulness, because something useful does not necessarily make life easier. |
+|“I'm in control.” or “I am the boss.”|Customizability| Emotional reaction of a user who feels they can tailor or adapt the product to their personal preferences. This reflects customizability, as it emphasizes control over the product’s appearance or behavior. |
+|“We know each other.”|Loyality| Emotional reaction of a user who values a strong personal or social connection over purely product-related features. This reflects loyalty, as it emphasizes attachment and preference based on relationships rather than functionality. |
+|“Not being alone.”|Social| Emotional reaction of a user who feels connected to others through the product and can present themselves positively. This aligns with the social factor, emphasizing interaction and social presence.| 
+|“Wow.”| beauty |Emotional reaction of a user who perceives the product as visually appealing or aesthetically pleasing. This aligns with the beauty factor, emphasizing the product’s design and appearance|
+|“Something went wrong.”|Controllability|Emotional reaction of a user who expected a different response from the product. The product did not behave consistently, leading to frustration or surprise. |
+|“I've never seen anything like this before.”|novelty| Emotional reaction of a user who encounters a new and innovative product or features for the first time. This reflects the novelty factor, emphasizing uniqueness and originality. |
 
 ### Task 3.3 (Improved UX Factors Analysis with StudyConnect Focus)
 
