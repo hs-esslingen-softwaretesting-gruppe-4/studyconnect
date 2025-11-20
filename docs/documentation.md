@@ -399,3 +399,15 @@ mvn verify
 ```
 
 **Fazit:** BDD-Tests seltener ausführen, um produktiv zu bleiben. Aber **immer vor Merge/Release**, um User Stories korrekt zu validieren und Regressionen zu vermeiden. 
+
+#### Review
+
+Das ausgefüllte Review Template befindet sind im Ordner docs/excercises.
+
+**Retrospective:**
+- Für einen Reviewer, dem die verwendete Programmiersprache (in diesem Fall Python) nicht ganz geläufig ist, braucht es zunächst eine gewisse Einarbeitungszeit, sowohl in die Sprache selbst als auch in die teaminterne Struktur. Mit einem soliden Grundverständnis lässt sich jedoch bereits sehr viel nachvollziehen, sodass ein effektives Review problemlos möglich ist. Beispielsweise können Funktionen, die zwar in den Anforderungen stehen, aber noch nicht implementiert wurden, klar erkannt werden. Zusätzlich trägt die erklärende Unterstützung durch den Autor zum Verständnis bei. Sie erleichtert sowohl das Review und führt auf beiden Seiten zu einem Lernprozess. Als Reviewer haben wir hierbei neue Wege der Implementierung kennengelernt.
+- Für den Autor bietet das Review die Möglichkeit, den eigenen Code erneut aus einer anderen Perspektive zu betrachten. Die Rolle zwingt dazu, eigen Implementierungsentscheidungen zu reflektieren und potentielle logische Lückenaufzudecken. Dabei können Probleme frühzeitig erkannt und beseitigt werden, bevor sie zu einem späteren Zeitpunkt zu größeren Fehlern führen.
+
+**Fazit**
+Demnach sind wir der Meinung, dass ein Review nach Implementierung der Grundfunktionen von großem Vorteil ist. Grobe Fehler können frühzeitig erkannt werden und dadurch zeitaufwändigere Nacharbeiten im späteren Verlauf vermieden werden. Auch vernachlässigte oder überbewertete Aspekte/Features können nochmals umpriorisiert werden.
+Wir empfehlen außerdem ein weiteres Review, sobald die Anwendung in ihren Grundzügen nutzbar ist. Dadurch können erneut potentielle Fehler sichtbar gemacht werden.
