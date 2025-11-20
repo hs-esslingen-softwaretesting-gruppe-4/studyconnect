@@ -402,13 +402,12 @@ mvn verify
 
 #### Review
 
-Das review Template befindet sind im Ordner docs/excercises.
+Das ausgefüllte Review Template befindet sind im Ordner docs/excercises.
 
 **Retrospective:**
-- Als Reviewer eines Projektes dessen Sprache (hier Python) einem neu ist braucht man etwas Einarbeitungszeit, um die Stuktur der Programmiersprache und die des Teams zu verstehen. Dennoch kann mit einem guten Grundverständnis relativ viel Verstanden werden und stehen einem Review nicht im Wege. Z.B. sind in Anforderungen beschriebene Funktionen, welche noch nicht implementiert sind gut zu erkennen.
-Die Erklärende Unterstützung eines Autors führt zudem nicht nur zum besseren Verständnis des Codes sondern auch zu einem Lernen beider Seiten, über neue mögliche Wege Features zu implementieren. Auch kann der unterstützende Autor selbst beim Review noch Unstimmigkeiten finden.
-- Auf der Seite des Autors, dessen Project reviewed wird, hilf das Review, den Code nochmals mit anderen Perspektiven zu prüfen. Zudem versetzt die Autor Rolle einen in den Zwang, die Entscheidungen über die Art der Umsetzung nochmals anzuschauen. Dadurch bekommt man die Chance mit den Reviewern logische Lücken zu entdecken und frühzeitig auszubessern.
+- Für einen Reviewer, dem die verwendete Programmiersprache (in diesem Fall Python) nicht ganz geläufig ist, braucht es zunächst eine gewisse Einarbeitungszeit, sowohl in die Sprache selbst als auch in die teaminterne Struktur. Mit einem soliden Grundverständnis lässt sich jedoch bereits sehr viel nachvollziehen, sodass ein effektives Review problemlos möglich ist. Beispielsweise können Funktionen, die zwar in den Anforderungen stehen, aber noch nicht implementiert wurden, klar erkannt werden. Zusätzlich trägt die erklärende Unterstützung durch den Autor zum Verständnis bei. Sie erleichtert sowohl das Review und führt auf beiden Seiten zu einem Lernprozess. Als Reviewer haben wir hierbei neue Wege der Implementierung kennengelernt.
+- Für den Autor bietet das Review die Möglichkeit, den eigenen Code erneut aus einer anderen Perspektive zu betrachten. Die Rolle zwingt dazu, eigen Implementierungsentscheidungen zu reflektieren und potentielle logische Lückenaufzudecken. Dabei können Probleme frühzeitig erkannt und beseitigt werden, bevor sie zu einem späteren Zeitpunkt zu größeren Fehlern führen.
 
 **Fazit**
-Demnach sind wir der Meinung, ist ein Review nach implementation der Grundfunktionen von großem Vorteil, da grobe Fehler frühzeitig erkannt werden können und so im späteren Verlauf viel Nacharbeitungszeit sparen. Auch vernachlässigte oder überbewertete Aspekte/Features können nochmals umpriorisiert werden.
-Zudem empfehlen wir nochmals ein Review zu machen, sobald die Applikation in ihren Grundzügen nutzbar ist, um nochmals grobe Fehler vorzubeugen.
+Demnach sind wir der Meinung, dass ein Review nach Implementierung der Grundfunktionen von großem Vorteil ist. Grobe Fehler können frühzeitig erkannt werden und dadurch zeitaufwändigere Nacharbeiten im späteren Verlauf vermieden werden. Auch vernachlässigte oder überbewertete Aspekte/Features können nochmals umpriorisiert werden.
+Wir empfehlen außerdem ein weiteres Review, sobald die Anwendung in ihren Grundzügen nutzbar ist. Dadurch können erneut potentielle Fehler sichtbar gemacht werden.
