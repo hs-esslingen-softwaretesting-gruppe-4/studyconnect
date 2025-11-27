@@ -1,6 +1,5 @@
 package de.softwaretesting.studyconnect.repositories;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,6 @@ class GroupRepositoryTest {
         admin.setEmail("admin@example.com");
         admin.setSurname("Admin");
         admin.setLastname("User");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         // Arrange: create a new group
@@ -89,7 +87,6 @@ class GroupRepositoryTest {
         admin.setEmail("taskadmin@example.com");
         admin.setSurname("Task");
         admin.setLastname("Admin");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         // Arrange: create a new group
@@ -142,7 +139,6 @@ class GroupRepositoryTest {
         admin.setEmail("nullname@example.com");
         admin.setSurname("NullName");
         admin.setLastname("User");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         Group group = new Group();
@@ -165,7 +161,6 @@ class GroupRepositoryTest {
         admin.setEmail("timestamp@example.com");
         admin.setSurname("Timestamp");
         admin.setLastname("User");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         Group group = new Group();
@@ -178,17 +173,16 @@ class GroupRepositoryTest {
         assertNotNull(saved.getUpdatedAt(), "updatedAt should be auto-set");
     }
 
-    @Test
     /**
      * Test that the isPublic field defaults to false when not explicitly set.
      */
+    @Test
     void shouldDefaultIsPublicToFalse() {
         // Arrange: create and save an admin user
         User admin = new User();
         admin.setEmail("publicdefault@example.com");
         admin.setSurname("PublicDefault");
         admin.setLastname("User");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         Group group = new Group();
@@ -213,7 +207,6 @@ class GroupRepositoryTest {
         admin.setEmail("admin2@example.com");
         admin.setSurname("Admin2");
         admin.setLastname("User");
-        admin.setCreatedAt(LocalDateTime.now());
         savedAdmin = userRepository.save(admin);
 
         // Arrange: create group
@@ -229,7 +222,6 @@ class GroupRepositoryTest {
             user.setEmail("user" + i + "@example.com");
             user.setSurname("User" + i);
             user.setLastname("Test");
-            user.setCreatedAt(LocalDateTime.now());
             members.add(userRepository.save(user));
         }
         members.add(savedAdmin); // include the admin

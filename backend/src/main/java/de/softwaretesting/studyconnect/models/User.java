@@ -28,7 +28,7 @@ public class User {
     private String keycloakUUID;
 
     @Email(message = "Please provide a valid email address")
-    @Column(name = "email", nullable = false, unique=true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "surname", nullable = false)

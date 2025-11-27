@@ -46,10 +46,10 @@ public class Group {
     @Column(name = "max_members", nullable = false)
     private Integer maxMembers = 20;
 
-    @Column(name = "is_public", nullable = false, columnDefinition = "boolean default false")
-    private boolean isPublic;
+    @Column(name = "is_public", nullable = false)
+    private boolean isPublic = false;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 

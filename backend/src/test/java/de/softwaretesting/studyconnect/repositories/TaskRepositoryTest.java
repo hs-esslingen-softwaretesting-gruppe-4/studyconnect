@@ -1,14 +1,13 @@
 package de.softwaretesting.studyconnect.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -42,7 +41,6 @@ class TaskRepositoryTest {
         creator.setEmail("creator@example.com");
         creator.setSurname("Creator");
         creator.setLastname("User");
-        creator.setCreatedAt(LocalDateTime.now());
         User savedCreator = userRepository.save(creator);
 
         Task task = new Task();
@@ -83,21 +81,18 @@ class TaskRepositoryTest {
         creator.setEmail("c@example.com");
         creator.setSurname("C");
         creator.setLastname("User");
-        creator.setCreatedAt(LocalDateTime.now());
         userRepository.saveAndFlush(creator);
 
         User assignee1 = new User();
         assignee1.setEmail("a1@example.com");
         assignee1.setSurname("A1");
         assignee1.setLastname("User");
-        assignee1.setCreatedAt(LocalDateTime.now());
         userRepository.saveAndFlush(assignee1);
 
         User assignee2 = new User();
         assignee2.setEmail("a2@example.com");
         assignee2.setSurname("A2");
         assignee2.setLastname("User");
-        assignee2.setCreatedAt(LocalDateTime.now());
         userRepository.saveAndFlush(assignee2);
 
         Task task = new Task();
