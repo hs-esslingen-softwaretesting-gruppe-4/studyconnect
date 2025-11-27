@@ -35,7 +35,9 @@ StudyConnect is a student-centered productivity tool designed to help students o
 - Cannot modify group settings
 
 #### 2.1.2 Group Administrator
+
 **Capabilities:**
+
 - All Student capabilities
 - Create and manage study groups
 - Invite and remove group members
@@ -45,6 +47,7 @@ StudyConnect is a student-centered productivity tool designed to help students o
 - Export group data
 
 **Restrictions:**
+
 - Cannot delete groups with active members
 - Cannot remove themselves as admin without transferring role
 
@@ -69,18 +72,22 @@ StudyConnect is a student-centered productivity tool designed to help students o
 ### 3.1 Personal Task Management
 
 #### 3.1.1 Task Creation and Management
+
 **Required Fields:**
+
 - Title (text, max 200 characters)
 - Due date (date picker with time optional)
 - Priority (Low, Medium, High)
 - Notes (text, max 1000 characters)
 
 **Optional Fields:**
+
 - Category (user-defined tags)
 - Status (Open, In Progress, Completed)
 - Tags (multiple, user-defined)
 
 **Operations:**
+
 - Create new task
 - Edit existing task
 - Delete task (with confirmation)
@@ -351,6 +358,7 @@ comments (
 ### 5.3 API Design
 
 #### 5.3.1 RESTful Endpoints
+
 ```
 GET    /api/tasks              # List user's tasks
 POST   /api/tasks              # Create new task

@@ -1,16 +1,13 @@
 package de.softwaretesting.studyconnect.repositories;
 
-import java.time.LocalDateTime;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.softwaretesting.studyconnect.models.User;
 
@@ -32,7 +29,6 @@ class UserRepositoryTest {
         user.setEmail("test@example.com");
         user.setSurname("John");
         user.setLastname("Doe");
-        user.setCreatedAt(LocalDateTime.now());
 
         User saved = userRepository.save(user);
 
@@ -44,7 +40,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null email field fails due to the not-null constraint.
+     * Tests that saving a User with a null email field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenEmailIsNull() {
@@ -52,7 +49,6 @@ class UserRepositoryTest {
         User user = new User();
         user.setSurname("John");
         user.setLastname("Doe");
-        user.setCreatedAt(LocalDateTime.now());
 
         // Act & Assert
         assertThrows(
@@ -61,7 +57,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null surname field fails due to the not-null constraint.
+     * Tests that saving a User with a null surname field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenSurnameIsNull() {
@@ -69,7 +66,6 @@ class UserRepositoryTest {
         User user = new User();
         user.setEmail("test@example.com");
         user.setLastname("Doe");
-        user.setCreatedAt(LocalDateTime.now());
 
         // Act & Assert
         assertThrows(
@@ -78,7 +74,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null lastname field fails due to the not-null constraint.
+     * Tests that saving a User with a null lastname field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenLastnameIsNull() {
@@ -86,7 +83,6 @@ class UserRepositoryTest {
         User user = new User();
         user.setEmail("test@example.com");
         user.setSurname("John");
-        user.setCreatedAt(LocalDateTime.now());
 
         // Act & Assert
         assertThrows(
@@ -95,28 +91,52 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a duplicate Keycloak UUID fails due to the unique constraint.
+     * Tests that saving a User with a duplicate Keycloak UUID fails due to the
+     * unique constraint.
      */
     @Test
     void shouldFailToSaveUserWithDuplicateKeycloakUUID() {
+        String uniqueUUID = "test-duplicate-uuid-" + System.nanoTime();
+
         User user1 = new User();
         user1.setEmail("user1@example.com");
         user1.setSurname("John");
         user1.setLastname("Doe");
-        user1.setCreatedAt(LocalDateTime.now());
-        user1.setKeycloakUUID("uuid-123");
+        user1.setKeycloakUUID(uniqueUUID);
         userRepository.saveAndFlush(user1);
 
         User user2 = new User();
         user2.setEmail("user2@example.com");
         user2.setSurname("Jane");
         user2.setLastname("Doe");
-        user2.setCreatedAt(LocalDateTime.now());
-        user2.setKeycloakUUID("uuid-123");
+        user2.setKeycloakUUID(uniqueUUID);
 
         assertThrows(
                 DataIntegrityViolationException.class,
                 () -> userRepository.saveAndFlush(user2));
     }
 
+    /**
+     * Tests that saving a User with a duplicate email fails due to the unique
+     * constraint.
+     */
+    @Test
+    void shouldFailToSaveUserWithDuplicateEmail() {
+        String duplicateEmail = "duplicate-email@example.com";
+
+        User user1 = new User();
+        user1.setEmail(duplicateEmail);
+        user1.setSurname("John");
+        user1.setLastname("Doe");
+        userRepository.saveAndFlush(user1);
+
+        User user2 = new User();
+        user2.setEmail(duplicateEmail);
+        user2.setSurname("Jane");
+        user2.setLastname("Doe");
+
+        assertThrows(
+                DataIntegrityViolationException.class,
+                () -> userRepository.saveAndFlush(user2));
+    }
 }

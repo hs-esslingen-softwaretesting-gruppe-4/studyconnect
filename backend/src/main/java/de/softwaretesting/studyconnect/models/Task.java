@@ -23,7 +23,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -72,11 +71,11 @@ public class Task {
     @Column(name = "tag")
     private Set<String> tags = new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> assignees = new HashSet<>();
 
@@ -150,17 +149,16 @@ public class Task {
     }
 
     // Inner enums for Priority and Status to keep them scoped with Task
-    public static enum Priority {
+    public enum Priority {
         LOW,
         MEDIUM,
         HIGH
     }
 
-    public static enum Status {
+    public enum Status {
         OPEN,
         IN_PROGRESS,
         COMPLETED,
         CANCELLED
     }
-
 }

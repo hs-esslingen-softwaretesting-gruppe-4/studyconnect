@@ -1,20 +1,19 @@
 package de.softwaretesting.studyconnect.steps;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.softwaretesting.studyconnect.models.Task;
-import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.models.Task.Status;
+import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.TaskRepository;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 public class UpdateProgressSteps {
 
@@ -36,7 +35,6 @@ public class UpdateProgressSteps {
         user.setEmail("test@example.com");
         user.setSurname("John");
         user.setLastname("Doe");
-        user.setCreatedAt(LocalDateTime.now());
         assertNotNull(user, "User should be logged in");
     }
 

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +27,8 @@ public class User {
     @Column(name = "keycloak_uuid", nullable = true, unique = true)
     private String keycloakUUID;
 
-    @Column(name = "email", nullable = false)
+    @Email(message = "Please provide a valid email address")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "surname", nullable = false)
@@ -40,9 +42,7 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
+        this.createdAt = LocalDateTime.now();
     }
 
 }

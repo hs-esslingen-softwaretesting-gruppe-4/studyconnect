@@ -1,22 +1,22 @@
 package de.softwaretesting.studyconnect.steps;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.HashSet;
-import io.cucumber.datatable.DataTable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.softwaretesting.studyconnect.models.Group;
-import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.models.Task;
+import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.GroupRepository;
 import de.softwaretesting.studyconnect.repositories.TaskRepository;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 public class AssignTaskSteps {
 
@@ -50,7 +50,6 @@ public class AssignTaskSteps {
     public void aGroup(String groupName) {
         Group g = new Group();
         g.setName(groupName);
-        g.setVisibility("PRIVATE");
         this.currentGroup = g;
     }
 
@@ -88,7 +87,7 @@ public class AssignTaskSteps {
                 if (!name.isEmpty()) {
                     user.setSurname(name);
                     user.setLastname(name);
-                    user.setEmail(name.replaceAll("\\s+", " ").toLowerCase() + "@example.local");
+                    user.setEmail(name.replaceAll("\\s+", ".").toLowerCase() + "@example.local");
                 } else {
                     user.setSurname("user");
                     user.setLastname("user");
@@ -105,7 +104,7 @@ public class AssignTaskSteps {
 
             if ("admin".equalsIgnoreCase(role)) {
                 g.setAdmin(user);
-                g.setCreatedBy(user.getId());
+                g.setCreatedBy(user);
             }
         }
         groupRepository.save(g);
@@ -253,7 +252,7 @@ public class AssignTaskSteps {
                 .map(m -> m.values().stream().findFirst().orElse("").trim())
                 .toList();
 
-        List<String> actual = t.getAssignees().stream().map(u -> u.getSurname()).toList();
+        List<String> actual = t.getAssignees().stream().map(user -> user.getSurname()).toList();
 
         if (!actual.containsAll(expected) || actual.size() != expected.size()) {
             throw new AssertionError("Assignees do not match. expected=" + expected + " actual=" + actual);
