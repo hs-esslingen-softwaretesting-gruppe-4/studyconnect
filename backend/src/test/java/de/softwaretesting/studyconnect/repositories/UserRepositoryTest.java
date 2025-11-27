@@ -40,7 +40,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null email field fails due to the not-null constraint.
+     * Tests that saving a User with a null email field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenEmailIsNull() {
@@ -56,7 +57,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null surname field fails due to the not-null constraint.
+     * Tests that saving a User with a null surname field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenSurnameIsNull() {
@@ -72,7 +74,8 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a null lastname field fails due to the not-null constraint.
+     * Tests that saving a User with a null lastname field fails due to the not-null
+     * constraint.
      */
     @Test
     void shouldFailToSaveUserWhenLastnameIsNull() {
@@ -88,12 +91,13 @@ class UserRepositoryTest {
     }
 
     /**
-     * Tests that saving a User with a duplicate Keycloak UUID fails due to the unique constraint.
+     * Tests that saving a User with a duplicate Keycloak UUID fails due to the
+     * unique constraint.
      */
     @Test
     void shouldFailToSaveUserWithDuplicateKeycloakUUID() {
         String uniqueUUID = "test-duplicate-uuid-" + System.nanoTime();
-        
+
         User user1 = new User();
         user1.setEmail("user1@example.com");
         user1.setSurname("John");
@@ -112,4 +116,27 @@ class UserRepositoryTest {
                 () -> userRepository.saveAndFlush(user2));
     }
 
+    /**
+     * Tests that saving a User with a duplicate email fails due to the unique
+     * constraint.
+     */
+    @Test
+    void shouldFailToSaveUserWithDuplicateEmail() {
+        String duplicateEmail = "duplicate-email@example.com";
+
+        User user1 = new User();
+        user1.setEmail(duplicateEmail);
+        user1.setSurname("John");
+        user1.setLastname("Doe");
+        userRepository.saveAndFlush(user1);
+
+        User user2 = new User();
+        user2.setEmail(duplicateEmail);
+        user2.setSurname("Jane");
+        user2.setLastname("Doe");
+
+        assertThrows(
+                DataIntegrityViolationException.class,
+                () -> userRepository.saveAndFlush(user2));
+    }
 }

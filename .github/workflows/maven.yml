@@ -6,6 +6,8 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
+# This workflow is triggered on pushes or pull requests to the main branch, but only when files in the backend/ directory are changed.
+
 name: Build and Test Backend
 
 on:
