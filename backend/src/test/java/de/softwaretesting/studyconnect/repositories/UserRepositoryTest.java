@@ -92,18 +92,20 @@ class UserRepositoryTest {
      */
     @Test
     void shouldFailToSaveUserWithDuplicateKeycloakUUID() {
+        String uniqueUUID = "test-duplicate-uuid-" + System.nanoTime();
+        
         User user1 = new User();
         user1.setEmail("user1@example.com");
         user1.setSurname("John");
         user1.setLastname("Doe");
-        user1.setKeycloakUUID("uuid-123");
+        user1.setKeycloakUUID(uniqueUUID);
         userRepository.saveAndFlush(user1);
 
         User user2 = new User();
         user2.setEmail("user2@example.com");
         user2.setSurname("Jane");
         user2.setLastname("Doe");
-        user2.setKeycloakUUID("uuid-123");
+        user2.setKeycloakUUID(uniqueUUID);
 
         assertThrows(
                 DataIntegrityViolationException.class,
