@@ -1,5 +1,5 @@
 services:
-  postgres_dev:
+  postgres_prod:
     container_name: 'postgres-studyconnect-prod'
     image: 'postgres:latest'
     environment:

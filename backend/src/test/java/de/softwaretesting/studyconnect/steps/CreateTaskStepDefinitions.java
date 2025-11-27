@@ -1,5 +1,12 @@
 package de.softwaretesting.studyconnect.steps;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import de.softwaretesting.studyconnect.models.Group;
 import de.softwaretesting.studyconnect.models.Task;
 import de.softwaretesting.studyconnect.models.User;
@@ -10,13 +17,6 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Step Definitions für die create-task.feature Szenarien.
@@ -47,12 +47,12 @@ public class CreateTaskStepDefinitions {
     @Given("the user is logged in as a student")
     public void the_user_is_logged_in_as_a_student() {
         // Erstelle einen Test-User mit eindeutiger UUID
-        String uniqueUUID = "test-uuid-" + System.currentTimeMillis();
+        String uniqueSuffix = String.valueOf(System.currentTimeMillis());
         currentUser = new User();
         currentUser.setSurname("Max");
         currentUser.setLastname("Mustermann");
-        currentUser.setEmail("max.mustermann@example.com");
-        currentUser.setKeycloakUUID(uniqueUUID);
+        currentUser.setEmail("max.mustermann." + uniqueSuffix + "@example.com");
+        currentUser.setKeycloakUUID("test-uuid-" + uniqueSuffix);
         currentUser = userRepository.save(currentUser);
     }
 
@@ -77,20 +77,19 @@ public class CreateTaskStepDefinitions {
         assertThat(currentUser).isNotNull();
         currentGroup = new Group();
         currentGroup.setName(groupName);
-        currentGroup.setCreatedBy(currentUser.getId());
-        currentGroup.setVisibility("PRIVATE");
+        currentGroup.setCreatedBy(currentUser);
         currentGroup = groupRepository.save(currentGroup);
     }
 
     @Given("the user is logged in but does not have task management permissions")
     public void the_user_is_logged_in_but_does_not_have_task_management_permissions() {
         // Erstelle User ohne Berechtigungen mit eindeutiger UUID
-        String uniqueUUID = "test-uuid-noperm-" + System.currentTimeMillis();
+        String uniqueSuffix = String.valueOf(System.currentTimeMillis());
         currentUser = new User();
         currentUser.setSurname("No");
         currentUser.setLastname("Permissions");
-        currentUser.setEmail("noperm@example.com");
-        currentUser.setKeycloakUUID(uniqueUUID);
+        currentUser.setEmail("noperm." + uniqueSuffix + "@example.com");
+        currentUser.setKeycloakUUID("test-uuid-noperm-" + uniqueSuffix);
         currentUser = userRepository.save(currentUser);
         accessDenied = false;
     }

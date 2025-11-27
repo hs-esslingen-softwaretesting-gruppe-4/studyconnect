@@ -2,20 +2,22 @@ package de.softwaretesting.studyconnect.repositories;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import de.softwaretesting.studyconnect.models.Group;
-import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.models.Task;
-import de.softwaretesting.studyconnect.repositories.TaskRepository;
-import java.util.List;
+import de.softwaretesting.studyconnect.models.User;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -30,6 +32,9 @@ class GroupRepositoryTest {
     @Autowired
     private TaskRepository taskRepository;
 
+    private User savedAdmin;
+
+
     /**
      * Test creating and saving a group with valid data.
      * Checks that all fields are persisted correctly, 
@@ -43,15 +48,15 @@ class GroupRepositoryTest {
         admin.setSurname("Admin");
         admin.setLastname("User");
         admin.setCreatedAt(LocalDateTime.now());
-        User savedAdmin = userRepository.save(admin);
+        savedAdmin = userRepository.save(admin);
 
         // Arrange: create a new group
         Group group = new Group();
         group.setName("Study Group 1");
         group.setDescription("Test group for StudyConnect");
-        group.setVisibility("PRIVATE");
+        group.setPublic(true);
         group.setMaxMembers(10);
-        group.setCreatedBy(savedAdmin.getId());
+        group.setCreatedBy(savedAdmin);
         group.setAdmin(savedAdmin);
 
         // Add the admin as a member
@@ -65,8 +70,8 @@ class GroupRepositoryTest {
         // Assert: verify that the group was saved correctly
         assertNotNull(saved.getId());
         assertEquals("Study Group 1", saved.getName());
-        assertEquals("PRIVATE", saved.getVisibility());
-        assertEquals(savedAdmin.getId(), saved.getCreatedBy());
+        assertTrue(saved.isPublic());
+        assertEquals(savedAdmin.getId(), saved.getCreatedBy().getId());
         assertNotNull(saved.getCreatedAt(), "createdAt should be auto-set");
         assertNotNull(saved.getUpdatedAt(), "updatedAt should be auto-set");
         assertEquals(savedAdmin.getId(), saved.getAdmin().getId());
@@ -85,15 +90,14 @@ class GroupRepositoryTest {
         admin.setSurname("Task");
         admin.setLastname("Admin");
         admin.setCreatedAt(LocalDateTime.now());
-        User savedAdmin = userRepository.save(admin);
+        savedAdmin = userRepository.save(admin);
 
         // Arrange: create a new group
         Group group = new Group();
         group.setName("Task Group");
         group.setDescription("Group for task tests");
-        group.setVisibility("PRIVATE");
         group.setMaxMembers(10);
-        group.setCreatedBy(savedAdmin.getId());
+        group.setCreatedBy(savedAdmin);
         group.setAdmin(savedAdmin);
 
         // Arrange: create a new task and add to group (bi-directional helper)
@@ -133,24 +137,18 @@ class GroupRepositoryTest {
      */
     @Test
     void shouldFailToSaveGroupWhenNameIsNull() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("nullname@example.com");
+        admin.setSurname("NullName");
+        admin.setLastname("User");
+        admin.setCreatedAt(LocalDateTime.now());
+        savedAdmin = userRepository.save(admin);
+
         Group group = new Group();
         group.setDescription("No name group");
-        group.setVisibility("PUBLIC");
-        group.setCreatedBy(1L);
-
-        assertThrows(Exception.class,
-                () -> groupRepository.saveAndFlush(group));
-    }
-
-    /**
-     * Test that saving a group without visibility fails.
-     * Database constraints should prevent null visibility.
-     */
-    @Test
-    void shouldFailToSaveGroupWhenVisibilityIsNull() {
-        Group group = new Group();
-        group.setName("Invalid Group");
-        group.setCreatedBy(1L);
+        group.setPublic(true);
+        group.setCreatedBy(savedAdmin);
 
         assertThrows(Exception.class,
                 () -> groupRepository.saveAndFlush(group));
@@ -162,15 +160,45 @@ class GroupRepositoryTest {
      */
     @Test
     void shouldAutoSetCreatedAndUpdatedAt() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("timestamp@example.com");
+        admin.setSurname("Timestamp");
+        admin.setLastname("User");
+        admin.setCreatedAt(LocalDateTime.now());
+        savedAdmin = userRepository.save(admin);
+
         Group group = new Group();
         group.setName("AutoTimestamp Group");
-        group.setVisibility("PRIVATE");
-        group.setCreatedBy(1L);
+        group.setCreatedBy(savedAdmin);
 
         Group saved = groupRepository.saveAndFlush(group);
 
         assertNotNull(saved.getCreatedAt(), "createdAt should be auto-set");
         assertNotNull(saved.getUpdatedAt(), "updatedAt should be auto-set");
+    }
+
+    @Test
+    /**
+     * Test that the isPublic field defaults to false when not explicitly set.
+     */
+    void shouldDefaultIsPublicToFalse() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("publicdefault@example.com");
+        admin.setSurname("PublicDefault");
+        admin.setLastname("User");
+        admin.setCreatedAt(LocalDateTime.now());
+        savedAdmin = userRepository.save(admin);
+
+        Group group = new Group();
+        group.setName("Default Public Group");
+        group.setCreatedBy(savedAdmin);
+        group.setAdmin(savedAdmin);
+
+        Group saved = groupRepository.saveAndFlush(group);
+
+        assertFalse(saved.isPublic(), "isPublic should default to false");
     }
 
     /**
@@ -186,13 +214,12 @@ class GroupRepositoryTest {
         admin.setSurname("Admin2");
         admin.setLastname("User");
         admin.setCreatedAt(LocalDateTime.now());
-        User savedAdmin = userRepository.save(admin);
+        savedAdmin = userRepository.save(admin);
 
         // Arrange: create group
         Group group = new Group();
         group.setName("Limited Group");
-        group.setVisibility("PRIVATE");
-        group.setCreatedBy(savedAdmin.getId());
+        group.setCreatedBy(savedAdmin);
         group.setAdmin(savedAdmin);
 
         // Arrange: create more members than the maxMembers value
