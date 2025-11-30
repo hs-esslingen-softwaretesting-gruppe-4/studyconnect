@@ -6,7 +6,7 @@ import java.util.Set;
 
 import de.softwaretesting.studyconnect.models.Task.Priority;
 import de.softwaretesting.studyconnect.models.Task.Status;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +22,7 @@ public class TaskRequestDTO implements Serializable {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     String description;
 
-    @Future(message = "Due date must be in the future")
+    @FutureOrPresent(message = "Due date must be in the present or future")
     LocalDateTime dueDate;
 
     @NotNull(message = "Priority is required")

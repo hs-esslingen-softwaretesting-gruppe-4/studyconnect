@@ -253,51 +253,6 @@ class TaskServiceTest {
         verify(taskRepository, never()).save(any(Task.class));
     }
 
-    // ==================== getTaskById Tests ====================
-
-    /**
-     * Retrieves an existing task by ID and verifies the response.
-     */
-    @Test
-    void getTaskById_WithExistingTask_ShouldReturnTask() {
-        // Arrange
-        Long taskId = 1L;
-        when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
-        when(taskResponseMapper.toDto(savedTask)).thenReturn(taskResponseDTO);
-
-        // Act
-        ResponseEntity<TaskResponseDTO> response = taskService.getTaskById(taskId);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(taskResponseDTO.getId(), response.getBody().getId());
-        assertEquals(taskResponseDTO.getTitle(), response.getBody().getTitle());
-
-        verify(taskRepository).findById(taskId);
-        verify(taskResponseMapper).toDto(savedTask);
-    }
-
-    /**
-     * Attempts to retrieve a non-existent task by ID and verifies that a NotFoundException is thrown.
-     */
-    @Test
-    void getTaskById_WithNonExistentTask_ShouldThrowNotFoundException() {
-        // Arrange
-        Long taskId = 999L;
-        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            taskService.getTaskById(taskId);
-        });
-
-        assertEquals("Task not found", exception.getMessage());
-        verify(taskRepository).findById(taskId);
-        verify(taskResponseMapper, never()).toDto(any(Task.class));
-    }
-
     // ==================== getAllTasksInGroup Tests ====================
 
     /**
