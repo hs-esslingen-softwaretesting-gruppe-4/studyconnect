@@ -63,19 +63,6 @@ public class TaskService {
     }
 
     /**
-     * Retrieves a task by its ID.
-     * @param taskId the ID of the task to retrieve
-     * @return a ResponseEntity containing the task's response DTO
-     * @throws NotFoundException if the task is not found
-     */
-    public ResponseEntity<TaskResponseDTO> getTaskById(Long taskId) {
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundException("Task not found"));
-        TaskResponseDTO taskResponseDTO = taskResponseMapper.toDto(task);
-        return ResponseEntity.ok(taskResponseDTO);
-    }
-
-    /**
      * Retrieves all tasks within a specific group.
      * @param groupId the ID of the group
      * @return a ResponseEntity containing a list of task response DTOs
@@ -114,6 +101,13 @@ public class TaskService {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Updates an existing task.
+     * @param taskId the ID of the task to update
+     * @param taskRequestDTO the data transfer object containing updated task details
+     * @return a ResponseEntity containing the updated task's response DTO
+     * @throws NotFoundException if the task or any user is not found
+     */
     public ResponseEntity<TaskResponseDTO> updateTask(Long taskId, TaskRequestDTO taskRequestDTO) {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundException("Task not found"));
