@@ -153,6 +153,11 @@ class TaskServiceTest {
         );
     }
 
+    // ==================== createTask Tests ====================
+
+    /**
+     * Creates a new task with valid data and verifies the response.
+     */
     @Test
     void createTask_WithValidData_ShouldReturnCreatedTask() {
         // Arrange
@@ -187,6 +192,9 @@ class TaskServiceTest {
         verify(taskResponseMapper).toDto(savedTask);
     }
 
+    /**
+     * Creates a new task with a non-existent group and verifies that a NotFoundException is thrown.
+     */
     @Test
     void createTask_WithNonExistentGroup_ShouldThrowNotFoundException() {
         // Arrange
@@ -203,6 +211,9 @@ class TaskServiceTest {
         verify(taskRepository, never()).save(any(Task.class));
     }
 
+    /**
+     * Creates a new task with a non-existent assignee and verifies that a NotFoundException is thrown.
+     */
     @Test
     void createTask_WithNonExistentAssignee_ShouldThrowNotFoundException() {
         // Arrange
@@ -221,6 +232,9 @@ class TaskServiceTest {
         verify(taskRepository, never()).save(any(Task.class));
     }
 
+    /**
+     * Creates a new task with a non-existent creator and verifies that a NotFoundException is thrown.
+     */
     @Test
     void createTask_WithNonExistentCreator_ShouldThrowNotFoundException() {
         // Arrange
@@ -236,6 +250,313 @@ class TaskServiceTest {
         });
 
         assertEquals("Creator user not found", exception.getMessage());
+        verify(taskRepository, never()).save(any(Task.class));
+    }
+
+    // ==================== getTaskById Tests ====================
+
+    /**
+     * Retrieves an existing task by ID and verifies the response.
+     */
+    @Test
+    void getTaskById_WithExistingTask_ShouldReturnTask() {
+        // Arrange
+        Long taskId = 1L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
+        when(taskResponseMapper.toDto(savedTask)).thenReturn(taskResponseDTO);
+
+        // Act
+        ResponseEntity<TaskResponseDTO> response = taskService.getTaskById(taskId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(taskResponseDTO.getId(), response.getBody().getId());
+        assertEquals(taskResponseDTO.getTitle(), response.getBody().getTitle());
+
+        verify(taskRepository).findById(taskId);
+        verify(taskResponseMapper).toDto(savedTask);
+    }
+
+    /**
+     * Attempts to retrieve a non-existent task by ID and verifies that a NotFoundException is thrown.
+     */
+    @Test
+    void getTaskById_WithNonExistentTask_ShouldThrowNotFoundException() {
+        // Arrange
+        Long taskId = 999L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            taskService.getTaskById(taskId);
+        });
+
+        assertEquals("Task not found", exception.getMessage());
+        verify(taskRepository).findById(taskId);
+        verify(taskResponseMapper, never()).toDto(any(Task.class));
+    }
+
+    // ==================== getAllTasksInGroup Tests ====================
+
+    /**
+     * Retrieves all tasks within an existing group and verifies the response.
+     */
+    @Test
+    void getAllTasksInGroup_WithExistingGroup_ShouldReturnTasks() {
+        // Arrange
+        Long groupId = 100L;
+        Task task2 = new Task();
+        task2.setId(2L);
+        task2.setTitle("Second Task");
+        task2.setGroup(group);
+
+        TaskResponseDTO taskResponseDTO2 = new TaskResponseDTO(
+                2L, "Second Task", "Description", LocalDateTime.now().plusDays(5),
+                Priority.LOW, Status.OPEN, "Category", Set.of(), 1L, Set.of(2L),
+                LocalDateTime.now(), LocalDateTime.now(), 100L
+        );
+
+        when(taskRepository.findByGroupId(groupId)).thenReturn(List.of(savedTask, task2));
+        when(taskResponseMapper.toDto(savedTask)).thenReturn(taskResponseDTO);
+        when(taskResponseMapper.toDto(task2)).thenReturn(taskResponseDTO2);
+
+        // Act
+        ResponseEntity<List<TaskResponseDTO>> response = taskService.getAllTasksInGroup(groupId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        assertEquals(taskResponseDTO.getId(), response.getBody().get(0).getId());
+        assertEquals(taskResponseDTO2.getId(), response.getBody().get(1).getId());
+
+        verify(taskRepository).findByGroupId(groupId);
+    }
+
+    /**
+     * Retrieves all tasks within a group that has no tasks and verifies the response is an empty list.
+     */
+    @Test
+    void getAllTasksInGroup_WithNoTasks_ShouldReturnEmptyList() {
+        // Arrange
+        Long groupId = 100L;
+        when(taskRepository.findByGroupId(groupId)).thenReturn(List.of());
+
+        // Act
+        ResponseEntity<List<TaskResponseDTO>> response = taskService.getAllTasksInGroup(groupId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(0, response.getBody().size());
+
+        verify(taskRepository).findByGroupId(groupId);
+    }
+
+    // ==================== getAllTasksAssignedToUser Tests ====================
+
+    /**
+     * Retrieves all tasks assigned to an existing user and verifies the response.
+     */
+    @Test
+    void getAllTasksAssignedToUser_WithExistingUser_ShouldReturnTasks() {
+        // Arrange
+        Long userId = 2L;
+        when(taskRepository.findByAssigneesId(userId)).thenReturn(List.of(savedTask));
+        when(taskResponseMapper.toDto(savedTask)).thenReturn(taskResponseDTO);
+
+        // Act
+        ResponseEntity<List<TaskResponseDTO>> response = taskService.getAllTasksAssignedToUser(userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals(taskResponseDTO.getId(), response.getBody().get(0).getId());
+
+        verify(taskRepository).findByAssigneesId(userId);
+    }
+
+    /**
+     * Retrieves all tasks assigned to a user with no assigned tasks and verifies the response is an empty list.
+     */
+    @Test
+    void getAllTasksAssignedToUser_WithNoAssignedTasks_ShouldReturnEmptyList() {
+        // Arrange
+        Long userId = 999L;
+        when(taskRepository.findByAssigneesId(userId)).thenReturn(List.of());
+
+        // Act
+        ResponseEntity<List<TaskResponseDTO>> response = taskService.getAllTasksAssignedToUser(userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(0, response.getBody().size());
+
+        verify(taskRepository).findByAssigneesId(userId);
+    }
+
+    // ==================== deleteTask Tests ====================
+
+    /**
+     * Deletes an existing task and verifies the response.
+     */
+    @Test
+    void deleteTask_WithExistingTask_ShouldReturnNoContent() {
+        // Arrange
+        Long taskId = 1L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
+
+        // Act
+        ResponseEntity<Void> response = taskService.deleteTask(taskId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        verify(taskRepository).findById(taskId);
+        verify(taskRepository).delete(savedTask);
+    }
+
+    /**
+     * Attempts to delete a non-existent task and verifies that a NotFoundException is thrown.
+     */
+    @Test
+    void deleteTask_WithNonExistentTask_ShouldThrowNotFoundException() {
+        // Arrange
+        Long taskId = 999L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            taskService.deleteTask(taskId);
+        });
+
+        assertEquals("Task not found", exception.getMessage());
+        verify(taskRepository).findById(taskId);
+        verify(taskRepository, never()).delete(any(Task.class));
+    }
+
+    // ==================== updateTask Tests ====================
+
+    /**
+     * Updates an existing task with valid data and verifies the response.
+     */
+    @Test
+    void updateTask_WithValidData_ShouldReturnUpdatedTask() {
+        // Arrange
+        Long taskId = 1L;
+        Set<Long> assigneeIds = new HashSet<>(Set.of(2L, 3L));
+        Set<String> updatedTags = new HashSet<>(Set.of("updated", "important"));
+        TaskRequestDTO updateRequestDTO = new TaskRequestDTO(
+                "Updated Task",
+                "Updated Description",
+                LocalDateTime.now().plusDays(14),
+                Priority.LOW,
+                Status.IN_PROGRESS,
+                "Updated Category",
+                updatedTags,
+                1L,
+                assigneeIds
+        );
+
+        Task updatedTask = new Task();
+        updatedTask.setTitle("Updated Task");
+        updatedTask.setDescription("Updated Description");
+        updatedTask.setPriority(Priority.LOW);
+        updatedTask.setStatus(Status.IN_PROGRESS);
+        updatedTask.setCategory("Updated Category");
+        updatedTask.setTags(new HashSet<>());
+        updatedTask.setAssignees(new HashSet<>());
+
+        Task savedUpdatedTask = new Task();
+        savedUpdatedTask.setId(1L);
+        savedUpdatedTask.setTitle("Updated Task");
+        savedUpdatedTask.setDescription("Updated Description");
+        savedUpdatedTask.setPriority(Priority.LOW);
+        savedUpdatedTask.setStatus(Status.IN_PROGRESS);
+        savedUpdatedTask.setCategory("Updated Category");
+        savedUpdatedTask.setTags(updatedTags);
+        savedUpdatedTask.setAssignees(Set.of(assignee1, assignee2));
+        savedUpdatedTask.setCreatedBy(creator);
+        savedUpdatedTask.setGroup(group);
+
+        TaskResponseDTO updatedResponseDTO = new TaskResponseDTO(
+                1L, "Updated Task", "Updated Description",
+                LocalDateTime.now().plusDays(14), Priority.LOW, Status.IN_PROGRESS,
+                "Updated Category", updatedTags, 1L, assigneeIds,
+                LocalDateTime.now(), LocalDateTime.now(), 100L
+        );
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
+        when(taskRequestMapper.toEntity(updateRequestDTO)).thenReturn(updatedTask);
+        when(userRepository.findAllById(assigneeIds)).thenReturn(List.of(assignee1, assignee2));
+        when(taskRepository.save(any(Task.class))).thenReturn(savedUpdatedTask);
+        when(taskResponseMapper.toDto(savedUpdatedTask)).thenReturn(updatedResponseDTO);
+
+        // Act
+        ResponseEntity<TaskResponseDTO> response = taskService.updateTask(taskId, updateRequestDTO);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Updated Task", response.getBody().getTitle());
+        assertEquals(Priority.LOW, response.getBody().getPriority());
+        assertEquals(Status.IN_PROGRESS, response.getBody().getStatus());
+
+        verify(taskRepository).findById(taskId);
+        verify(taskRequestMapper).toEntity(updateRequestDTO);
+        verify(userRepository).findAllById(assigneeIds);
+        verify(taskRepository).save(any(Task.class));
+        verify(taskResponseMapper).toDto(savedUpdatedTask);
+    }
+
+    /**
+     * Attempts to update a non-existent task and verifies that a NotFoundException is thrown.
+     */
+    @Test
+    void updateTask_WithNonExistentTask_ShouldThrowNotFoundException() {
+        // Arrange
+        Long taskId = 999L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            taskService.updateTask(taskId, taskRequestDTO);
+        });
+
+        assertEquals("Task not found", exception.getMessage());
+        verify(taskRepository).findById(taskId);
+        verify(taskRepository, never()).save(any(Task.class));
+    }
+
+    /**
+     * Attempts to update a task with a non-existent assignee and verifies that a NotFoundException is thrown.
+     */
+    @Test
+    void updateTask_WithNonExistentAssignee_ShouldThrowNotFoundException() {
+        // Arrange
+        Long taskId = 1L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
+        when(taskRequestMapper.toEntity(taskRequestDTO)).thenReturn(task);
+        // Return only one user when two are expected
+        when(userRepository.findAllById(taskRequestDTO.getAssigneeIds())).thenReturn(List.of(assignee1));
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            taskService.updateTask(taskId, taskRequestDTO);
+        });
+
+        assertEquals("One or more assignee users not found", exception.getMessage());
+        verify(taskRepository).findById(taskId);
         verify(taskRepository, never()).save(any(Task.class));
     }
 }
