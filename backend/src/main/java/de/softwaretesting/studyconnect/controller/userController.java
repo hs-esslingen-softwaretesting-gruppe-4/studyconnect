@@ -24,9 +24,9 @@ public class userController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
-        Optional<User> userData = userRepository.findById(id);
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable("userId") Long userId) {
+        Optional<User> userData = userRepository.findById(userId);
         if (userData.isPresent()) {
             return new ResponseEntity<>(userData.get(), HttpStatus.OK);
         } else {
@@ -34,9 +34,9 @@ public class userController {
         }
     }
 
-    @PutMapping("/users/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
-        Optional<User> userData = userRepository.findById(id);
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<User> updateUser(@PathVariable("userId") Long userId, @RequestBody User user) {
+        Optional<User> userData = userRepository.findById(userId);
         if (userData.isPresent()) {
             User existingUser = userData.get();
             existingUser.setEmail(user.getEmail());

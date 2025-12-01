@@ -37,7 +37,7 @@ public class taskController {
         try {
             return TaskService.getAllTasksInGroup(groupId);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
