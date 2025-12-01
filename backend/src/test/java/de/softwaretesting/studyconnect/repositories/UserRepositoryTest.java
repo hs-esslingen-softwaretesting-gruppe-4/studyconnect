@@ -139,4 +139,225 @@ class UserRepositoryTest {
                 DataIntegrityViolationException.class,
                 () -> userRepository.saveAndFlush(user2));
     }
+
+    // ========== BOUNDARY VALUE ANALYSIS TESTS ==========
+
+    /**
+     * Tests that a User can be saved with very long but valid field values.
+     * Ensures the system handles boundary conditions for text fields.
+     */
+    @Test
+    void shouldHandleLongFieldValues() {
+        // Arrange - create user with long field values
+        User user = new User();
+        user.setEmail("very.long.email.address.for.testing.purposes@example.com");
+        user.setSurname("VeryLongSurnameWithManyCharactersToTestBoundaries");
+        user.setLastname("VeryLongLastnameWithManyCharactersToTestBoundaries");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("very.long.email.address.for.testing.purposes@example.com", saved.getEmail());
+    }
+
+    /**
+     * Tests minimum valid length for name fields (1 character).
+     */
+    @Test
+    void shouldHandleMinimumLengthNames() {
+        // Arrange - single character names (boundary)
+        User user = new User();
+        user.setEmail("min@example.com");
+        user.setSurname("J");
+        user.setLastname("D");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("J", saved.getSurname());
+        assertEquals("D", saved.getLastname());
+    }
+
+    // ========== EQUIVALENCE CLASS PARTITIONING TESTS ==========
+
+    /**
+     * Tests that empty string values for email are allowed.
+     * Empty strings are a different equivalence class from NULL.
+     */
+    @Test
+    void shouldAllowEmptyEmail() {
+        // Arrange - empty email (valid in database)
+        User user = new User();
+        user.setEmail("");
+        user.setSurname("John");
+        user.setLastname("Doe");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("", saved.getEmail());
+    }
+
+    /**
+     * Tests that empty string values for surname are allowed.
+     */
+    @Test
+    void shouldAllowEmptySurname() {
+        // Arrange - empty surname
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setSurname("");
+        user.setLastname("Doe");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("", saved.getSurname());
+    }
+
+    /**
+     * Tests that empty string values for lastname are allowed.
+     */
+    @Test
+    void shouldAllowEmptyLastname() {
+        // Arrange - empty lastname
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setSurname("John");
+        user.setLastname("");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("", saved.getLastname());
+    }
+
+    /**
+     * Tests that keycloakUUID can be NULL (optional field).
+     * NULL is a valid equivalence class for this field.
+     */
+    @Test
+    void shouldAllowNullKeycloakUUID() {
+        // Arrange - NULL keycloakUUID is valid
+        User user = new User();
+        user.setEmail("nulluuid@example.com");
+        user.setSurname("Null");
+        user.setLastname("UUID");
+        user.setKeycloakUUID(null);
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(null, saved.getKeycloakUUID());
+    }
+
+    /**
+     * Tests that keycloakUUID can be an empty string.
+     */
+    @Test
+    void shouldAllowEmptyKeycloakUUID() {
+        // Arrange - empty string keycloakUUID
+        User user = new User();
+        user.setEmail("emptyuuid@example.com");
+        user.setSurname("Empty");
+        user.setLastname("UUID");
+        user.setKeycloakUUID("");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("", saved.getKeycloakUUID());
+    }
+
+    // ========== EDGE CASE TESTS ==========
+
+    /**
+     * Tests email with special characters (valid format).
+     */
+    @Test
+    void shouldHandleEmailWithSpecialCharacters() {
+        // Arrange - valid email with special chars
+        User user = new User();
+        user.setEmail("user+tag@sub.example.com");
+        user.setSurname("Special");
+        user.setLastname("Email");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("user+tag@sub.example.com", saved.getEmail());
+    }
+
+    /**
+     * Tests names with special characters and unicode.
+     */
+    @Test
+    void shouldHandleNamesWithUnicodeAndSpecialChars() {
+        // Arrange - names with unicode and special characters
+        User user = new User();
+        user.setEmail("unicode@example.com");
+        user.setSurname("François");
+        user.setLastname("Müller-Schmidt");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("François", saved.getSurname());
+        assertEquals("Müller-Schmidt", saved.getLastname());
+    }
+
+    /**
+     * Tests that createdAt timestamp is automatically set.
+     */
+    @Test
+    void shouldAutoSetCreatedAt() {
+        // Arrange
+        User user = new User();
+        user.setEmail("timestamp@example.com");
+        user.setSurname("Time");
+        user.setLastname("Stamp");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertNotNull(saved.getCreatedAt(), "createdAt should be auto-set by @PrePersist");
+    }
+
+    /**
+     * Tests whitespace handling in names (should be preserved).
+     */
+    @Test
+    void shouldPreserveWhitespaceInNames() {
+        // Arrange - names with whitespace
+        User user = new User();
+        user.setEmail("whitespace@example.com");
+        user.setSurname("John Paul");
+        user.setLastname("Van Der Berg");
+
+        // Act
+        User saved = userRepository.saveAndFlush(user);
+
+        // Assert
+        assertEquals("John Paul", saved.getSurname());
+        assertEquals("Van Der Berg", saved.getLastname());
+    }
 }

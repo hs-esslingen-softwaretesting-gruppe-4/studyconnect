@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
 import de.softwaretesting.studyconnect.models.Group;
@@ -233,5 +234,308 @@ class GroupRepositoryTest {
         // Assert: all members are persisted regardless of maxMembers
         assertEquals(26, saved.getMembers().size(), "All members including admin should be saved");
         assertTrue(saved.getMembers().contains(savedAdmin));
+    }
+
+    // ========== BOUNDARY VALUE ANALYSIS TESTS ==========
+
+    /**
+     * Tests group name at maximum length (100 characters).
+     */
+    @Test
+    void shouldHandleNameAtMaxLength() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-maxname@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("MaxName");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with 100-character name
+        String maxName = "A".repeat(100);
+        Group group = new Group();
+        group.setName(maxName);
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(100, saved.getName().length());
+    }
+
+    /**
+     * Tests group name at minimum length (1 character).
+     */
+    @Test
+    void shouldHandleNameAtMinLength() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-minname@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("MinName");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with 1-character name
+        Group group = new Group();
+        group.setName("A");
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(1, saved.getName().length());
+    }
+
+    /**
+     * Tests group description at maximum length (500 characters).
+     */
+    @Test
+    void shouldHandleDescriptionAtMaxLength() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-maxdesc@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("MaxDesc");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with 500-character description
+        String maxDesc = "B".repeat(500);
+        Group group = new Group();
+        group.setName("Description Test");
+        group.setDescription(maxDesc);
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(500, saved.getDescription().length());
+    }
+
+    /**
+     * Tests maxMembers at boundary value 0.
+     */
+    @Test
+    void shouldHandleMaxMembersZero() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-zeromembers@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("ZeroMembers");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with maxMembers = 0
+        Group group = new Group();
+        group.setName("Zero Members Group");
+        group.setMaxMembers(0);
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(0, saved.getMaxMembers());
+
+        // Arrange: try to add a member
+        User member = new User();
+        member.setEmail("nomember@example.com");
+        member.setSurname("No");
+        member.setLastname("Member");
+        member = userRepository.save(member);
+
+        // Act: try to add member
+        boolean added = saved.addMember(member);
+
+        // Assert: should not be added
+        assertFalse(added, "Member should not be added when maxMembers is 0");
+        assertEquals(0, saved.getMembers().size());
+    }
+
+    /**
+     * Tests maxMembers with very large value.
+     */
+    @Test
+    void shouldHandleMaxMembersVeryLarge() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-largemax@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("LargeMax");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with maxMembers = 1000
+        Group group = new Group();
+        group.setName("Large Members Group");
+        group.setMaxMembers(1000);
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(1000, saved.getMaxMembers());
+    }
+
+    // ========== EQUIVALENCE CLASS PARTITIONING TESTS ==========
+
+    /**
+     * Tests that NULL description is allowed (optional field).
+     */
+    @Test
+    void shouldAllowNullDescription() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-nulldesc@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("NullDesc");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with NULL description
+        Group group = new Group();
+        group.setName("No Description Group");
+        group.setDescription(null);
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals(null, saved.getDescription());
+    }
+
+    /**
+     * Tests that empty description is allowed.
+     */
+    @Test
+    void shouldAllowEmptyDescription() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-emptydesc@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("EmptyDesc");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with empty description
+        Group group = new Group();
+        group.setName("Empty Description Group");
+        group.setDescription("");
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("", saved.getDescription());
+    }
+
+    /**
+     * Tests that NULL maxMembers uses default value (20).
+     */
+    @Test
+    void shouldUseDefaultMaxMembersWhenNull() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-defaultmax@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("DefaultMax");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group without setting maxMembers
+        Group group = new Group();
+        group.setName("Default Max Members Group");
+        group.setCreatedBy(savedAdmin);
+        // Not setting maxMembers
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        // Should use default value
+        assertNotNull(saved.getMaxMembers());
+    }
+
+    // ========== EDGE CASE TESTS ==========
+
+    /**
+     * Tests that attempting to add the same member twice doesn't increase count.
+     */
+    @Test
+    void shouldNotAddDuplicateMember() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-duplicate@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("Duplicate");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create user and group
+        User member = new User();
+        member.setEmail("duplicate@example.com");
+        member.setSurname("Dup");
+        member.setLastname("Member");
+        member = userRepository.save(member);
+
+        Group group = new Group();
+        group.setName("Duplicate Member Test");
+        group.setCreatedBy(savedAdmin);
+        Group saved = groupRepository.save(group);
+
+        // Act: add member twice
+        boolean added1 = saved.addMember(member);
+        boolean added2 = saved.addMember(member);
+
+        // Assert
+        assertTrue(added1, "First add should succeed");
+        assertFalse(added2, "Second add should fail (duplicate)");
+        assertEquals(1, saved.getMembers().size());
+    }
+
+    /**
+     * Tests group name with special characters and unicode.
+     */
+    @Test
+    void shouldHandleNameWithSpecialCharacters() {
+        // Arrange: create and save an admin user
+        User admin = new User();
+        admin.setEmail("admin-specialchars@example.com");
+        admin.setSurname("Admin");
+        admin.setLastname("SpecialChars");
+        savedAdmin = userRepository.save(admin);
+
+        // Arrange: create group with special characters
+        Group group = new Group();
+        group.setName("Café & Restaurant 中文 😀");
+        group.setCreatedBy(savedAdmin);
+
+        // Act
+        Group saved = groupRepository.saveAndFlush(group);
+
+        // Assert
+        assertNotNull(saved.getId());
+        assertEquals("Café & Restaurant 中文 😀", saved.getName());
+    }
+
+    /**
+     * Tests that createdBy is required (NOT NULL constraint).
+     */
+    @Test
+    void shouldFailToSaveGroupWithNullCreatedBy() {
+        // Arrange: create group without createdBy
+        Group group = new Group();
+        group.setName("No Creator Group");
+        // Not setting createdBy
+
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class,
+                () -> groupRepository.saveAndFlush(group));
     }
 }
