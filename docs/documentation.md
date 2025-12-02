@@ -411,3 +411,28 @@ Das ausgefüllte Review Template befindet sich im Ordner docs/exercises.
 **Fazit:**
 Demnach sind wir der Meinung, dass ein Review nach Implementierung der Grundfunktionen von großem Vorteil ist. Grobe Fehler können frühzeitig erkannt und dadurch zeitaufwändige Nacharbeiten im späteren Verlauf vermieden werden. Auch vernachlässigte oder überbewertete Aspekte/Features können nochmals umpriorisiert werden.
 Wir empfehlen außerdem ein weiteres Review, sobald die Anwendung in ihren Grundzügen nutzbar ist. Dadurch können erneut potentielle Fehler sichtbar gemacht werden.
+
+#### Repository Testing für TaskRepository (TaskIntgerationTest.java)
+
+In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusammenspiel mit der Datenbank. Ziel ist es, sicherzustellen, dass alle CRUD-Operationen und Abfragen korrekt funktionieren und die Businesslogik der Task-Entität fehlerfrei umgesetzt wird.
+
+**Testinhalte**
+1. Erstellen und Abrufen von Tasks: 
+    - Prüft, ob ein Task korrekt in der datenbank gespeichert wird und über seine ID wiedergegeben werden kann.
+2. Aktualisieren von Tasks: 
+    - Testet, ob Änderungen an einem task korrekt persistiert werden. 
+3. Löschen von Tasks: 
+    - Stellt sicher, dass ein Task nach dem Löschen nicht mehr in der Datenbank vorhanden ist.
+4. Abfragen nach Fruppe und Assignees: 
+    - Überprüfung von Repository-methoden wie `findByGroupId()` und `findByAssigneesId()`, um Tasks nach der Gruppenzugehörigkeit oder zugewiesenen Nutzern zu filtern.
+5. Verwalten von Tags und Assignees: 
+    - Hinzufügen und entfernen von tags und zugewiesenen Nutzern wird getestet, einschließlich der Helper-Methoden in der Task-Klasse.
+6. Überprüfung von Status, Priorität und Kategorie: 
+    - Tests zur korrekten Behandlung von task-Priorität, Kategorie und Statusänderungen.
+7. Überfällige Tasks erkennen: 
+    - Prüft, ob Tasks mit abgelaufenem Fälligkeitsdatum korrekt als überfällig markiert werden, und dass abgeschlossee Tasks nicht mehr als überfällig gelten.
+
+**Technische Umsetzung**
+- Verwendung von @DataJpaTest zur Initialisierung eines in-memory H2-Datenbanksystems für isolierte Tests.
+- Nutzung von JUnit-Assertions (assertEquals, assertNotNull, assertTrue) zur Validierung der Testergebnisse.
+- Sicherstellung, dass Testdaten vor jedem Test korrekt initialisiert werden und nach Abschluss keine Abhängigkeiten zwischen Tests bestehen.
