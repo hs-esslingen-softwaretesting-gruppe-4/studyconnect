@@ -11,4 +11,5 @@ import de.softwaretesting.studyconnect.models.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByKeycloakUUID(String keycloakUUID);
+    Optional<User> findByEmail(String email);
 }

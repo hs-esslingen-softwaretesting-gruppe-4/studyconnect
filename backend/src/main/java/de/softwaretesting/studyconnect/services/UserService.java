@@ -12,6 +12,8 @@ import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserResponseMapper userResponseMapper;
     private final UserRequestMapper userRequestMapper;
+    private final PasswordEncoder passwordEncoder;
     
     /**
      * Retrieves a user by ID and maps it to a UserResponseDTO.
@@ -59,5 +62,36 @@ public class UserService {
         User savedUser = userRepository.save(updatedUser);
         UserResponseDTO userResponseDTO = userResponseMapper.toDto(savedUser);
         return ResponseEntity.ok(userResponseDTO);
+    }
+
+    public User register(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("USER");
+        return userRepository.save(user);
+    }
+
+    public User registerWithRole(User user, String role) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    public User login(String email, String password) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    public boolean isPasswordValid(String password) {
+        if (password == null || password.length() < 8) return false;
+        if (!password.matches(".*[A-Z].*")) return false;
+        if (!password.matches(".*[a-z].*")) return false;
+        if (!password.matches(".*[0-9].*")) return false;
+        if (!password.matches(".*[!@#$%^&*()_+=\\[\\]{};':\"|,.<>/?-].*")) return false;        return true;
     }
 }
