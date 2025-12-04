@@ -1,29 +1,79 @@
 package de.softwaretesting.studyconnect.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.mappers.request.UserRequestMapper;
+import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserResponseMapper userResponseMapper;
     private final UserRequestMapper userRequestMapper;
-    private final PasswordEncoder passwordEncoder;
-    
+    private final KeycloakService keycloakService;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+    /*@PostConstruct
+    public void init() {
+        keycloakService.deleteRealm("studyconnect");
+        boolean created = keycloakService.createRealm("studyconnect");
+        if(created){
+            keycloakService.createUserInRealm("studyconnect", "admin", "adminpassword", "admin@example.com");
+            keycloakService.createUserInRealm("studyconnect", "admin", "adminpassword", "admin@example.com");
+            logger.info("Realm 'studyconnect' and admin user created successfully.");
+            List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm("studyconnect");
+            for (KeycloakUserResponseDTO user : users) {
+                logger.info("User in realm: {} - {}", user.getId(), user.getUsername());
+            }
+        }
+    }*/
+
+    @PostConstruct
+    public void init() {
+        
+        // Create the configured realm
+        boolean created = keycloakService.createRealm();
+        if (!created) {
+            return;
+        }
+
+        // Retrieve all existing users in the realm and create their local representations if they don't exist
+        List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm();
+        for (KeycloakUserResponseDTO user : users) {
+            Optional<User> existingUser = userRepository.findByKeycloakUUID(user.getId());
+            if (existingUser.isEmpty()) {
+            // User doesn't exist locally, create it
+                User newUser = new User();
+                newUser.setKeycloakUUID(user.getId());
+                newUser.setEmail(user.getEmail());
+                newUser.setSurname(user.getFirstName());
+                newUser.setLastname(user.getLastName());
+                userRepository.save(newUser);
+                logger.info("Created local user for Keycloak user: {} - {}", user.getId(), user.getUsername());
+            }
+        }
+    }
+
+
     /**
      * Retrieves a user by ID and maps it to a UserResponseDTO.
      * 
@@ -64,34 +114,77 @@ public class UserService {
         return ResponseEntity.ok(userResponseDTO);
     }
 
-    public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("USER");
-        return userRepository.save(user);
-    }
+    /**
+     * Creates a new user with the provided UserRequestDTO.
+     * 
+     * @param userRequestDTO the user request DTO containing user details
+     * @return a ResponseEntity containing the created user's response DTO
+     */    
+    public ResponseEntity<UserResponseDTO> createUser(UserCreateRequestDTO userCreateRequestDTO) {
 
-    public User registerWithRole(User user, String role) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(role);
-        return userRepository.save(user);
-    }
+        User newUser = new User();
+        boolean successfulUserCreation = keycloakService.createUserInRealm(
+            userCreateRequestDTO.getPassword(),
+            userCreateRequestDTO.getEmail(),
+            userCreateRequestDTO.getSurname(),
+            userCreateRequestDTO.getLastname()
+        );
 
-    public User login(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                return user;
-            }
+        if (!successfulUserCreation) {
+            throw new InternalServerErrorException("Internal error during user creation in Keycloak");
         }
-        return null;
+        
+        // On successful creation in Keycloak, create local user
+        KeycloakUserResponseDTO createdKeycloakUser = keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
+        if (createdKeycloakUser == null) {
+            throw new InternalServerErrorException("Internal error: Error retrieving created user from Keycloak");
+        }
+
+        newUser.setKeycloakUUID(createdKeycloakUser.getId());
+        newUser.setEmail(createdKeycloakUser.getEmail());
+        newUser.setSurname(createdKeycloakUser.getFirstName());
+        newUser.setLastname(createdKeycloakUser.getLastName());
+        userRepository.save(newUser);
+
+        UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
     }
 
-    public boolean isPasswordValid(String password) {
-        if (password == null || password.length() < 8) return false;
-        if (!password.matches(".*[A-Z].*")) return false;
-        if (!password.matches(".*[a-z].*")) return false;
-        if (!password.matches(".*[0-9].*")) return false;
-        if (!password.matches(".*[!@#$%^&*()_+=\\[\\]{};':\"|,.<>/?-].*")) return false;        return true;
+
+    /**
+     * Creates a new admin user for the application with the provided UserCreateRequestDTO.
+     * 
+     * @param userCreateRequestDTO the user request DTO containing admin user details
+     * @return a ResponseEntity containing the created admin user's response DTO
+     */
+    public ResponseEntity<UserResponseDTO> createAdmin(UserCreateRequestDTO userCreateRequestDTO) {
+
+        User newUser = new User();
+        boolean successfulUserCreation = keycloakService.createAdminUserInRealm(
+            userCreateRequestDTO.getPassword(),
+            userCreateRequestDTO.getEmail(),
+            userCreateRequestDTO.getSurname(),
+            userCreateRequestDTO.getLastname()
+        );
+
+        if (!successfulUserCreation) {
+            throw new InternalServerErrorException("Internal error during admin creation in Keycloak");
+        }
+        
+        // On successful creation in Keycloak, create local user
+        KeycloakUserResponseDTO createdKeycloakUser = keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
+        if (createdKeycloakUser == null) {
+            throw new InternalServerErrorException("Internal error: Error retrieving created admin from Keycloak");
+        }
+
+        newUser.setKeycloakUUID(createdKeycloakUser.getId());
+        newUser.setEmail(createdKeycloakUser.getEmail());
+        newUser.setSurname(createdKeycloakUser.getFirstName());
+        newUser.setLastname(createdKeycloakUser.getLastName());
+        userRepository.save(newUser);
+
+        UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
     }
+        
 }

@@ -40,12 +40,6 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "password", nullable = true)
-    private String password;
-
-    @Column(name = "role", nullable = true)
-    private String role;
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
