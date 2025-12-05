@@ -62,7 +62,7 @@ public class KeycloakAdminTokenService {
     public void init() {
         if (adminUsername == null || adminUsername.isBlank() ||
             adminPassword == null || adminPassword.isBlank()) {
-            logger.warn("Keycloak admin credentials not configured. Token service will not be initialized.");
+            logger.warn("Keycloak admin credentials not configured. Token service will not be initialized. Please set KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD environment variables.");
             return;
         }
         

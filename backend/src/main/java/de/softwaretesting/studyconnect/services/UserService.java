@@ -32,21 +32,10 @@ public class UserService {
     private final KeycloakService keycloakService;
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    /*@PostConstruct
-    public void init() {
-        keycloakService.deleteRealm("studyconnect");
-        boolean created = keycloakService.createRealm("studyconnect");
-        if(created){
-            keycloakService.createUserInRealm("studyconnect", "admin", "adminpassword", "admin@example.com");
-            keycloakService.createUserInRealm("studyconnect", "admin", "adminpassword", "admin@example.com");
-            logger.info("Realm 'studyconnect' and admin user created successfully.");
-            List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm("studyconnect");
-            for (KeycloakUserResponseDTO user : users) {
-                logger.info("User in realm: {} - {}", user.getId(), user.getUsername());
-            }
-        }
-    }*/
-
+    /**
+     * Initializes the service by ensuring the Keycloak realm exists and syncing users.
+     * This method is called after the service is constructed.
+     */
     @PostConstruct
     public void init() {
         
@@ -84,7 +73,7 @@ public class UserService {
      */
     public ResponseEntity<UserResponseDTO> getUserWithId(Long userId) {
         // Map DTO to entity
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
         // Return user
         User savedUser = userRepository.save(user);
