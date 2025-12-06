@@ -14,9 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,7 +28,6 @@ public class KeycloakService {
     
     private final KeycloakAdminTokenService keycloakAdminTokenService;
     private static final Logger logger = LoggerFactory.getLogger(KeycloakService.class);
-    private String accessToken;
     private final RestTemplate restTemplate;
 
     @Value("${KEYCLOAK_AUTH_SERVER_URL}")
@@ -44,19 +43,11 @@ public class KeycloakService {
     private String defaultAdminRole;
 
     /**
-     * Initializes the service by fetching an initial token on application startup.
+     * Returns a valid access token from the token service.
+     * @return the current valid access token
      */
-    @PostConstruct
-    public void init() {
-        String token = keycloakAdminTokenService.getAccessToken();
-        if (token != null) {
-            // Log a portion of the token for verification
-            String maskedToken = token.substring(0, Math.min(20, token.length())) + "...";
-            logger.info("Successfully retrieved Keycloak admin token: {}", maskedToken);
-            this.accessToken = token;
-        } else {
-            logger.warn("Failed to retrieve Keycloak admin token");
-        }
+    private String getAccessToken() {
+        return keycloakAdminTokenService.getAccessToken();
     }
 
     /**
@@ -76,7 +67,7 @@ public class KeycloakService {
         // If the realm doesn't exist, create it
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         Map<String, Object> body = Map.of(
             "realm", realmName,
@@ -114,7 +105,7 @@ public class KeycloakService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         Map<String, Object> body = Map.of("name", roleName);
 
@@ -139,7 +130,7 @@ public class KeycloakService {
         String deleteUrl = keycloakServerUrl + "/admin/realms/" + realmName;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -156,10 +147,11 @@ public class KeycloakService {
     }
 
     /**
-     * Creates a new user in the configured realm with the default user role.
-     * @param username the username of the new user
+     * Creates a user in the configured realm.
      * @param password the password for the new user
      * @param email the email of the new user
+     * @param surname the surname of the new user
+     * @param lastname the last name of the new user
      * @return true if the user was created successfully, false otherwise
      */
     public boolean createUserInRealm(String password, String email, String surname, String lastname) {
@@ -168,7 +160,7 @@ public class KeycloakService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         Map<String, Object> credentials = Map.of(
             "type", "password",
@@ -198,12 +190,20 @@ public class KeycloakService {
         }
     }
 
+    /**
+     * Creates an admin user in the configured realm.
+     * @param password the password for the new admin user
+     * @param email the email of the new admin user
+     * @param surname the surname of the new admin user
+     * @param lastname the last name of the new admin user
+     * @return true if the admin user was created successfully, false otherwise
+     */
     public boolean createAdminUserInRealm(String password, String email, String surname, String lastname) {
         String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         Map<String, Object> credentials = Map.of(
             "type", "password",
@@ -242,7 +242,7 @@ public class KeycloakService {
         String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users/" + userId;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -259,10 +259,15 @@ public class KeycloakService {
     }
 
     public KeycloakUserResponseDTO retrieveUserByEmail(String email) {
-        String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users?email=" + email;
+
+        String userUrl = UriComponentsBuilder
+        .fromUriString(keycloakServerUrl)
+        .pathSegment("admin", "realms", realmName, "users")
+        .queryParam("email", email)
+        .toUriString();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -291,7 +296,7 @@ public class KeycloakService {
         String usersUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -325,7 +330,7 @@ public class KeycloakService {
         String realmsUrl = keycloakServerUrl + "/admin/realms";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(getAccessToken());
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 

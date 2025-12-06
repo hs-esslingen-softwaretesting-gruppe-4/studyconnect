@@ -1,7 +1,7 @@
 package de.softwaretesting.studyconnect.services;
 
 import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
-import de.softwaretesting.studyconnect.dtos.request.UserRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
@@ -78,35 +78,41 @@ class UserServiceTest {
         );
     }
 
-    // ==================== getUserWithId Tests ====================
+    // ==================== getUserById Tests ====================
 
     @Test
-    void getUserWithId_shouldReturnUser_whenUserExists() {
+    void getUserById_shouldReturnUser_whenUserExists() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
-        when(userResponseMapper.toDto(any(User.class))).thenReturn(testUserResponseDTO);
+        when(userResponseMapper.toDto(testUser)).thenReturn(testUserResponseDTO);
 
-        ResponseEntity<UserResponseDTO> response = userService.getUserWithId(1L);
+        ResponseEntity<UserResponseDTO> response = userService.getUserById(1L);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("test@example.com", response.getBody().getEmail());
+        assertEquals("Max", response.getBody().getSurname());
+        assertEquals("Mustermann", response.getBody().getLastname());
         verify(userRepository).findById(1L);
+        verify(userResponseMapper).toDto(testUser);
     }
 
     @Test
-    void getUserWithId_shouldThrowNotFoundException_whenUserDoesNotExist() {
+    void getUserById_shouldThrowNotFoundException_whenUserDoesNotExist() {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> userService.getUserWithId(999L));
+        NotFoundException exception = assertThrows(NotFoundException.class, 
+            () -> userService.getUserById(999L));
+        
+        assertEquals("User with id 999 not found", exception.getMessage());
         verify(userRepository).findById(999L);
+        verify(userResponseMapper, never()).toDto(any(User.class));
     }
 
     // ==================== updateUserWithId Tests ====================
 
     @Test
     void updateUserWithId_shouldUpdateUser_whenUserExists() {
-        UserRequestDTO updateRequest = new UserRequestDTO("test@example.com", "Updated", "Name");
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO("test@example.com", "Updated", "Name");
         User updatedUser = new User();
         updatedUser.setId(1L);
         updatedUser.setSurname("Updated");
@@ -114,7 +120,7 @@ class UserServiceTest {
         updatedUser.setEmail("test@example.com");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRequestMapper.toEntity(any(UserRequestDTO.class))).thenReturn(updatedUser);
+        when(userRequestMapper.toEntity(any(UserUpdateRequestDTO.class))).thenReturn(updatedUser);
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
         when(userResponseMapper.toDto(any(User.class))).thenReturn(
             new UserResponseDTO(1L, "test@example.com", "Name", "Updated")
@@ -130,7 +136,7 @@ class UserServiceTest {
 
     @Test
     void updateUserWithId_shouldThrowNotFoundException_whenUserDoesNotExist() {
-        UserRequestDTO updateRequest = new UserRequestDTO("test@example.com", "Updated", "Name");
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO("test@example.com", "Updated", "Name");
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.updateUserWithId(999L, updateRequest));
@@ -138,13 +144,13 @@ class UserServiceTest {
 
     @Test
     void updateUserWithId_shouldPreserveEmailAndCreatedAt() {
-        UserRequestDTO updateRequest = new UserRequestDTO("newemail@example.com", "Updated", "Name");
+        UserUpdateRequestDTO updateRequest = new UserUpdateRequestDTO("newemail@example.com", "Updated", "Name");
         User mappedUser = new User();
         mappedUser.setSurname("Updated");
         mappedUser.setLastname("Name");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userRequestMapper.toEntity(any(UserRequestDTO.class))).thenReturn(mappedUser);
+        when(userRequestMapper.toEntity(any(UserUpdateRequestDTO.class))).thenReturn(mappedUser);
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(userResponseMapper.toDto(any(User.class))).thenReturn(testUserResponseDTO);
 

@@ -8,7 +8,7 @@ import lombok.Value;
 @Value
 public class KeycloakUserResponseDTO {
 
-    private String id;
+    private String keycloakUUID;
     private Long createdTimestamp;
     private String username;
     private Boolean enabled;

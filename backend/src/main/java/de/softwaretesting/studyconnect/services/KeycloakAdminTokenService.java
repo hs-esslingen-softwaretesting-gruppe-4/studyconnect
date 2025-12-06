@@ -199,12 +199,12 @@ public class KeycloakAdminTokenService {
      * @param tokenResponse the response from Keycloak
      */
     private void updateTokens(KeycloakTokenResponseDTO tokenResponse) {
-        this.accessToken = tokenResponse.accessToken;
-        this.refreshToken = tokenResponse.refreshToken;
-        this.tokenExpiryTime = Instant.now().plusSeconds(tokenResponse.expiresIn);
+        this.accessToken = tokenResponse.getAccessToken();
+        this.refreshToken = tokenResponse.getRefreshToken();
+        this.tokenExpiryTime = Instant.now().plusSeconds(tokenResponse.getExpiresIn());
         
-        if (tokenResponse.refreshExpiresIn != null && tokenResponse.refreshExpiresIn > 0) {
-            this.refreshTokenExpiryTime = Instant.now().plusSeconds(tokenResponse.refreshExpiresIn);
+        if (tokenResponse.getRefreshExpiresIn() != null && tokenResponse.getRefreshExpiresIn() > 0) {
+            this.refreshTokenExpiryTime = Instant.now().plusSeconds(tokenResponse.getRefreshExpiresIn());
         } else {
             // Default refresh token expiry to 30 minutes if not provided
             this.refreshTokenExpiryTime = Instant.now().plusSeconds(1800);

@@ -51,33 +51,15 @@ class KeycloakServiceTest {
         setField(keycloakService, "realmName", TEST_REALM);
         setField(keycloakService, "defaultClientRole", TEST_CLIENT_ROLE);
         setField(keycloakService, "defaultAdminRole", TEST_ADMIN_ROLE);
-        setField(keycloakService, "accessToken", TEST_TOKEN);
+
+        // Mock the token service to return a valid token
+        lenient().when(keycloakAdminTokenService.getAccessToken()).thenReturn(TEST_TOKEN);
     }
 
     private void setField(Object target, String fieldName, Object value) throws Exception {
         Field field = target.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(target, value);
-    }
-
-    // ========== init() tests ==========
-
-    @Test
-    void init_shouldSetAccessToken_whenTokenServiceReturnsToken() {
-        when(keycloakAdminTokenService.getAccessToken()).thenReturn(TEST_TOKEN);
-
-        keycloakService.init();
-
-        verify(keycloakAdminTokenService).getAccessToken();
-    }
-
-    @Test
-    void init_shouldLogWarning_whenTokenServiceReturnsNull() {
-        when(keycloakAdminTokenService.getAccessToken()).thenReturn(null);
-
-        keycloakService.init();
-
-        verify(keycloakAdminTokenService).getAccessToken();
     }
 
     // ========== createRealm() tests ==========
@@ -357,7 +339,7 @@ class KeycloakServiceTest {
         KeycloakUserResponseDTO result = keycloakService.retrieveUserByUUID(userId);
 
         assertNotNull(result);
-        assertEquals(userId, result.getId());
+        assertEquals(userId, result.getKeycloakUUID());
         assertEquals("John", result.getFirstName());
     }
 

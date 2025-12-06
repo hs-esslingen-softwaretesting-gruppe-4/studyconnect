@@ -8,17 +8,17 @@ import lombok.Value;
 public class KeycloakTokenResponseDTO {
 
     @JsonProperty("access_token")
-    public String accessToken;
+    private String accessToken;
 
     @JsonProperty("refresh_token")
-    public String refreshToken;
+    private String refreshToken;
 
     @JsonProperty("expires_in")
-    public Long expiresIn;
+    private Long expiresIn;
 
     @JsonProperty("refresh_expires_in")
-    public Long refreshExpiresIn;
+    private Long refreshExpiresIn;
 
     @JsonProperty("token_type")
-    public String tokenType;
+    private String tokenType;
 }

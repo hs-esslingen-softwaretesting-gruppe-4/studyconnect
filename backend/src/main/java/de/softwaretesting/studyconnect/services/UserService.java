@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
-import de.softwaretesting.studyconnect.dtos.request.UserRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.mappers.request.UserRequestMapper;
@@ -48,16 +48,16 @@ public class UserService {
         // Retrieve all existing users in the realm and create their local representations if they don't exist
         List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm();
         for (KeycloakUserResponseDTO user : users) {
-            Optional<User> existingUser = userRepository.findByKeycloakUUID(user.getId());
+            Optional<User> existingUser = userRepository.findByKeycloakUUID(user.getKeycloakUUID());
             if (existingUser.isEmpty()) {
-            // User doesn't exist locally, create it
+                // User doesn't exist locally, create it
                 User newUser = new User();
-                newUser.setKeycloakUUID(user.getId());
+                newUser.setKeycloakUUID(user.getKeycloakUUID());
                 newUser.setEmail(user.getEmail());
                 newUser.setSurname(user.getFirstName());
                 newUser.setLastname(user.getLastName());
                 userRepository.save(newUser);
-                logger.info("Created local user for Keycloak user: {} - {}", user.getId(), user.getUsername());
+                logger.info("Created local user for Keycloak user: {} - {}", user.getKeycloakUUID(), user.getUsername());
             }
         }
     }
@@ -71,29 +71,28 @@ public class UserService {
      * @return a ResponseEntity containing the user's response DTO
      * @throws NotFoundException if the user is not found
      */
-    public ResponseEntity<UserResponseDTO> getUserWithId(Long userId) {
+    public ResponseEntity<UserResponseDTO> getUserById(Long userId) {
         // Map DTO to entity
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
         // Return user
-        User savedUser = userRepository.save(user);
-        UserResponseDTO userResponseDTO = userResponseMapper.toDto(savedUser);
-        return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
+        UserResponseDTO userResponseDTO = userResponseMapper.toDto(user);
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.OK);
     }
 
     /**
      * Updates a user by ID with the provided UserRequestDTO.
      * 
      * @param userId the ID of the user to update
-     * @param userRequestDTO the user request DTO containing updated user details
+     * @param userUpdateRequestDTO the user request DTO containing updated user details
      * @return a ResponseEntity containing the updated user's response DTO
      * @throws NotFoundException if the user is not found
      */
-    public ResponseEntity<UserResponseDTO> updateUserWithId(Long userId, UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> updateUserWithId(Long userId, UserUpdateRequestDTO userUpdateRequestDTO) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        User updatedUser = userRequestMapper.toEntity(userRequestDTO);
+        User updatedUser = userRequestMapper.toEntity(userUpdateRequestDTO);
         updatedUser.setId(existingUser.getId());
         updatedUser.setEmail(existingUser.getEmail());
         updatedUser.setCreatedAt(existingUser.getCreatedAt());
@@ -104,9 +103,9 @@ public class UserService {
     }
 
     /**
-     * Creates a new user with the provided UserRequestDTO.
+     * Creates a new user with the provided UserCreateRequestDTO.
      * 
-     * @param userRequestDTO the user request DTO containing user details
+     * @param userCreateRequestDTO the user request DTO containing user details
      * @return a ResponseEntity containing the created user's response DTO
      */    
     public ResponseEntity<UserResponseDTO> createUser(UserCreateRequestDTO userCreateRequestDTO) {
@@ -129,7 +128,7 @@ public class UserService {
             throw new InternalServerErrorException("Internal error: Error retrieving created user from Keycloak");
         }
 
-        newUser.setKeycloakUUID(createdKeycloakUser.getId());
+        newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
         newUser.setEmail(createdKeycloakUser.getEmail());
         newUser.setSurname(createdKeycloakUser.getFirstName());
         newUser.setLastname(createdKeycloakUser.getLastName());
@@ -166,7 +165,7 @@ public class UserService {
             throw new InternalServerErrorException("Internal error: Error retrieving created admin from Keycloak");
         }
 
-        newUser.setKeycloakUUID(createdKeycloakUser.getId());
+        newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
         newUser.setEmail(createdKeycloakUser.getEmail());
         newUser.setSurname(createdKeycloakUser.getFirstName());
         newUser.setLastname(createdKeycloakUser.getLastName());

@@ -4,7 +4,7 @@ import de.softwaretesting.studyconnect.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
-import de.softwaretesting.studyconnect.dtos.request.UserRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 
 import org.springframework.http.ResponseEntity;
@@ -23,15 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-    UserService userService;
+    private final UserService userService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable("userId") Long userId) {
-        return userService.getUserWithId(userId);
+        return userService.getUserById(userId);
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable("userId") Long userId, @Valid @RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable("userId") Long userId, @Valid @RequestBody UserUpdateRequestDTO userRequestDTO) {
         return userService.updateUserWithId(userId, userRequestDTO);
     }
 
