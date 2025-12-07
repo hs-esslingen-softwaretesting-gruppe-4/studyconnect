@@ -68,7 +68,6 @@ public class UserService {
    * Retrieves a user by ID and maps it to a UserResponseDTO.
    *
    * @param userId the ID of the user to retrieve
-   * @param taskRequestDTO the user request DTO containing user details
    * @return a ResponseEntity containing the user's response DTO
    * @throws NotFoundException if the user is not found
    */

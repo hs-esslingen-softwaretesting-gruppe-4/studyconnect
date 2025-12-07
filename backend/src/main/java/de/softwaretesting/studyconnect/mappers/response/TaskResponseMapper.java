@@ -20,6 +20,7 @@ public interface TaskResponseMapper extends EntityMapper<TaskResponseDTO, Task> 
   @Mapping(target = "createdById", source = "createdBy.id")
   @Mapping(target = "assigneeIds", source = "assignees", qualifiedByName = "assigneeIdsMapping")
   @Mapping(target = "groupId", source = "group.id")
+  @Override
   TaskResponseDTO toDto(Task entity);
 
   @Named("assigneeIdsMapping")
