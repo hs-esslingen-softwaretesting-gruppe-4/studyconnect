@@ -293,7 +293,7 @@ class KeycloakServiceTest {
 
     Map<String, Object> body = captor.getValue().getBody();
     assertNotNull(body);
-    assertEquals(List.of(TEST_ADMIN_ROLE), body.get("realmRoles"));
+    assertEquals(List.of(TEST_CLIENT_ROLE, TEST_ADMIN_ROLE), body.get("realmRoles"));
   }
 
   @Test

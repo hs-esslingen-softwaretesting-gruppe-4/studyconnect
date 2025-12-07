@@ -16,6 +16,7 @@
     <!-- Checks for whitespace -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
+        <property name="severity" value="error"/>
     </module>
 
     <!-- Checks for Size Violations -->
@@ -24,7 +25,9 @@
     </module>
 
     <!-- Checks that there is a newline at the end of each file -->
-    <module name="NewlineAtEndOfFile"/>
+    <module name="NewlineAtEndOfFile">
+        <property name="severity" value="error"/>
+    </module>
 
     <!-- Line length check (must be at Checker level, not TreeWalker) -->
     <module name="LineLength">
@@ -33,22 +36,48 @@
     </module>
 
     <module name="TreeWalker">
-        <!-- Checks for Naming Conventions -->
-        <module name="ConstantName"/>
-        <module name="LocalFinalVariableName"/>
-        <module name="LocalVariableName"/>
-        <module name="MemberName"/>
-        <module name="MethodName"/>
-        <module name="PackageName"/>
-        <module name="ParameterName"/>
-        <module name="StaticVariableName"/>
-        <module name="TypeName"/>
+        <!-- Checks for Naming Conventions (HIGH PRIORITY - ERROR) -->
+        <module name="ConstantName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="LocalFinalVariableName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="MemberName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="MethodName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="PackageName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="ParameterName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="StaticVariableName">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="TypeName">
+            <property name="severity" value="error"/>
+        </module>
 
-        <!-- Checks for imports -->
-        <module name="AvoidStarImport"/>
-        <module name="IllegalImport"/>
-        <module name="RedundantImport"/>
-        <module name="UnusedImports"/>
+        <!-- Checks for imports (HIGH PRIORITY - ERROR) -->
+        <module name="AvoidStarImport">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="IllegalImport">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="RedundantImport">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="UnusedImports">
+            <property name="severity" value="error"/>
+        </module>
 
         <!-- Checks for Size Violations -->
         <module name="MethodLength">
@@ -80,12 +109,18 @@
         <module name="LeftCurly"/>
         <module name="RightCurly"/>
 
-        <!-- Checks for common coding problems -->
-        <module name="EmptyStatement"/>
-        <module name="EqualsHashCode"/>
+        <!-- Checks for common coding problems (HIGH PRIORITY - ERROR) -->
+        <module name="EmptyStatement">
+            <property name="severity" value="error"/>
+        </module>
+        <module name="EqualsHashCode">
+            <property name="severity" value="error"/>
+        </module>
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
-        <module name="MissingSwitchDefault"/>
+        <module name="MissingSwitchDefault">
+            <property name="severity" value="error"/>
+        </module>
         <module name="MultipleVariableDeclarations"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
@@ -106,8 +141,10 @@
         </module>
         <module name="UpperEll"/>
 
-        <!-- Annotations -->
-        <module name="MissingOverride"/>
+        <!-- Annotations (HIGH PRIORITY - ERROR) -->
+        <module name="MissingOverride">
+            <property name="severity" value="error"/>
+        </module>
 
         <!-- Indentation -->
         <module name="Indentation">

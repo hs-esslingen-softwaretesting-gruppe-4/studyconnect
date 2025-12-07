@@ -51,6 +51,8 @@ PostgreSQL hat sich als führender Open-Source-Konkurrent zu einem weit verbreit
 Es bietet umfassende Funktionen wie die Unterstützung von JSON-Daten, Volltextsuche und benutzerdefinierten Datentypen. Zudem zeichnet es sich durch enorme Skalierbarkeit aus und ist sowohl für kleine als auch für sehr große Datenbanken geeignet. 
 Durch die hohe ACID-Konformität gewährleistet es eine ausgezeichnete Datenintegrität und Transaktionssicherheit, während die engagierte Community kontinuierlich neue Funktionen und Updates bereitstellt.
 
+---
+
 ### Projektmanagment
 
 Für das Projektmanagement setzen wir auf das **GitHub-Kanban-Board**, auf dem alle Aufgaben, Features und sonstigen Angelegenheiten als Issues erfasst werden. Teammitglieder weisen sich Issues selbständig zu.
@@ -58,6 +60,8 @@ Für das Projektmanagement setzen wir auf das **GitHub-Kanban-Board**, auf dem a
 Die Entwicklung erfolgt auf *Feature-Branches*, die jeweils einem bestimmten Issue zugeordnet sind. Sobald ein Feature fertiggestellt ist, wird der Branch in `main` gemerged. Dabei wird in der Commit- oder Merge-Nachricht das zugehörige Issue verlinkt, sodass automatisch nachvollziehbar ist, welches Issue dadurch abgeschlossen wurde.
 
 Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem Rückfragen, Abstimmungen und Diskussionen zu Aufgaben stattfinden. So bleibt die Zusammenarbeit strukturiert, und alle Teammitglieder können jederzeit den aktuellen Stand einsehen.
+
+---
 
 ### Funktionale Anforderungen
 
@@ -126,6 +130,8 @@ Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem R�
 - Kritische Funktionen auf Testbarkeit prüfen und für bessere Testbarkeit modifizieren falls möglich.
 - Lauffähige Applikations-Versionen während der Entwicklung starten und testen.
 
+---
+
 ### Systemkontext-Diagramm
 Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem StudyConnect-System und anderen Systemen oder Akteuren dar.
 
@@ -133,6 +139,8 @@ Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem Stu
 <p align="center">
   <em>Systemkontext-Diagramm</em>
 </p>
+
+---
 
 ### Use-Case-Diagramm
 Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zur visuellen Veranschaulichung dargestellt. 
@@ -143,6 +151,8 @@ Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zu
 </p>
 
 Die Use-Case Beschreibung für dieses Diagramm kann unter dem Ordner use-cases gefunden werden.
+
+---
 
 ### Die Anwendung starten
 
@@ -227,11 +237,15 @@ Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie 
 - Ob Docker Desktop (bei Verwendung von Docker) läuft und die DB-Container gestartet sind.
 - Ob die Einstellungen in der `.env`-Datei und gegebenenfalls in `src/main/resources/application.properties` korrekt sind (JDBC-URL, Benutzer, Passwort, Ports).
 
+---
+
 ### Starten von Tests im Backend
 
 Die Tests laufen lokal standardmäßig gegen eine H2 In-Memory-Datenbank. Die Konfiguration befindet sich in `backend/src/main/resources/application-test.properties`.
 
 Implementierte Unit Tests können mit `mvn test` ausgeführt werden. Führen Sie alle implementierten Tests mit `mvn verify` aus, alternativ mit `.\mvnw.cmd verify`.
+
+---
 
 ### Test-Cases
 
@@ -436,3 +450,90 @@ In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusam
 - Verwendung von @DataJpaTest zur Initialisierung eines in-memory H2-Datenbanksystems für isolierte Tests.
 - Nutzung von JUnit-Assertions (assertEquals, assertNotNull, assertTrue) zur Validierung der Testergebnisse.
 - Sicherstellung, dass Testdaten vor jedem Test korrekt initialisiert werden und nach Abschluss keine Abhängigkeiten zwischen Tests bestehen.
+
+---
+
+### Entwicklungs-Tools
+Dieses Kapitel listet weitere verwendete Tools zur Entwicklung der App
+
+#### Spotless
+
+**Spotless** ist ein automatisches Code-Formatierungstool, das den Java-Code nach einheitlichen Stilrichtlinien formatiert.
+
+**Zweck:**
+- Automatische Formatierung des gesamten Quellcodes
+- Konsistente Code-Formatierung ohne manuelle Anpassungen
+- Erzwingung von Stilrichtlinien durch automatische Behebung
+
+**Verwendete Formatter:**
+- Google Java Format (Version 1.17.0)
+
+**Wann wird es ausgeführt:**
+- Automatisch während der `validate`-Phase des Maven-Build-Prozesses
+- Kann manuell mit `mvn spotless:apply` ausgeführt werden
+- Kann mit `mvn spotless:check` überprüft werden (ohne Änderungen)
+
+**Befehl zum Ausführen:**
+```bash
+# Automatische Formatierung anwenden
+mvn spotless:apply
+
+# Nur prüfen, ohne zu ändern
+mvn spotless:check
+```
+
+**Vorteil:**
+Durch die Kombination mit Checkstyle wird sichergestellt, dass Code zunächst automatisch formatiert wird, bevor Checkstyle die erweiterten Code-Quality-Regeln prüft.
+
+#### Checkstyle
+
+**Checkstyle** ist ein statisches Code-Analyse-Tool, das Java-Code nach definierten Coding Standards überprüft.
+
+**Zweck:**
+- Validierung der Code-Qualität nach festgelegten Richtlinien
+- Erzwingung von Naming-Konventionen, Import-Qualität und Strukturintegrität
+- Frühe Erkennung von potentiellen Bugs und Designfehlern
+
+**Konfiguration:**
+- Hauptkonfiguration: `backend/checkstyle.xml`
+- Suppressionen: `backend/checkstyle-suppressions.xml`
+- Maven-Plugin: `maven-checkstyle-plugin` (Version 3.6.0)
+
+**Durchgesetzte Regeln** (Auszug):
+- **19 ERROR-Regeln** (blockieren den Build):
+  - Naming-Konventionen (z.B. CONSTANT_NAME, camelCase)
+  - Import-Qualität (keine Wildcard-Imports, keine ungenutzten Imports)
+  - Strukturintegrität (z.B. EqualsHashCode, MissingSwitchDefault)
+  - Datei-Format (keine Tabs, Newline am Ende)
+
+- **28 WARNING-Regeln** (nicht-blockierend):
+  - Zeilenlänge (max. 120 Zeichen)
+  - Methodenlänge (max. 150 Zeilen)
+  - Parameter-Anzahl (max. 7)
+  - Whitespace-Regeln
+
+**Wann wird es ausgeführt:**
+- Automatisch während der `validate`-Phase des Maven-Build-Prozesses (vor der Kompilierung)
+- Kann manuell mit `mvn checkstyle:check` ausgeführt werden
+
+**Befehle:**
+```bash
+# Checkstyle-Überprüfung (blockiert Build bei ERROR-Verletzungen)
+mvn checkstyle:check
+
+# HTML-Report generieren (Ablageort unter /target/reports)
+mvn checkstyle:checkstyle
+
+# Als Teil des kompletten Build-Prozesses
+mvn clean install
+```
+
+**Build-Verhalten:**
+- ERROR-Verletzungen: Build schlägt fehl ❌
+- WARNING-Verletzungen: Build erfolgreich, Warnungen werden angezeigt ⚠️
+
+**Weitere Informationen:**
+Eine detaillierte Dokumentation der Checkstyle-Konfiguration, aller Regeln und der Schweregrad-Strategie finden Sie in der Datei [checkstyle-configuration.md](checkstyle-configuration.md).
+
+**Vorteil:**
+Die tiefgestaffelte Schweregrad-Strategie (19 ERROR + 28 WARNING) stellt sicher, dass kritische Code-Quality-Probleme automatisch erkannt und blockiert werden, während Richtlinien mit Kontext-Abhängigkeit flexible Handhabung ermöglichen.

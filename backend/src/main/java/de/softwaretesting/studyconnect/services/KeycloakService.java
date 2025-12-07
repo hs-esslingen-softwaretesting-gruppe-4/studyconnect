@@ -23,7 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class KeycloakService {
 
   private final KeycloakAdminTokenService keycloakAdminTokenService;
-  private static final Logger logger = LoggerFactory.getLogger(KeycloakService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakService.class);
   private final RestTemplate restTemplate;
 
   @Value("${KEYCLOAK_AUTH_SERVER_URL}")
@@ -58,7 +58,7 @@ public class KeycloakService {
     // First, check if the realm already exists
     List<String> existingRealms = getAllRealms();
     if (existingRealms.contains(realmName)) {
-      logger.info("Realm '{}' already exists in Keycloak", realmName);
+      LOGGER.info("Realm '{}' already exists in Keycloak", realmName);
       return true; // Realm already exists
     }
 
@@ -80,7 +80,7 @@ public class KeycloakService {
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
       if (response.getStatusCode().is2xxSuccessful()) {
-        logger.info("Realm '{}' created successfully in Keycloak", realmName);
+        LOGGER.info("Realm '{}' created successfully in Keycloak", realmName);
         // Create default roles
         addRoleToRealm(defaultClientRole);
         addRoleToRealm(defaultAdminRole);
@@ -89,7 +89,7 @@ public class KeycloakService {
       return false;
 
     } catch (Exception e) {
-      logger.error("Error creating realm: {}", e.getMessage());
+      LOGGER.error("Error creating realm: {}", e.getMessage());
       return false;
     }
   }
@@ -113,11 +113,11 @@ public class KeycloakService {
 
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(roleUrl, request, Void.class);
-      logger.info("Role '{}' added successfully to realm '{}'", roleName, realmName);
+      LOGGER.info("Role '{}' added successfully to realm '{}'", roleName, realmName);
       return response.getStatusCode().is2xxSuccessful();
 
     } catch (Exception e) {
-      logger.error("Error adding role to realm: {}", e.getMessage());
+      LOGGER.error("Error adding role to realm: {}", e.getMessage());
       return false;
     }
   }
@@ -139,11 +139,11 @@ public class KeycloakService {
       ResponseEntity<Void> response =
           restTemplate.exchange(
               deleteUrl, org.springframework.http.HttpMethod.DELETE, request, Void.class);
-      logger.info("Realm '{}' deleted successfully from Keycloak", realmName);
+      LOGGER.info("Realm '{}' deleted successfully from Keycloak", realmName);
       return response.getStatusCode().is2xxSuccessful();
 
     } catch (Exception e) {
-      logger.error("Error deleting realm: {}", e.getMessage());
+      LOGGER.error("Error deleting realm: {}", e.getMessage());
       return false;
     }
   }
@@ -187,12 +187,12 @@ public class KeycloakService {
 
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(userUrl, request, Void.class);
-      logger.info(
+      LOGGER.info(
           "User '{}' '{}' created successfully in realm '{}'", surname, lastname, realmName);
       return response.getStatusCode().is2xxSuccessful();
 
     } catch (Exception e) {
-      logger.error("Error creating user in realm: {}", e.getMessage());
+      LOGGER.error("Error creating user in realm: {}", e.getMessage());
       return false;
     }
   }
@@ -228,7 +228,7 @@ public class KeycloakService {
             "lastName",
             lastname,
             "realmRoles",
-            List.of(defaultAdminRole),
+            List.of(defaultClientRole, defaultAdminRole),
             "credentials",
             List.of(credentials));
 
@@ -236,12 +236,12 @@ public class KeycloakService {
 
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(userUrl, request, Void.class);
-      logger.info(
+      LOGGER.info(
           "Admin user '{}' '{}' created successfully in realm '{}'", surname, lastname, realmName);
       return response.getStatusCode().is2xxSuccessful();
 
     } catch (Exception e) {
-      logger.error("Error creating admin user in realm: {}", e.getMessage());
+      LOGGER.error("Error creating admin user in realm: {}", e.getMessage());
       return false;
     }
   }
@@ -267,11 +267,11 @@ public class KeycloakService {
               org.springframework.http.HttpMethod.GET,
               request,
               KeycloakUserResponseDTO.class);
-      logger.info("User '{}' retrieved successfully from realm '{}'", userId, realmName);
+      LOGGER.info("User '{}' retrieved successfully from realm '{}'", userId, realmName);
       return response.getBody();
 
     } catch (Exception e) {
-      logger.error("Error retrieving user by UUID: {}", e.getMessage());
+      LOGGER.error("Error retrieving user by UUID: {}", e.getMessage());
       return null;
     }
   }
@@ -296,7 +296,7 @@ public class KeycloakService {
               org.springframework.http.HttpMethod.GET,
               request,
               KeycloakUserResponseDTO[].class);
-      logger.info("User with email '{}' retrieved successfully from realm '{}'", email, realmName);
+      LOGGER.info("User with email '{}' retrieved successfully from realm '{}'", email, realmName);
       KeycloakUserResponseDTO[] users = response.getBody();
       if (users != null && users.length > 0) {
         return users[0]; // Return the first matching user
@@ -305,7 +305,7 @@ public class KeycloakService {
       }
 
     } catch (Exception e) {
-      logger.error("Error retrieving user by email: {}", e.getMessage());
+      LOGGER.error("Error retrieving user by email: {}", e.getMessage());
       return null;
     }
   }
@@ -330,13 +330,13 @@ public class KeycloakService {
               org.springframework.http.HttpMethod.GET,
               request,
               KeycloakUserResponseDTO[].class);
-      logger.info("All users retrieved successfully from realm '{}'", realmName);
+      LOGGER.info("All users retrieved successfully from realm '{}'", realmName);
       return response.getBody() != null
           ? Arrays.asList(response.getBody())
           : Collections.emptyList();
 
     } catch (Exception e) {
-      logger.error("Error retrieving all users in realm: {}", e.getMessage());
+      LOGGER.error("Error retrieving all users in realm: {}", e.getMessage());
       return Collections.emptyList();
     }
   }
@@ -367,7 +367,7 @@ public class KeycloakService {
       ResponseEntity<Map[]> response =
           restTemplate.exchange(
               realmsUrl, org.springframework.http.HttpMethod.GET, request, Map[].class);
-      logger.info("All realms retrieved successfully");
+      LOGGER.info("All realms retrieved successfully");
       if (response.getBody() != null) {
         return Arrays.stream(response.getBody()).map(realm -> (String) realm.get("realm")).toList();
       } else {
@@ -375,7 +375,7 @@ public class KeycloakService {
       }
 
     } catch (Exception e) {
-      logger.error("Error retrieving all realms: {}", e.getMessage());
+      LOGGER.error("Error retrieving all realms: {}", e.getMessage());
       return Collections.emptyList();
     }
   }

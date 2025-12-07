@@ -24,7 +24,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class KeycloakAdminTokenService {
 
-  private static final Logger logger = LoggerFactory.getLogger(KeycloakAdminTokenService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAdminTokenService.class);
 
   /**
    * Buffer time in seconds before token expiry to trigger refresh. Token will be refreshed 60
@@ -60,16 +60,16 @@ public class KeycloakAdminTokenService {
         || adminUsername.isBlank()
         || adminPassword == null
         || adminPassword.isBlank()) {
-      logger.warn(
+      LOGGER.warn(
           "Keycloak admin credentials not configured. Token service will not be initialized. Please set KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD environment variables.");
       return;
     }
 
     try {
       fetchNewToken();
-      logger.info("Keycloak admin token successfully initialized");
+      LOGGER.info("Keycloak admin token successfully initialized");
     } catch (Exception e) {
-      logger.error("Failed to initialize Keycloak admin token: {}", e.getMessage());
+      LOGGER.error("Failed to initialize Keycloak admin token: {}", e.getMessage());
     }
   }
 
@@ -89,7 +89,7 @@ public class KeycloakAdminTokenService {
       }
       return accessToken;
     } catch (Exception e) {
-      logger.error("Failed to get access token: {}", e.getMessage());
+      LOGGER.error("Failed to get access token: {}", e.getMessage());
       return null;
     } finally {
       tokenLock.unlock();
@@ -122,7 +122,7 @@ public class KeycloakAdminTokenService {
 
   /** Fetches a new access token using the admin credentials. */
   private void fetchNewToken() {
-    logger.debug("Fetching new Keycloak admin token");
+    LOGGER.debug("Fetching new Keycloak admin token");
 
     String tokenUrl = keycloakServerUrl + "/realms/master/protocol/openid-connect/token";
 
@@ -143,10 +143,10 @@ public class KeycloakAdminTokenService {
 
       if (response.getBody() != null) {
         updateTokens(response.getBody());
-        logger.info("Successfully fetched new Keycloak admin token");
+        LOGGER.info("Successfully fetched new Keycloak admin token");
       }
     } catch (Exception e) {
-      logger.error("Failed to fetch new token from Keycloak: {}", e.getMessage());
+      LOGGER.error("Failed to fetch new token from Keycloak: {}", e.getMessage());
       throw new RuntimeException("Failed to fetch Keycloak admin token", e);
     }
   }
@@ -157,12 +157,12 @@ public class KeycloakAdminTokenService {
    */
   private void refreshAccessToken() {
     if (isRefreshTokenExpired() || refreshToken == null) {
-      logger.debug("Refresh token expired, fetching new token");
+      LOGGER.debug("Refresh token expired, fetching new token");
       fetchNewToken();
       return;
     }
 
-    logger.debug("Refreshing Keycloak admin token");
+    LOGGER.debug("Refreshing Keycloak admin token");
 
     String tokenUrl = keycloakServerUrl + "/realms/master/protocol/openid-connect/token";
 
@@ -182,10 +182,10 @@ public class KeycloakAdminTokenService {
 
       if (response.getBody() != null) {
         updateTokens(response.getBody());
-        logger.info("Successfully refreshed Keycloak admin token");
+        LOGGER.info("Successfully refreshed Keycloak admin token");
       }
     } catch (Exception e) {
-      logger.warn("Failed to refresh token, attempting to fetch new token: {}", e.getMessage());
+      LOGGER.warn("Failed to refresh token, attempting to fetch new token: {}", e.getMessage());
       fetchNewToken();
     }
   }
@@ -221,11 +221,11 @@ public class KeycloakAdminTokenService {
     tokenLock.lock();
     try {
       if (isTokenExpired()) {
-        logger.debug("Scheduled token refresh triggered");
+        LOGGER.debug("Scheduled token refresh triggered");
         refreshAccessToken();
       }
     } catch (Exception e) {
-      logger.error("Scheduled token refresh failed: {}", e.getMessage());
+      LOGGER.error("Scheduled token refresh failed: {}", e.getMessage());
     } finally {
       tokenLock.unlock();
     }
@@ -239,7 +239,7 @@ public class KeycloakAdminTokenService {
       this.refreshToken = null;
       this.tokenExpiryTime = null;
       this.refreshTokenExpiryTime = null;
-      logger.info("Keycloak admin tokens invalidated");
+      LOGGER.info("Keycloak admin tokens invalidated");
     } finally {
       tokenLock.unlock();
     }

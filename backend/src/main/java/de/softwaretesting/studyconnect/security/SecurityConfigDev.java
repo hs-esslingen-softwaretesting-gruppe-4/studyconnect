@@ -1,9 +1,9 @@
 package de.softwaretesting.studyconnect.security;
 
 import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,12 +21,13 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @Profile("dev")
 public class SecurityConfigDev {
 
-  private static final Logger logger = LoggerFactory.getLogger(SecurityConfigDev.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfigDev.class);
 
-  @Autowired private Environment env;
+  private final Environment env;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -64,12 +65,12 @@ public class SecurityConfigDev {
     try {
       if (jwtDecoder() != null) {
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-        logger.info("OAuth2 JWT authentication enabled");
+        LOGGER.info("OAuth2 JWT authentication enabled");
       } else {
-        logger.warn("OAuth2 JWT authentication disabled - issuer unreachable or not configured");
+        LOGGER.warn("OAuth2 JWT authentication disabled - issuer unreachable or not configured");
       }
     } catch (Exception e) {
-      logger.warn(
+      LOGGER.warn(
           "OAuth2 JWT authentication disabled due to configuration error: {}", e.getMessage());
     }
 
@@ -92,15 +93,15 @@ public class SecurityConfigDev {
   public JwtDecoder jwtDecoder() {
     String issuerUri = env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri");
     if (issuerUri == null || issuerUri.isBlank()) {
-      logger.warn("Issuer URI not configured. OAuth2 will be disabled.");
+      LOGGER.warn("Issuer URI not configured. OAuth2 will be disabled.");
       return null;
     }
 
     try {
-      logger.info("Attempting to configure JwtDecoder with issuer: {}", issuerUri);
+      LOGGER.info("Attempting to configure JwtDecoder with issuer: {}", issuerUri);
       return JwtDecoders.fromIssuerLocation(issuerUri);
     } catch (Exception e) {
-      logger.warn(
+      LOGGER.warn(
           "Failed to configure JwtDecoder for issuer '{}'. OAuth2 authentication will be "
               + "disabled in dev mode. Error: {}",
           issuerUri,

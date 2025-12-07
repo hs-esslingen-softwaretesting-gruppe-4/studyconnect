@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -36,12 +36,13 @@ import org.springframework.web.cors.CorsConfiguration;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @Profile("prod")
 public class SecurityConfig {
 
-  private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
-  @Autowired private Environment env;
+  private final Environment env;
 
   @Bean
   public SecurityFilterChain securityFilterChain(
@@ -75,12 +76,12 @@ public class SecurityConfig {
                 oauth2.jwt(
                     jwtDecoder ->
                         jwtDecoder.jwtAuthenticationConverter(jwtAuthenticationConverter)));
-        logger.info("OAuth2 JWT authentication enabled for production");
+        LOGGER.info("OAuth2 JWT authentication enabled for production");
       } else {
-        logger.warn("OAuth2 JWT authentication disabled - issuer unreachable or not configured");
+        LOGGER.warn("OAuth2 JWT authentication disabled - issuer unreachable or not configured");
       }
     } catch (Exception e) {
-      logger.warn(
+      LOGGER.warn(
           "OAuth2 JWT authentication disabled due to configuration error: {}", e.getMessage());
     }
 
@@ -97,7 +98,7 @@ public class SecurityConfig {
   public JwtDecoder jwtDecoder() {
     String issuerUri = env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri");
     if (issuerUri == null || issuerUri.isBlank()) {
-      logger.warn("Issuer URI not configured. OAuth2 will be disabled.");
+      LOGGER.warn("Issuer URI not configured. OAuth2 will be disabled.");
       return null;
     }
 
@@ -106,18 +107,18 @@ public class SecurityConfig {
 
     while (retryCount < maxRetries) {
       try {
-        logger.info(
+        LOGGER.info(
             "Attempting to configure JwtDecoder with issuer: {} (attempt {}/{})",
             issuerUri,
             retryCount + 1,
             maxRetries);
         JwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
-        logger.info("Successfully configured JwtDecoder for issuer: {}", issuerUri);
+        LOGGER.info("Successfully configured JwtDecoder for issuer: {}", issuerUri);
         return decoder;
       } catch (Exception e) {
         retryCount++;
         if (retryCount < maxRetries) {
-          logger.warn(
+          LOGGER.warn(
               "Failed to configure JwtDecoder (attempt {}/{}). Retrying in 2 seconds. Error: {}",
               retryCount,
               maxRetries,
@@ -126,11 +127,11 @@ public class SecurityConfig {
             Thread.sleep(2000); // Wait 2 seconds before retrying
           } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            logger.warn("JwtDecoder initialization interrupted");
+            LOGGER.warn("JwtDecoder initialization interrupted");
             return null;
           }
         } else {
-          logger.warn(
+          LOGGER.warn(
               "Failed to configure JwtDecoder for issuer '{}' after {} attempts. OAuth2 "
                   + "authentication will be disabled. Error: {}",
               issuerUri,
