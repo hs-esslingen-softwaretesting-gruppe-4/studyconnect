@@ -1,11 +1,6 @@
 package de.softwaretesting.studyconnect.models;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -23,15 +18,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Task entity following the specification in docs/spec.md.
- * - supports multiple assignees
- * - supports tags as an ElementCollection
- * - includes helper methods for entity management
+ * Task entity following the specification in docs/spec.md. - supports multiple assignees - supports
+ * tags as an ElementCollection - includes helper methods for entity management
  */
 @Entity
 @Table(name = "tasks")
@@ -40,125 +36,122 @@ import lombok.Setter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Task {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    @Column(name = "id", nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @EqualsAndHashCode.Include
+  @Column(name = "id", nullable = false)
+  private Long id;
 
-    @Column(name = "title", nullable = false, length = 200)
-    private String title;
+  @Column(name = "title", nullable = false, length = 200)
+  private String title;
 
-    @Column(name = "description", length = 1000)
-    private String description;
+  @Column(name = "description", length = 1000)
+  private String description;
 
-    @Column(name = "due_date")
-    private LocalDateTime dueDate;
+  @Column(name = "due_date")
+  private LocalDateTime dueDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "priority", nullable = false)
-    private Priority priority = Priority.MEDIUM;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "priority", nullable = false)
+  private Priority priority = Priority.MEDIUM;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status = Status.OPEN;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  private Status status = Status.OPEN;
 
-    @Column(name = "category")
-    private String category;
+  @Column(name = "category")
+  private String category;
 
-    @ElementCollection
-    @CollectionTable(name = "task_tags")
-    @Column(name = "tag")
-    private Set<String> tags = new HashSet<>();
+  @ElementCollection
+  @CollectionTable(name = "task_tags")
+  @Column(name = "tag")
+  private Set<String> tags = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id")
-    private User createdBy;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "created_by_id")
+  private User createdBy;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> assignees = new HashSet<>();
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(
+      name = "task_assignees",
+      joinColumns = @JoinColumn(name = "task_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> assignees = new HashSet<>();
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    @JsonBackReference
-    private Group group;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "group_id")
+  @JsonBackReference
+  private Group group;
 
-    // Helper methods
+  // Helper methods
 
-    public void addAssignee(User user) {
-        if (user == null)
-            return;
-        assignees.add(user);
-    }
+  public void addAssignee(User user) {
+    if (user == null) return;
+    assignees.add(user);
+  }
 
-    public void removeAssignee(User user) {
-        if (user == null)
-            return;
-        assignees.remove(user);
-    }
+  public void removeAssignee(User user) {
+    if (user == null) return;
+    assignees.remove(user);
+  }
 
-    public void addTag(String tag) {
-        if (tag == null || tag.isBlank())
-            return;
-        tags.add(tag.trim());
-    }
+  public void addTag(String tag) {
+    if (tag == null || tag.isBlank()) return;
+    tags.add(tag.trim());
+  }
 
-    public void removeTag(String tag) {
-        if (tag == null)
-            return;
-        tags.remove(tag.trim());
-    }
+  public void removeTag(String tag) {
+    if (tag == null) return;
+    tags.remove(tag.trim());
+  }
 
-    public void markComplete() {
-        this.status = Status.COMPLETED;
-        this.updatedAt = LocalDateTime.now();
-    }
+  public void markComplete() {
+    this.status = Status.COMPLETED;
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    public void setInProgress() {
-        this.status = Status.IN_PROGRESS;
-        this.onUpdate();
-    }
+  public void setInProgress() {
+    this.status = Status.IN_PROGRESS;
+    this.onUpdate();
+  }
 
-    public boolean isOverdue() {
-        if (dueDate == null)
-            return false;
-        return status != Status.COMPLETED && dueDate.isBefore(LocalDateTime.now());
-    }
+  public boolean isOverdue() {
+    if (dueDate == null) return false;
+    return status != Status.COMPLETED && dueDate.isBefore(LocalDateTime.now());
+  }
 
-    public void setGroup(Group group) {
-        this.group = group;
-    }
+  public void setGroup(Group group) {
+    this.group = group;
+  }
 
-    @PrePersist
-    void onCreate() {
-        if (this.createdAt == null)
-            this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
+  @PrePersist
+  void onCreate() {
+    if (this.createdAt == null) this.createdAt = LocalDateTime.now();
+    this.updatedAt = this.createdAt;
+  }
 
-    @PreUpdate
-    void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+  @PreUpdate
+  void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    // Inner enums for Priority and Status to keep them scoped with Task
-    public enum Priority {
-        LOW,
-        MEDIUM,
-        HIGH
-    }
+  // Inner enums for Priority and Status to keep them scoped with Task
+  public enum Priority {
+    LOW,
+    MEDIUM,
+    HIGH
+  }
 
-    public enum Status {
-        OPEN,
-        IN_PROGRESS,
-        COMPLETED,
-        CANCELLED
-    }
+  public enum Status {
+    OPEN,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELLED
+  }
 }

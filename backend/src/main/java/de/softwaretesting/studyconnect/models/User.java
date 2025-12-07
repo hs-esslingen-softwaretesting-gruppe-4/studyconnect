@@ -1,7 +1,5 @@
 package de.softwaretesting.studyconnect.models;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,30 +18,29 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Long id;
 
-    @Column(name = "keycloak_uuid", nullable = true, unique = true)
-    private String keycloakUUID;
+  @Column(name = "keycloak_uuid", nullable = true, unique = true)
+  private String keycloakUUID;
 
-    @Email(message = "Please provide a valid email address")
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
+  @Email(message = "Please provide a valid email address")
+  @Column(name = "email", nullable = false, unique = true)
+  private String email;
 
-    @Column(name = "surname", nullable = false)
-    private String surname;
+  @Column(name = "surname", nullable = false)
+  private String surname;
 
-    @Column(name = "lastname", nullable = false)
-    private String lastname;
+  @Column(name = "lastname", nullable = false)
+  private String lastname;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 }

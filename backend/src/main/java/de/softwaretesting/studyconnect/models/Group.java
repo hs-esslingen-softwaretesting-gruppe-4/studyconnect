@@ -1,13 +1,6 @@
 package de.softwaretesting.studyconnect.models;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,6 +16,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,85 +28,87 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "groups")
-
 public class Group {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Long id;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+  @Column(name = "name", nullable = false, length = 100)
+  private String name;
 
-    @Column(name = "description", length = 500)
-    private String description;
+  @Column(name = "description", length = 500)
+  private String description;
 
-    @Column(name = "max_members", nullable = false)
-    private Integer maxMembers = 20;
+  @Column(name = "max_members", nullable = false)
+  private Integer maxMembers = 20;
 
-    @Column(name = "is_public", nullable = false)
-    private boolean isPublic = false;
+  @Column(name = "is_public", nullable = false)
+  private boolean isPublic = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "created_by", nullable = false)
+  private User createdBy;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<Task> tasks = new ArrayList<>();
+  @OneToMany(
+      mappedBy = "group",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  @JsonManagedReference
+  private List<Task> tasks = new ArrayList<>();
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
 
-    @ManyToMany
-    @JoinTable(
-        name = "group_members",
-        joinColumns = @JoinColumn(name = "group_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> members = new HashSet<>(); 
+  @ManyToMany
+  @JoinTable(
+      name = "group_members",
+      joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> members = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private User admin;
+  @ManyToOne
+  @JoinColumn(name = "admin_id")
+  private User admin;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public boolean addMember(User user) {
+    if (this.members.size() >= this.maxMembers) {
+      return false;
     }
+    return this.members.add(user);
+  }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+  public void addTask(Task task) {
+    if (task == null) return;
+    if (!this.tasks.contains(task)) {
+      this.tasks.add(task);
     }
+    // avoid infinite loop if already set
+    if (task.getGroup() == null || !this.equals(task.getGroup())) {
+      task.setGroup(this);
+    }
+  }
 
-    public boolean addMember(User user) {
-        if (this.members.size() >= this.maxMembers) {
-            return false;
-        }
-        return this.members.add(user);
+  public void removeTask(Task task) {
+    if (task == null) return;
+    if (this.tasks.remove(task)) {
+      // if orphanRemoval or cascade remove is desired, nulling group will allow removal
+      task.setGroup(null);
     }
-
-    public void addTask(Task task) {
-        if (task == null) return;
-        if (!this.tasks.contains(task)) {
-            this.tasks.add(task);
-        }
-        // avoid infinite loop if already set
-        if (task.getGroup() == null || !this.equals(task.getGroup())) {
-            task.setGroup(this);
-        }
-    }
-
-    public void removeTask(Task task) {
-        if (task == null) return;
-        if (this.tasks.remove(task)) {
-            // if orphanRemoval or cascade remove is desired, nulling group will allow removal
-            task.setGroup(null);
-        }
-    }
+  }
 }

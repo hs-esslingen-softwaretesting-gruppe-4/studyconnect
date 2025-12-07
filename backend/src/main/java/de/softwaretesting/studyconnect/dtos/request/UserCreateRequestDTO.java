@@ -6,31 +6,29 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Value;
 
-
-/**
- * Data Transfer Object for creating a new user.
- */
+/** Data Transfer Object for creating a new user. */
 @Value
 public class UserCreateRequestDTO {
 
-    @NotBlank(message = "Surname is required")
-    @Size(max = 100, message = "Surname must not exceed 100 characters")
-    private String surname;
+  @NotBlank(message = "Surname is required")
+  @Size(max = 100, message = "Surname must not exceed 100 characters")
+  private String surname;
 
-    @NotBlank(message = "Lastname is required")
-    @Size(max = 100, message = "Lastname must not exceed 100 characters")
-    private String lastname;
+  @NotBlank(message = "Lastname is required")
+  @Size(max = 100, message = "Lastname must not exceed 100 characters")
+  private String lastname;
 
-    @Size(min = 8, message = "Password must be at least 8 characters long")
-    @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
-    @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter")
-    @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one digit")
-    @Pattern(regexp = ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*", message = "Password must contain at least one special character")
-    @NotBlank(message = "Password is required")
-    private String password;
+  @Size(min = 8, message = "Password must be at least 8 characters long")
+  @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
+  @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter")
+  @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one digit")
+  @Pattern(
+      regexp = ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*",
+      message = "Password must contain at least one special character")
+  @NotBlank(message = "Password is required")
+  private String password;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Please provide a valid email address")
-    private String email;
-
+  @NotBlank(message = "Email is required")
+  @Email(message = "Please provide a valid email address")
+  private String email;
 }

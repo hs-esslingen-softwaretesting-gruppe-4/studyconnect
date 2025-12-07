@@ -1,26 +1,25 @@
 package de.softwaretesting.studyconnect.dtos.response;
 
+import de.softwaretesting.studyconnect.models.Task.Priority;
+import de.softwaretesting.studyconnect.models.Task.Status;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
-
-import de.softwaretesting.studyconnect.models.Task.Priority;
-import de.softwaretesting.studyconnect.models.Task.Status;
 import lombok.Value;
 
 @Value
 public class TaskResponseDTO implements Serializable {
-    Long id;
-    String title;
-    String description;
-    LocalDateTime dueDate;
-    Priority priority;
-    Status status;
-    String category;
-    Set<String> tags;
-    Long createdById;
-    Set<Long> assigneeIds;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    Long groupId;
+  private Long id;
+  private String title;
+  private String description;
+  private LocalDateTime dueDate;
+  private Priority priority;
+  private Status status;
+  private String category;
+  private Set<String> tags;
+  private Long createdById;
+  private Set<Long> assigneeIds;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private Long groupId;
 }
