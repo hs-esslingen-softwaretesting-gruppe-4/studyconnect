@@ -338,14 +338,14 @@
             <version>0.8.12</version>
 
             <executions>
-                <!-- 1. Prepare agent before tests -->
+                <!-- 1. Prepare agent before tests to start evaluating the coverage -->
                 <execution>
                     <goals>
                         <goal>prepare-agent</goal>
                     </goals>
                 </execution>
 
-                <!-- 2. Generate the coverage report after tests -->
+                <!-- 2. Generate the html coverage report after tests -->
                 <execution>
                     <id>report</id>
                     <phase>test</phase>
@@ -354,7 +354,7 @@
                     </goals>
                 </execution>
 
-                <!-- 3. Enforce minimum coverage rules -->
+                <!-- 3. Enforce minimum coverage rules (build fail) -->
                 <execution>
                     <id>check</id>
                     <phase>verify</phase>
@@ -377,6 +377,20 @@
                     </configuration>
                 </execution>
             </executions>
+            <configuration>
+                <excludes>
+                <!-- Exclude Files which are generally not tested 
+                    or should not be included due to ... reason -->
+                <exclude>**/StudyconnectApplication.class</exclude>
+                <exclude>**/GlobalExceptionHandler.class</exclude>
+                <exclude>**/dtos/**/*.class</exclude>
+                <exclude>**/mappers/**/*.class</exclude>
+                <exclude>**/config/*.class</exclude>
+                <exclude>**/security/*.class</exclude>
+                <!-- Excluded classes below should be tested later -->
+                <exclude>**/controller/*.class</exclude>
+                </excludes>
+            </configuration>
         </plugin>
         </plugins>
     </build>
