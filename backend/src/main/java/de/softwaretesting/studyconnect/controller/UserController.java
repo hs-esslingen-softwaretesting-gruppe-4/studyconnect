@@ -1,12 +1,11 @@
 package de.softwaretesting.studyconnect.controller;
 
-import de.softwaretesting.studyconnect.services.UserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
-
+import de.softwaretesting.studyconnect.services.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,20 +22,23 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable("userId") Long userId) {
-        return userService.getUserById(userId);
-    }
+  @GetMapping("/{userId}")
+  public ResponseEntity<UserResponseDTO> getUserById(@PathVariable("userId") Long userId) {
+    return userService.getUserById(userId);
+  }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable("userId") Long userId, @Valid @RequestBody UserUpdateRequestDTO userRequestDTO) {
-        return userService.updateUserWithId(userId, userRequestDTO);
-    }
+  @PutMapping("/{userId}")
+  public ResponseEntity<UserResponseDTO> updateUser(
+      @PathVariable("userId") Long userId,
+      @Valid @RequestBody UserUpdateRequestDTO userRequestDTO) {
+    return userService.updateUserWithId(userId, userRequestDTO);
+  }
 
-    @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserCreateRequestDTO userRequestDTO) {
-        return userService.createUser(userRequestDTO);
-    }
+  @PostMapping
+  public ResponseEntity<UserResponseDTO> createUser(
+      @Valid @RequestBody UserCreateRequestDTO userRequestDTO) {
+    return userService.createUser(userRequestDTO);
+  }
 }

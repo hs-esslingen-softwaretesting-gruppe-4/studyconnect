@@ -7,7 +7,8 @@ import org.junit.platform.suite.api.Suite;
 
 /**
  * Cucumber integration test runner for executing BDD feature files using the Failsafe/verify phase.
- * This class intentionally ends with 'IT' so the Maven Failsafe plugin picks it up during 'mvn verify'.
+ * This class intentionally ends with 'IT' so the Maven Failsafe plugin picks it up during 'mvn
+ * verify'.
  */
 @Suite
 @IncludeEngines("cucumber")
@@ -15,5 +16,6 @@ import org.junit.platform.suite.api.Suite;
 @ConfigurationParameter(key = "cucumber.glue", value = "de.softwaretesting.studyconnect")
 @ConfigurationParameter(key = "cucumber.plugin", value = "pretty")
 public class StudyconnectCucumberIT {
-    // Entry point for executing Cucumber features on the JUnit Platform during integration-test/verify.
+  // Entry point for executing Cucumber features on the JUnit Platform during
+  // integration-test/verify.
 }
