@@ -537,3 +537,48 @@ Eine detaillierte Dokumentation der Checkstyle-Konfiguration, aller Regeln und d
 
 **Vorteil:**
 Die tiefgestaffelte Schweregrad-Strategie (19 ERROR + 28 WARNING) stellt sicher, dass kritische Code-Quality-Probleme automatisch erkannt und blockiert werden, während Richtlinien mit Kontext-Abhängigkeit flexible Handhabung ermöglichen.
+
+### JaCoCo
+**JaCoCo** ist ein Code-Coverage-Tool, das während des Testlaufs die Ausführungsabdeckung des Java-Codes misst und detaillierte Berichte generiert.
+
+**Zweck**
+- Ermittlung der **Testabdeckung** (Line-, Branch-, Method-, Class-Coverage)
+- **Erzwingung von Mindestabdeckungen** zur Sicherstellung nachhaltiger Testqualität
+- **Absicherung** gegen ungetestete kritische Codepfade
+- Transparente Darstellung der Testqualität in HTML-, CSV- und XML-Reports
+
+**Konfiguration**
+- Integriert über das jacoco-maven-plugin im pom.xml
+- Erzeugt Coverage-Daten in: backend/target/jacoco.exec
+- Reports in: backend/target/site/jacoco/index.html
+- Thresholds (Beispiel):
+  - Line Coverage ≥ 80 %
+
+**Wann wird es ausgeführt:**
+- Automatisch während der Maven-Phasen:
+  - prepare-agent (Instrumentation vor Teststart)
+  - test (Generierung der Coverage-Daten)
+  - verify (Prüfung der Mindestabdeckungen)
+- Zusätzlich beim Ausführen von mvn test, mvn verify oder mvn clean install
+
+**Befehle**
+```bash
+# Führt Tests aus und erzeugt Coverage-Daten
+mvn test
+
+# Erzeugt vollständigen HTML-Report unter /target/site/jacoco
+mvn jacoco:report
+
+# Führt Coverage-Check mit Grenzwerten aus (Build bricht bei Unterschreitung ab)
+mvn jacoco:check
+
+# Teil des vollständigen Build-Prozesses inkl. Coverage-Check
+mvn clean install
+```
+**Build-Verhalten**
+- Coverage unter festgelegtem Minimum → Build schlägt fehl ❌
+- Coverage erfüllt oder übertroffen → Build erfolgreich ✔️
+- Reports werden unabhängig vom Build-Ergebnis generiert
+
+**Vorteil**
+Durch die Integration in den automatischen Build-Prozess stellt JaCoCo sicher, dass **kritische Komponenten dauerhaft getestet** bleiben. Die Mindestabdeckungsregeln verhindern schleichenden Qualitätsverlust und fördern eine testgetriebene, robuste Entwicklungskultur.
