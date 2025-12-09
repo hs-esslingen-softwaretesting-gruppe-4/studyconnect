@@ -33,7 +33,6 @@ Location: `/backend/pom.xml`
 | **prepare-agent** | Attaches the JaCoCo agent before tests to collect coverage data         |
 | **report**        | Generates the HTML coverage report after the test phase                 |
 | **check**         | Fails the build if the configured coverage threshold is not met (≥ 80%) |
-age is below given treshhold (80% or 0.80)
 
 **File Exclusions (Optional)**
 These can be added under the plugin’s <configuration> section to exclude files that should not be considered for coverage (e.g., generated classes, DTOs).
@@ -54,8 +53,8 @@ Example:
 ### Plugin Declaration in `pom.xml`
 
 ```xml
-</build>
-    </plugins>
+<build>
+    <plugins>
     <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -101,8 +100,7 @@ Example:
         </executions>
         <configuration>
             <excludes>
-            <!-- Exclude Files which are generally not tested 
-                or should not be included due to ... reason -->
+            <!-- Exclude Files which are generally not tested -->
             </excludes>
         </configuration>
     </plugin>
@@ -116,12 +114,12 @@ Example:
 
 **Execution Phase:**
 - Gets activated during the **test** phase to generate the test report
-- **Check** goal runs during the **validate** phase of the Maven lifecycle
+- **Check** goal runs during the **verify** phase of the Maven lifecycle
 
 ---
 
 ## Running JaCoCo
-## Quick Commands
+### Quick Commands
 ```bash
 # Run tests and generate coverage report
 mvn clean test
@@ -160,6 +158,27 @@ validate → compile → test → package → verify → install → deploy
 
 ---
 
+## Current JaCoCo Results
+
+|GROUP       |PACKAGE                                   |CLASS                       |INSTRUCTION_MISSED|INSTRUCTION_COVERED|BRANCH_MISSED|BRANCH_COVERED|LINE_MISSED|LINE_COVERED|COMPLEXITY_MISSED|COMPLEXITY_COVERED|METHOD_MISSED|METHOD_COVERED|
+|------------|------------------------------------------|----------------------------|------------------|-------------------|-------------|--------------|-----------|------------|-----------------|------------------|-------------|--------------|
+|studyconnect|de.softwaretesting.studyconnect.services  |TaskService                 |0                 |221                |0            |4             |0          |44          |0                |11                |0            |9             |
+|studyconnect|de.softwaretesting.studyconnect.services  |UserService                 |0                 |274                |0            |14            |0          |73          |0                |15                |0            |8             |
+|studyconnect|de.softwaretesting.studyconnect.services  |KeycloakService             |2                 |620                |2            |10            |1          |140         |2                |17                |0            |13            |
+|studyconnect|de.softwaretesting.studyconnect.services  |KeycloakAdminTokenService   |18                |324                |6            |26            |7          |93          |6                |21                |0            |11            |
+|studyconnect|de.softwaretesting.studyconnect.models    |Comment                     |4                 |10                 |0            |0             |2          |4           |1                |2                 |1            |2             |
+|studyconnect|de.softwaretesting.studyconnect.models    |Task.Status                 |0                 |27                 |0            |0             |0          |5           |0                |1                 |0            |1             |
+|studyconnect|de.softwaretesting.studyconnect.models    |Group                       |11                |71                 |7            |7             |2          |22          |7                |6                 |1            |5             |
+|studyconnect|de.softwaretesting.studyconnect.models    |Task                        |0                 |110                |1            |17            |0          |32          |1                |19                |0            |11            |
+|studyconnect|de.softwaretesting.studyconnect.models    |User                        |0                 |7                  |0            |0             |0          |3           |0                |2                 |0            |2             |
+|studyconnect|de.softwaretesting.studyconnect.models    |Task.Priority               |0                 |21                 |0            |0             |0          |4           |0                |1                 |0            |1             |
+|studyconnect|de.softwaretesting.studyconnect.exceptions|BadRequestException         |4                 |0                  |0            |0             |2          |0           |1                |0                 |1            |0             |
+|studyconnect|de.softwaretesting.studyconnect.exceptions|InternalServerErrorException|0                 |4                  |0            |0             |0          |2           |0                |1                 |0            |1             |
+|studyconnect|de.softwaretesting.studyconnect.exceptions|NotFoundException           |0                 |4                  |0            |0             |0          |2           |0                |1                 |0            |1             |
+
+
+---
+
 ## Appendix
 
 ### Quick Reference Commands
@@ -183,7 +202,7 @@ mvn clean verify
 - Configuration File:
 `backend/pom.xml`
 
-### Refferences
+### References
 
 - [JaCoCo Official Documentation](https://www.jacoco.org/)
 

@@ -553,7 +553,6 @@ Die tiefgestaffelte Schweregrad-Strategie (19 ERROR + 28 WARNING) stellt sicher,
 - Reports in: backend/target/site/jacoco/index.html
 - Thresholds (Beispiel):
   - Line Coverage ≥ 80 %
-  - Branch Coverage ≥ 70 %
 
 **Wann wird es ausgeführt:**
 - Automatisch während der Maven-Phasen:
