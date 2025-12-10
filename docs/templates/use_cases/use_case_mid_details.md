@@ -1,11 +1,11 @@
 # Use Case: XYZ
 
-### Name: 
+### Name:
 Provide a descriptive name in the form of **Verb + Object**.
 
     <Text goes here>
 
-### Summary: 
+### Summary:
 Short descriptive summary 2-4 sentences.
 
     <Text goes here>
@@ -49,4 +49,4 @@ The result of the process and the conditions that must be met after the process 
 Descriptive figures of the use case, e.g., use case diagrams, context diagrams, class diagrams, Mockups, etc.
 
 ### Further supporting material:
-Additional information and contet of supporting material of the use case.
+Additional information and content of supporting material of the use case.

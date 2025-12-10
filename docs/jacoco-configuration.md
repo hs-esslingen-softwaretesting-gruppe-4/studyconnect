@@ -152,7 +152,7 @@ validate → compile → test → package → verify → install → deploy
 
 #### Maven Surefire Plugin
 
-- **Purpose**: Runs unit tests  
+- **Purpose**: Runs unit tests
 - **Phase**: `test`
 - JaCoCo collects coverage during Surefire execution.
 
@@ -208,5 +208,5 @@ mvn clean verify
 
 ---
 
-*Document Version: 1.1*  
+*Document Version: 1.1*
 *Last Updated: December 8, 2025*

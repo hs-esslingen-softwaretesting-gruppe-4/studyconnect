@@ -12,6 +12,3 @@
 ### Task 5.3
 - The configuration setup is documented in [documentation](../documentation.md#aufbau--setup-der-bdd-integrationstests)
 - Answer to the question  is in the same file located [here](../documentation.md#test-ausführungsstrategie-bdd-vs-unit-tests).
-
-
-

@@ -325,32 +325,32 @@ StudyConnect is a student-centered productivity tool designed to help students o
 ```sql
 -- Users table
 users (
-  id, email, password_hash, name, 
+  id, email, password_hash, name,
   created_at, updated_at, last_login
 )
 
 -- Groups table
 groups (
-  id, name, description, visibility, 
+  id, name, description, visibility,
   max_members, created_by, created_at, updated_at
 )
 
 -- Group members table
 group_members (
-  id, group_id, user_id, role, 
+  id, group_id, user_id, role,
   joined_at, invited_by
 )
 
 -- Tasks table
 tasks (
-  id, title, description, due_date, priority, 
-  status, category, created_by, assigned_to, 
+  id, title, description, due_date, priority,
+  status, category, created_by, assigned_to,
   group_id, created_at, updated_at
 )
 
 -- Comments table
 comments (
-  id, task_id, user_id, content, 
+  id, task_id, user_id, content,
   created_at, updated_at
 )
 ```

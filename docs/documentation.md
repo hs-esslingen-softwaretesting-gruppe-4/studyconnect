@@ -32,23 +32,23 @@ TypeScript fördert zudem eine bessere Strukturierung von größeren Projekten. 
 
 #### Spring Boot (Backend)
 
-Für das Backend fiel die Wahl auf Spring Boot. Das Framework ermöglicht die schnelle und effiziente Entwicklung von REST-APIs, über die das Angular-Frontend mit den benötigten Daten versorgt wird.  
+Für das Backend fiel die Wahl auf Spring Boot. Das Framework ermöglicht die schnelle und effiziente Entwicklung von REST-APIs, über die das Angular-Frontend mit den benötigten Daten versorgt wird.
 
-Die Architektur von Spring Boot ist klar strukturiert und folgt dem Schichtenmodell:  
-- **Controller**: nimmt Anfragen entgegen und leitet sie weiter  
-- **Service**: enthält die zentrale Geschäftslogik  
-- **Repository**: kapselt den Zugriff auf die Datenbank  
+Die Architektur von Spring Boot ist klar strukturiert und folgt dem Schichtenmodell:
+- **Controller**: nimmt Anfragen entgegen und leitet sie weiter
+- **Service**: enthält die zentrale Geschäftslogik
+- **Repository**: kapselt den Zugriff auf die Datenbank
 
-Diese Trennung fördert eine saubere Code-Struktur und erleichtert die Wartung sowie Erweiterbarkeit der Anwendung.  
+Diese Trennung fördert eine saubere Code-Struktur und erleichtert die Wartung sowie Erweiterbarkeit der Anwendung.
 
-Spring Boot bietet zudem eine enge Integration mit Spring Data JPA, wodurch Datenbankzugriffe stark vereinfacht werden. Standard-CRUD-Operationen lassen sich ohne großen Implementierungsaufwand realisieren. Für komplexere Anforderungen können individuelle Methoden flexibel ergänzt werden.  
+Spring Boot bietet zudem eine enge Integration mit Spring Data JPA, wodurch Datenbankzugriffe stark vereinfacht werden. Standard-CRUD-Operationen lassen sich ohne großen Implementierungsaufwand realisieren. Für komplexere Anforderungen können individuelle Methoden flexibel ergänzt werden.
 
 Ein weiterer Vorteil liegt in der großen Community und dem breiten Ökosystem von Spring. Dadurch stehen zahlreiche Erweiterungen und Bibliotheken zur Verfügung, die den Entwicklungsprozess beschleunigen und gleichzeitig die Stabilität der Anwendung sicherstellen.
 
 #### PostgreSQL (Datenbank)
 
-PostgreSQL hat sich als führender Open-Source-Konkurrent zu einem weit verbreiteten relationalen Datenbankmanagementsystem (DBMS) etabliert. 
-Es bietet umfassende Funktionen wie die Unterstützung von JSON-Daten, Volltextsuche und benutzerdefinierten Datentypen. Zudem zeichnet es sich durch enorme Skalierbarkeit aus und ist sowohl für kleine als auch für sehr große Datenbanken geeignet. 
+PostgreSQL hat sich als führender Open-Source-Konkurrent zu einem weit verbreiteten relationalen Datenbankmanagementsystem (DBMS) etabliert.
+Es bietet umfassende Funktionen wie die Unterstützung von JSON-Daten, Volltextsuche und benutzerdefinierten Datentypen. Zudem zeichnet es sich durch enorme Skalierbarkeit aus und ist sowohl für kleine als auch für sehr große Datenbanken geeignet.
 Durch die hohe ACID-Konformität gewährleistet es eine ausgezeichnete Datenintegrität und Transaktionssicherheit, während die engagierte Community kontinuierlich neue Funktionen und Updates bereitstellt.
 
 ---
@@ -90,7 +90,7 @@ Die sonstige Kommunikation im Team läuft über einen Discord-Server, auf dem R�
 - **Testability:** Klare Modulgrenzen und Schnittstellen zur einfachen Testdurchführung.
 - **Portability:** Plattformübergreifende Nutzbarkeit sowie leichte Integration in bestehende Lern-Workflows durch Exportisierung.
 - **Integration:** Unterstützung zukünftiger Integration mit externen Lernplattformen und institutionellen Systemen.
- 
+
 ### Quality Model
 
 #### 4 major Quality aspects
@@ -143,7 +143,7 @@ Das Systemkontext-Diagramm stellt die wichtigsten Interaktionen zwischen dem Stu
 ---
 
 ### Use-Case-Diagramm
-Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zur visuellen Veranschaulichung dargestellt. 
+Basierend auf der Funktion "Task Management" wird folgendes Use-Case Diagramm zur visuellen Veranschaulichung dargestellt.
 
 ![Uce-Case-Diagramm: task-management](images/Use-case-Task-Management.png)
 <p align="center">
@@ -387,7 +387,7 @@ BDD/Acceptance Tests sollten **weniger häufig** als Unit Tests ausgeführt werd
 
 - Da **Unit-Tests** nur isolierte Klassen oder Funktionen testen, werden sie sehr schnell ausgeführt, oft innerhalb weniger Millisekunden. Aus diesem Grund können Unit-Tests jederzeit im Entwicklungs-/Bereitstellungsprozess durchgeführt werden, beispielsweise vor jedem Push und Merge/Request, aber auch lokal vor jedem Commit.
 
-- **Behaviour driven development tests (BDD)** hingegen umfassen das Testen mehrerer Module der App und haben im Allgemeinen einen breiteren Testumfang, weshalb sie langsamer und fehleranfälliger sind. Sie werden verwendet, um zu überprüfen, ob eine Funktion korrekt implementiert wurde.  
+- **Behaviour driven development tests (BDD)** hingegen umfassen das Testen mehrerer Module der App und haben im Allgemeinen einen breiteren Testumfang, weshalb sie langsamer und fehleranfälliger sind. Sie werden verwendet, um zu überprüfen, ob eine Funktion korrekt implementiert wurde.
 Daher ist es sinnvoll, diese Tests in einer CI/CD-Pipeline auszuführen, beispielsweise bei einem Pull-Request (dies ist am sinnvollsten, wenn in Feature-Branches gearbeitet wird) oder bei Bedarf von Entwickler oder der Qualitätssicherung ausgeführt werden, um zu überprüfen, ob eine Funktion vollständig implementiert wurde.
 
 - **Akzeptanztests** überprüfen, ob die Software die Anforderungen erfüllt und für die Produktion bereit ist. Dies erfordert einen noch breiteren Testumfang als BDD-Tests, wodurch sie ressourcen- und zeitaufwändiger sind. Daher sollten diese Tests vor der Veröffentlichung durchgeführt werden, beispielsweise bei einem Pull-Request in main/master in einer CI/CD-Pipeline.
@@ -412,7 +412,7 @@ mvn verify
 - Main Branch: Alle Tests
 ```
 
-**Fazit:** BDD-Tests seltener ausführen, um produktiv zu bleiben. Aber **immer vor Merge/Release**, um User Stories korrekt zu validieren und Regressionen zu vermeiden. 
+**Fazit:** BDD-Tests seltener ausführen, um produktiv zu bleiben. Aber **immer vor Merge/Release**, um User Stories korrekt zu validieren und Regressionen zu vermeiden.
 
 #### Review
 
@@ -431,19 +431,19 @@ Wir empfehlen außerdem ein weiteres Review, sobald die Anwendung in ihren Grund
 In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusammenspiel mit der Datenbank. Ziel ist es, sicherzustellen, dass alle CRUD-Operationen und Abfragen korrekt funktionieren und die Businesslogik der Task-Entität fehlerfrei umgesetzt wird.
 
 **Testinhalte**
-1. Erstellen und Abrufen von Tasks: 
+1. Erstellen und Abrufen von Tasks:
     - Prüft, ob ein Task korrekt in der datenbank gespeichert wird und über seine ID wiedergegeben werden kann.
-2. Aktualisieren von Tasks: 
-    - Testet, ob Änderungen an einem task korrekt persistiert werden. 
-3. Löschen von Tasks: 
+2. Aktualisieren von Tasks:
+    - Testet, ob Änderungen an einem task korrekt persistiert werden.
+3. Löschen von Tasks:
     - Stellt sicher, dass ein Task nach dem Löschen nicht mehr in der Datenbank vorhanden ist.
-4. Abfragen nach Fruppe und Assignees: 
+4. Abfragen nach Gruppe und Assignees:
     - Überprüfung von Repository-methoden wie `findByGroupId()` und `findByAssigneesId()`, um Tasks nach der Gruppenzugehörigkeit oder zugewiesenen Nutzern zu filtern.
-5. Verwalten von Tags und Assignees: 
+5. Verwalten von Tags und Assignees:
     - Hinzufügen und entfernen von tags und zugewiesenen Nutzern wird getestet, einschließlich der Helper-Methoden in der Task-Klasse.
-6. Überprüfung von Status, Priorität und Kategorie: 
+6. Überprüfung von Status, Priorität und Kategorie:
     - Tests zur korrekten Behandlung von task-Priorität, Kategorie und Statusänderungen.
-7. Überfällige Tasks erkennen: 
+7. Überfällige Tasks erkennen:
     - Prüft, ob Tasks mit abgelaufenem Fälligkeitsdatum korrekt als überfällig markiert werden, und dass abgeschlossee Tasks nicht mehr als überfällig gelten.
 
 **Technische Umsetzung**

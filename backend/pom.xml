@@ -379,7 +379,7 @@
             </executions>
             <configuration>
                 <excludes>
-                <!-- Exclude Files which are generally not tested 
+                <!-- Exclude Files which are generally not tested
                     or should not be included due to ... reason -->
                 <exclude>**/StudyconnectApplication.class</exclude>
                 <exclude>**/GlobalExceptionHandler.class</exclude>
