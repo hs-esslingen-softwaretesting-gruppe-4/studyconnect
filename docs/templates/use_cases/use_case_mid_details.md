@@ -49,4 +49,4 @@ The result of the process and the conditions that must be met after the process 
 Descriptive figures of the use case, e.g., use case diagrams, context diagrams, class diagrams, Mockups, etc.
 
 ### Further supporting material:
-Additional information and contet of supporting material of the use case.
+Additional information and content of supporting material of the use case.

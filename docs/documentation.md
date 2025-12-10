@@ -437,7 +437,7 @@ In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusam
     - Testet, ob Änderungen an einem task korrekt persistiert werden.
 3. Löschen von Tasks:
     - Stellt sicher, dass ein Task nach dem Löschen nicht mehr in der Datenbank vorhanden ist.
-4. Abfragen nach Fruppe und Assignees:
+4. Abfragen nach Gruppe und Assignees:
     - Überprüfung von Repository-methoden wie `findByGroupId()` und `findByAssigneesId()`, um Tasks nach der Gruppenzugehörigkeit oder zugewiesenen Nutzern zu filtern.
 5. Verwalten von Tags und Assignees:
     - Hinzufügen und entfernen von tags und zugewiesenen Nutzern wird getestet, einschließlich der Helper-Methoden in der Task-Klasse.
