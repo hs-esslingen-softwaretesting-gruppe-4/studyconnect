@@ -15,6 +15,10 @@ jobs:
     name: Build and analyze
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: backend
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,4 +44,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Studyconnect-Group-4 -Dsonar.projectName='Studyconnect Group 4'
+        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Studyconnect-Group-4 -Dsonar.projectName='Studyconnect Group 4'
