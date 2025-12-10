@@ -1,10 +1,10 @@
 # Use Case: Update Progress
 
-### Name: 
+### Name:
 
     Update Progress
 
-### Summary: 
+### Summary:
 
     Dieser Anwendungsfall ermöglicht es einem eingeloggten Studenten oder einem Gruppenadministrator, den aktuellen Zusatand einer Aufgabe zu ändern. Dies ist essentiell, um die "Awareness of Progress" zu gewährleisten, die Zeitplanung effektiv zu unterstützen.
 
@@ -37,7 +37,7 @@
 
 ### Exceptions:
 
-    E1: Fehlende Berechtigung 
+    E1: Fehlende Berechtigung
     Wenn ein nicht autorisierter Student versucht, den Status einer Aufgabe zu ändern (z. B. eine fremde persönliche Aufgabe), bricht das System den Vorgang ab und zeigt eine Fehlermeldung an.
 
     E2: Ungültiges Status
@@ -48,10 +48,10 @@
 
 ### Outputs and Post-Conditions:
 
-    Outputs: 
+    Outputs:
     - Bestätigungsmeldung
     - Die Detailsicht der Aufgabe zeigt den neuen Fortschrittsstatus an.
-    
+
     Post-Conditions:
     - Der Fortschrittsstatus der Aufgabe im Datenbankeintrag ist auf den neuen Wert gesetzt
     - (Bei Gruppenaufgaben): Alle relevanten Gruppenmitglieder (z. B. der Administrator) haben eine Benachrichtigung über die Statusänderung erhalten.

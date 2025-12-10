@@ -4,9 +4,9 @@
 
 This document details the Checkstyle configuration setup for the StudyConnect backend application. Checkstyle is a static code analysis tool that helps developers write Java code that adheres to a coding standard.
 
-**Date Configured**: December 7, 2025  
-**Checkstyle Version**: 9.3 (via maven-checkstyle-plugin 3.6.0)  
-**Java Version**: 21  
+**Date Configured**: December 7, 2025
+**Checkstyle Version**: 9.3 (via maven-checkstyle-plugin 3.6.0)
+**Java Version**: 21
 **Spring Boot Version**: 3.5.6
 
 ---
@@ -405,10 +405,10 @@ mvn install -Dcheckstyle.skip=true
 
 ### Execution Summary
 
-**Date**: December 7, 2025  
-**Command**: `mvn checkstyle:check`  
-**Build Status**: ✅ **SUCCESS**  
-**Total Violations**: 7 warnings (0 violations according to the plugin)  
+**Date**: December 7, 2025
+**Command**: `mvn checkstyle:check`
+**Build Status**: ✅ **SUCCESS**
+**Total Violations**: 7 warnings (0 violations according to the plugin)
 **Files Checked**: All `.java`, `.properties`, and `.xml` files in `src/`
 
 ### Detailed Violations
@@ -513,9 +513,9 @@ Checkstyle runs here
 
 #### 1. Spotless Maven Plugin
 
-**Version**: 2.40.0  
-**Purpose**: Automatically formats code  
-**Phase**: `validate`  
+**Version**: 2.40.0
+**Purpose**: Automatically formats code
+**Phase**: `validate`
 **Goal**: `apply`
 
 **Formatter**: Google Java Format 1.17.0
@@ -528,14 +528,14 @@ Checkstyle runs here
 
 #### 2. Maven Surefire Plugin
 
-**Purpose**: Runs unit tests  
+**Purpose**: Runs unit tests
 **Phase**: `test`
 
 Checkstyle runs before tests, ensuring code quality before test execution.
 
 #### 3. Maven Failsafe Plugin
 
-**Purpose**: Runs integration tests  
+**Purpose**: Runs integration tests
 **Phase**: `verify`
 
 Checkstyle violations are caught before integration tests run.
@@ -665,7 +665,7 @@ public class StudyconnectApplication {
 Or exclude main classes in `checkstyle-suppressions.xml`:
 
 ```xml
-<suppress checks="HideUtilityClassConstructor" 
+<suppress checks="HideUtilityClassConstructor"
           files=".*Application\.java"/>
 ```
 
@@ -784,6 +784,6 @@ mvn validate
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: December 7, 2025*  
+*Document Version: 1.0*
+*Last Updated: December 7, 2025*
 *Maintained by: StudyConnect Development Team*

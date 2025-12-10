@@ -1,0 +1,79 @@
+# Pre-commit hooks configuration for StudyConnect
+# Documentation: https://pre-commit.com/
+
+repos:
+  # 1. Checkstyle - Java Code Style Linting
+  # Validates Java code against the project's Checkstyle rules
+  - repo: local
+    hooks:
+      - id: checkstyle
+        name: Checkstyle
+        entry: cmd /c 'cd backend && mvn checkstyle:check -DskipTests -q'
+        language: system
+        files: '\.(java|properties|xml)$'
+        pass_filenames: false
+
+  # 2. Spotless - Code Formatting (Google Java Format)
+  # Automatically formats Java code and fails if formatting is needed
+  - repo: local
+    hooks:
+      - id: spotless-check
+        name: Spotless Format Check
+        entry: cmd /c 'cd backend && mvn spotless:check -DskipTests -q'
+        language: system
+        files: '\.java$'
+        pass_filenames: false
+
+  # 3. Maven Compile Check
+  # Ensures code compiles without errors
+  - repo: local
+    hooks:
+      - id: maven-compile
+        name: Maven Compile
+        entry: cmd /c 'cd backend && mvn clean compile -DskipTests -q'
+        language: system
+        files: '\.java$'
+        pass_filenames: false
+        exclude: '^docs/|^\.github/'
+
+  # 4. Unit Tests (optional - can be slow)
+  # Uncomment to run tests before commit
+  # - repo: local
+  #   hooks:
+  #     - id: maven-test
+  #       name: Maven Unit Tests
+  #       entry: cmd /c 'cd backend && mvn test -q'
+  #       language: system
+  #       files: '\.java$'
+  #       pass_filenames: false
+
+  # 5. YAML Validation
+  # Validates YAML files for syntax errors
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        name: YAML Lint
+        files: '\.(yaml|yml)$'
+        args: [--config-data=relaxed]
+
+  # 6. Standard pre-commit hooks
+  # Generic file validation and formatting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-json
+        name: Check JSON
+      - id: check-yaml
+        name: Check YAML
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+      - id: end-of-file-fixer
+        name: Fix end of file
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+      - id: check-case-conflict
+        name: Check for case conflicts
+
+# Global settings
+fail_fast: false

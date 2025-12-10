@@ -1,10 +1,10 @@
 # Use Case: Create Task
 
-### Name: 
+### Name:
 
     Create Task
 
-### Summary: 
+### Summary:
 
     Dieser Anwendungsfall ermöglicht es einem eingeloggten Studenten, eine neue persönliche oder gruppenbezogene Aufgabe in der StudyConnect-Anwendung zu definieren. Das System erfasst wesentliche Aufgabendetails wie Titel, Priorität, Fälligkeitsdatum und optionale Kategoerie/Notizen. Dadurch wird sichergestellt, dass alle Lernverpflichtungen formal strukturiert und verfolgt werden können.
 
@@ -43,7 +43,7 @@
 
 ### Exceptions:
 
-    E1: Fehlende Pflichteingabe 
+    E1: Fehlende Pflichteingabe
     Versucht der Student, die Aufgabe ohne Titel zu speichern, zeigt das System eine Fehlermeldung anund hält das Formular zur Korrektur geöffnet
 
     E2: Ungültiges Eingabeformat
@@ -54,9 +54,9 @@
 
 ### Outputs and Post-Conditions:
 
-    Outputs: 
+    Outputs:
     - Bestätigungsmeldung
-    
+
     Post-Conditions:
     - Ein neuer Aufgabendatensatz existiert in der Datenbank
     - Die neue Aufgabe ist mit initiierenden Studenten verknüpft

@@ -1,11 +1,11 @@
 # Use Case: XYZ
 
-### Name: 
+### Name:
 Provide a descriptive name in the form of **Verb + Object**.
 
     <Text goes here>
 
-### Summary: 
+### Summary:
 Short descriptive summary 2-4 sentences.
 
     <Text goes here>

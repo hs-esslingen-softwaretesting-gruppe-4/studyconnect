@@ -1,10 +1,10 @@
 # Use Case: Assign Task
 
-### Name: 
+### Name:
 
     Assign Task
 
-### Summary: 
+### Summary:
 
     Dieser Anwendungsfall ermöglicht es dem Gruppenadministrator, eine bestehende Aufgabe innerhalb einer StudyConnect-Gruppe einem oder mehreren Gruppenmitgliedern zuzuweisen. Dies dient der Koordination von Verantwortlichkeiten und der klaren Verteilung von Aufgaben innerhalb der Lerngruppe, was die Zusammenarbeit strukturiert.
 
@@ -24,7 +24,7 @@
 ### Pre-Conditions:
 
     1. Der Benutzer muss erfolgreich als Gruppenadministrator in der StudyConnect-Anwendung eingeloggt sein.
-    2. Die ausgewählte Aufgabe muss bereits existieren und mit der betreffenden Gruppe verknüpft sein. 
+    2. Die ausgewählte Aufgabe muss bereits existieren und mit der betreffenden Gruppe verknüpft sein.
     3. Die zu wählenden Mitglieder müssen aktive Mitglieder der Gruppe sein.
 
 ### Process Description:
@@ -33,8 +33,8 @@
     2. Der Gruppenadministrator wählt die Zuweisungsfunktion, woraufhin das System eine Liste aller aktiven Gruppenmitglieder zur Auswahl anzeigt.
     3. Der Gruppenadministrator wählt ein oder mehrere Mitglieder aus der Liste aus und bestätigt die Zuweisung, das System validiert die Eingabe.
     4. Das System aktualisiert den Aufgabaendatensatz und speichert die IDs der zugewiesenen Mitglieder.
-    5. Das System sendet eine automatische Benachrichtigung an die neu zugewiesenen Mitglieder über die Notification Service. 
-    6. Das System bestätigt die erfolgreiche Zuweisung und aktualisiert die Detailsicht der Aufgabe.  
+    5. Das System sendet eine automatische Benachrichtigung an die neu zugewiesenen Mitglieder über die Notification Service.
+    6. Das System bestätigt die erfolgreiche Zuweisung und aktualisiert die Detailsicht der Aufgabe.
 
 ### Exceptions:
 

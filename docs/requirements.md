@@ -114,7 +114,3 @@ This document captures the initial functional and non-functional requirements fo
 ### 6. Portability and Compatibility
 - NFR-17 (Should): The web app shall support the latest versions of Chrome, Firefox, Safari, and Edge. (Source: Derived)
 - NFR-18 (Could): The mobile experience shall be responsive for small screens down to 360×640 logical pixels. (Source: Derived)
-
-
-
-
