@@ -25,7 +25,7 @@ public class UserController {
   private final UserService userService;
 
   /**
-   * Get user by id
+   * Retrieves a user by their ID.
    *
    * @param userId the id of the user
    * @return the user with the given id
