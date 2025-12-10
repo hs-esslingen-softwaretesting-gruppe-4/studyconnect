@@ -15,6 +15,13 @@ jobs:
     name: Build and analyze
     runs-on: ubuntu-latest
 
+    env:
+      KEYCLOAK_ADMIN: ${{ secrets.KEYCLOAK_ADMIN }}
+      KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+      KEYCLOAK_AUTH_SERVER_URL: ${{ secrets.KEYCLOAK_AUTH_SERVER_URL }}
+      KEYCLOAK_ISSUER_URI: ${{ secrets.KEYCLOAK_ISSUER_URI }}
+      KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+
     defaults:
       run:
         working-directory: backend
