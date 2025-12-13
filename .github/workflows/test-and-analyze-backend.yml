@@ -38,6 +38,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -45,5 +47,18 @@ jobs:
         distribution: 'temurin'
         cache: maven
         cache-dependency-path: backend/pom.xml
+    - name: Cache SonarQube packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
     - name: Build and Test with Maven
       run: ./mvnw verify
+      # Push to SonarQube only if the build and tests were successful
+    - name: SonarQube Analysis
+      if: success()
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Studyconnect-Group-4 -Dsonar.projectName='Studyconnect Group 4'
