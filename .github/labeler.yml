@@ -12,4 +12,4 @@ frontend:
 
 tests:
 - changed-files:
-  - any-glob-to-any-file: 'backend/src/tests/**'
+  - any-glob-to-any-file: 'backend/src/test/**'

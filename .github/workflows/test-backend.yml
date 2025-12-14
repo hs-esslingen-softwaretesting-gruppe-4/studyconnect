@@ -12,7 +12,7 @@ name: Quick Test Backend (any branch except main)
 
 on:
   push:
-    branches: [ "*", "!main" ]
+    branches-ignore: [ "main" ]
     paths:
       - 'backend/**'
 

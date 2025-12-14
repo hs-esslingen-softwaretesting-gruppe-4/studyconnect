@@ -57,13 +57,11 @@ ENV POSTGRES_PORT=5432
 ENV POSTGRES_DB=studyconnectdb
 ENV POSTGRES_USER=studyconnect
 ENV POSTGRES_PASSWORD=secret
-ENV DATABASE_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 ENV JPA_HIBERNATE_DDL_AUTO=validate
 
 # Keycloak configuration (override with actual values)
 ENV KEYCLOAK_AUTH_SERVER_URL=https://keycloak.example.com
 ENV KEYCLOAK_REALM=studyconnect
-ENV KEYCLOAK_ISSUER_URI=${KEYCLOAK_AUTH_SERVER_URL}/realms/${KEYCLOAK_REALM}
 ENV STUDYCONNECT_REQUIRED_ROLE=studyconnect
 
 # Security configuration
@@ -77,4 +75,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT}/actuator/health || exit 1
 
 # Run application
-ENTRYPOINT ["sh", "-c", "java ${JVM_OPTS} -Dserver.port=${PORT} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "export DATABASE_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} && export KEYCLOAK_ISSUER_URI=${KEYCLOAK_AUTH_SERVER_URL}/realms/${KEYCLOAK_REALM} && java ${JVM_OPTS} -Dserver.port=${PORT} -jar app.jar"]

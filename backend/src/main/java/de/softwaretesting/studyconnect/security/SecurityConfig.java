@@ -90,7 +90,7 @@ public class SecurityConfig {
 
   @Bean
   /**
-   * Configures the JwtDecoder bean using issuer URI from environment properti s. Attempts to
+   * Configures the JwtDecoder bean using issuer URI from environment properties. Attempts to
    * initialize with retries and graceful fallback if issuer is unreachable at startup.
    *
    * @return JwtDecoder instance, or null if issuer is unreachable after retries
@@ -145,7 +145,11 @@ public class SecurityConfig {
     return null;
   }
 
-  // Password encoder bean
+  /**
+   * Defines the PasswordEncoder bean using BCrypt hashing algorithm.
+   *
+   * @return PasswordEncoder instance
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -155,10 +159,10 @@ public class SecurityConfig {
   interface AuthoritiesConverter
       extends Converter<Map<String, Object>, Collection<GrantedAuthority>> {}
 
-  /*
+  /**
+   * Converts Keycloak realm roles from JWT claims into GrantedAuthority collection.
    *
-   * Extracts roles from the "realm_access" claim in the JWT and converts them to GrantedAuthority objects.
-   * This is used to enforce authorization rules based on the user's roles.
+   * @return AuthoritiesConverter instance
    */
   @Bean
   AuthoritiesConverter realmRolesAuthoritiesConverter() {
@@ -174,9 +178,11 @@ public class SecurityConfig {
     };
   }
 
-  /*
+  /**
+   * Configures JwtAuthenticationConverter to use custom AuthoritiesConverter.
    *
-   * Configures a JwtAuthenticationConverter that uses the AuthoritiesConverter to extract authorities from the JWT.
+   * @param authoritiesConverter Converter to extract authorities from JWT
+   * @return JwtAuthenticationConverter instance
    */
   @Bean
   JwtAuthenticationConverter authenticationConverter(AuthoritiesConverter authoritiesConverter) {

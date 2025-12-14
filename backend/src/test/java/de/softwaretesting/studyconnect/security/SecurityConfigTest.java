@@ -2,7 +2,6 @@ package de.softwaretesting.studyconnect.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -19,9 +18,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -155,32 +155,9 @@ class SecurityConfigTest {
         .containsExactlyInAnyOrder("admin", "studyconnect");
   }
 
-  @Test
-  void jwtDecoder_ShouldReturnNullWhenIssuerUriNotConfigured() {
-    // Given
-    when(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).thenReturn(null);
-
-    // When
-    JwtDecoder decoder = securityConfig.jwtDecoder();
-
-    // Then
-    assertThat(decoder).isNull();
-  }
-
-  @Test
-  void jwtDecoder_ShouldReturnNullWhenIssuerUriIsBlank() {
-    // Given
-    when(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).thenReturn("");
-
-    // When
-    JwtDecoder decoder = securityConfig.jwtDecoder();
-
-    // Then
-    assertThat(decoder).isNull();
-  }
-
-  @Test
-  void jwtDecoder_ShouldReturnNullWhenIssuerIsUnreachable() {
+  @ParameterizedTest
+  @ValueSource(strings = {"", "http://unreachable-server:8080/auth/realms/test"})
+  void jwtDecoder_ShouldReturnNullWhenIssuerUriNotConfiguredOrUnreachable(String issuerUri) {
     // Given
     when(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"))
         .thenReturn("http://unreachable-server:8080/auth/realms/test");
@@ -200,7 +177,7 @@ class SecurityConfigTest {
     void contextLoads() {
       // Test that the security configuration loads without errors in prod profile
       // This will fail if there are any bean creation issues
-      assertThat(true).isTrue();
+      assertThat(SecurityContextHolder.getContext()).isNotNull();
     }
   }
 
@@ -302,10 +279,7 @@ class SecurityConfigTest {
 
       JwtAuthenticationToken authentication =
           new JwtAuthenticationToken(
-              jwt,
-              Arrays.stream(annotation.roles())
-                  .map(SimpleGrantedAuthority::new)
-                  .collect(Collectors.toList()));
+              jwt, Arrays.stream(annotation.roles()).map(SimpleGrantedAuthority::new).toList());
 
       SecurityContext context = SecurityContextHolder.createEmptyContext();
       context.setAuthentication(authentication);

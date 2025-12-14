@@ -188,8 +188,14 @@ public class KeycloakService {
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(userUrl, request, Void.class);
       LOGGER.info(
-          "User '{}' '{}' created successfully in realm '{}'", surname, lastname, realmName);
-      return response.getStatusCode().is2xxSuccessful();
+          "User '{}' '{}' created successfully in realm '{}', status code: {}",
+          surname,
+          lastname,
+          realmName,
+          response.getStatusCode());
+      boolean isSuccessful = response.getStatusCode().is2xxSuccessful();
+      LOGGER.debug("Status code is2xxSuccessful: {}", isSuccessful);
+      return isSuccessful;
 
     } catch (Exception e) {
       LOGGER.error("Error creating user in realm: {}", e.getMessage());
