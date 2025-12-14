@@ -18,12 +18,19 @@ public class UserCreateRequestDTO {
   @Size(max = 100, message = "Lastname must not exceed 100 characters")
   private String lastname;
 
-  @Size(min = 8, message = "Password must be at least 8 characters long")
-  @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
-  @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter")
-  @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one digit")
+  @Size(
+      min = 8,
+      max = 256,
+      message = "Password must be at least 8 characters and at most 256 characters")
   @Pattern(
-      regexp = ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*",
+      regexp = "^(?=.*[A-Z]).*$",
+      message = "Password must contain at least one uppercase letter")
+  @Pattern(
+      regexp = "^(?=.*[a-z]).*$",
+      message = "Password must contain at least one lowercase letter")
+  @Pattern(regexp = "^(?=.*\\d).*$", message = "Password must contain at least one digit")
+  @Pattern(
+      regexp = "^(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).*$",
       message = "Password must contain at least one special character")
   @NotBlank(message = "Password is required")
   private String password;

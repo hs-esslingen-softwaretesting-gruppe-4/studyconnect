@@ -90,7 +90,7 @@ public class SecurityConfig {
 
   @Bean
   /**
-   * Configures the JwtDecoder bean using issuer URI from environment properties. Attempts to
+   * Configures the JwtDecoder bean using issuer URI from environment properti s. Attempts to
    * initialize with retries and graceful fallback if issuer is unreachable at startup.
    *
    * @return JwtDecoder instance, or null if issuer is unreachable after retries
@@ -156,6 +156,7 @@ public class SecurityConfig {
       extends Converter<Map<String, Object>, Collection<GrantedAuthority>> {}
 
   /*
+   *
    * Extracts roles from the "realm_access" claim in the JWT and converts them to GrantedAuthority objects.
    * This is used to enforce authorization rules based on the user's roles.
    */
@@ -174,6 +175,7 @@ public class SecurityConfig {
   }
 
   /*
+   *
    * Configures a JwtAuthenticationConverter that uses the AuthoritiesConverter to extract authorities from the JWT.
    */
   @Bean

@@ -9,3 +9,7 @@ backend:
 frontend:
 - changed-files:
   - any-glob-to-any-file: 'frontend/**'
+
+tests:
+- changed-files:
+  - any-glob-to-any-file: 'backend/src/tests/**'

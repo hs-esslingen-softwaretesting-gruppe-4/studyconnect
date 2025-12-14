@@ -25,6 +25,13 @@ $RECYCLE.BIN/
 System Volume Information/
 
 # ------------------------------
+# Linux system files
+# ------------------------------
+*~~
+.nfs*
+.pre-commit-config.yaml
+
+# ------------------------------
 # Common IDEs and editors
 # ------------------------------
 # VS Code
