@@ -29,11 +29,9 @@ RUN ./mvnw clean package -DskipTests
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S studyconnect && \
+# Install curl for health checks and create non-root user for security
+RUN apk add --no-cache curl && \
+    addgroup -g 1001 -S studyconnect && \
     adduser -u 1001 -S studyconnect -G studyconnect
 
 # Set working directory

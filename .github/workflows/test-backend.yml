@@ -6,17 +6,13 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow is triggered on pushes or pull requests to the main branch, but only when files in the backend/ directory are changed.
+# This workflow is triggered on pushes to any branch except main, but only when files in the backend/ directory are changed.
 
-name: Build and Test Backend (push/pr main)
+name: Quick Test Backend (any branch except main)
 
 on:
   push:
-    branches: [ "main" ]
-    paths:
-      - 'backend/**'
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "*", "!main" ]
     paths:
       - 'backend/**'
 
@@ -38,8 +34,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -47,18 +41,5 @@ jobs:
         distribution: 'temurin'
         cache: maven
         cache-dependency-path: backend/pom.xml
-    - name: Cache SonarQube packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
     - name: Build and Test with Maven
       run: ./mvnw verify
-      # Push to SonarQube only if the build and tests were successful
-    - name: SonarQube Analysis
-      if: success()
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Studyconnect-Group-4 -Dsonar.projectName='Studyconnect Group 4'

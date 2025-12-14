@@ -1,11 +1,11 @@
 # This workflow will build a Docker package and publish it to GitHub packages when the test-and-analyze workflow succeeds
 # For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 
-name: Build and Package Backend
+name: Build and Package Backend(push main)
 
 on:
   workflow_run:
-    workflows: ["Build and Test Backend"]
+    workflows: ["Build and Test Backend (push/pr main)"]
     types:
       - completed
     branches: [ "main" ]
@@ -48,9 +48,6 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository }}/studyconnect-backend
         tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
