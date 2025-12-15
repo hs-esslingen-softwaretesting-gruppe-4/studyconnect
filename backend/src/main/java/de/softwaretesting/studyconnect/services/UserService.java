@@ -4,6 +4,7 @@ import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.mappers.request.UserRequestMapper;
@@ -115,6 +116,8 @@ public class UserService {
   public ResponseEntity<UserResponseDTO> createUser(UserCreateRequestDTO userCreateRequestDTO) {
 
     User newUser = new User();
+    LOGGER.info("Starting user creation for email: {}", userCreateRequestDTO.getEmail());
+
     boolean successfulUserCreation =
         keycloakService.createUserInRealm(
             userCreateRequestDTO.getPassword(),
@@ -122,17 +125,33 @@ public class UserService {
             userCreateRequestDTO.getSurname(),
             userCreateRequestDTO.getLastname());
 
+    LOGGER.info("User creation in Keycloak result: {}", successfulUserCreation);
+
     if (!successfulUserCreation) {
-      throw new InternalServerErrorException("Internal error during user creation in Keycloak");
+      LOGGER.error(
+          "User creation failed in Keycloak for email: {}", userCreateRequestDTO.getEmail());
+
+      // Check if user already exists locally to provide better error message
+      Optional<User> existingUser = userRepository.findByEmail(userCreateRequestDTO.getEmail());
+      if (existingUser.isPresent()) {
+        throw new BadRequestException(
+            "User with email " + userCreateRequestDTO.getEmail() + " already exists");
+      } else {
+        throw new InternalServerErrorException("Internal error during user creation in Keycloak");
+      }
     }
 
     // On successful creation in Keycloak, create local user
+    LOGGER.info("Attempting to retrieve user by email: {}", userCreateRequestDTO.getEmail());
     KeycloakUserResponseDTO createdKeycloakUser =
         keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
     if (createdKeycloakUser == null) {
+      LOGGER.error("Failed to retrieve user from Keycloak after creation");
       throw new InternalServerErrorException(
           "Internal error: Error retrieving created user from Keycloak");
     }
+
+    LOGGER.info("Successfully retrieved user from Keycloak: {}", createdKeycloakUser.getEmail());
 
     newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
     newUser.setEmail(createdKeycloakUser.getEmail());

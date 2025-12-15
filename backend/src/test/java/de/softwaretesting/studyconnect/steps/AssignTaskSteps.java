@@ -244,7 +244,7 @@ public class AssignTaskSteps {
             .map(m -> m.values().stream().findFirst().orElse("").trim())
             .toList();
 
-    List<String> actual = t.getAssignees().stream().map(user -> user.getSurname()).toList();
+    List<String> actual = t.getAssignees().stream().map(User::getSurname).toList();
 
     if (!actual.containsAll(expected) || actual.size() != expected.size()) {
       throw new AssertionError(

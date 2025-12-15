@@ -582,3 +582,101 @@ mvn clean install
 
 **Vorteil**
 Durch die Integration in den automatischen Build-Prozess stellt JaCoCo sicher, dass **kritische Komponenten dauerhaft getestet** bleiben. Die Mindestabdeckungsregeln verhindern schleichenden Qualitätsverlust und fördern eine testgetriebene, robuste Entwicklungskultur.
+
+
+### CI-Pipeline
+
+Die CI/CD-Pipeline besteht aus **vier koordinierten GitHub Actions Workflows**, die verschiedene Aspekte der Qualitätssicherung und Deployment-Pipeline abdecken:
+
+#### 1. Pull Request Labeler (`pr-labeler.yml`)
+
+**Zweck:** Automatische Kategorisierung von Pull Requests durch Label-Zuweisungen
+
+**Trigger:** `pull_request_target` - Wird bei jedem Pull Request ausgeführt
+- **Warum `pull_request_target`?** Ermöglicht Write-Access für Labels auch bei Pull Requests von Forks, da der Workflow im Kontext des Basis-Repository ausgeführt wird
+
+**Runner:** `ubuntu-latest` - Standardmäßig für leichtgewichtige Labeling-Operationen
+
+**Funktionalität:**
+- Analysiert geänderte Dateien im Pull Request
+- Vergibt automatisch Labels (`documentation`, `backend`, `frontend`)
+- Erkennt Änderungen in `/docs`, `/backend` und `/frontend` Ordnern
+
+**Permissions:** `contents: read`, `pull-requests: write`, `issues: write` für automatische Label-Erstellung
+
+#### 2. Quick Test Backend (`test-backend.yml`)
+
+**Zweck:** Schnelle Feedback-Schleife für Feature-Branches ohne aufwendige Analyse
+
+**Trigger:** `push` zu allen Branches **außer `main`** mit Änderungen in `backend/**`
+- **Warum Branch-Ausschluss?** Vermeidet doppelte Ausführung, da main-Branch bereits umfassende Tests über anderen Workflow erhält
+
+**Runner:** `ubuntu-latest` - Optimiert für schnelle Testausführung
+
+**Funktionalität:**
+- Kompilierung mit JDK 21 (Eclipse Temurin Distribution)
+- Maven-Caching für verbesserte Performance
+- Ausführung aller Tests: `./mvnw verify`
+- **Kein SonarQube** für schnelleres Feedback
+
+#### 3. Build and Test Backend Main (`test-and-analyze-backend.yml`)
+
+**Zweck:** Umfassende Qualitätsprüfung für Production-Branch mit statischer Code-Analyse
+
+**Trigger:**
+- `push` zu `main` Branch mit Änderungen in `backend/**`
+- `pull_request` zu `main` Branch mit Änderungen in `backend/**`
+
+**Runner:** `ubuntu-latest` mit erweiterten Umgebungsvariablen für Keycloak-Integration
+
+**Funktionalität:**
+- Vollständige Test-Suite: `./mvnw verify`
+- **SonarQube-Integration** für Code-Quality-Analyse
+- `fetch-depth: 0` für vollständige Git-Historie (erforderlich für SonarQube)
+- SonarQube-Caching zur Performance-Optimierung
+
+**Umgebungsvariablen:** Keycloak-Konfiguration für Integrationstests
+
+**Keycloak-Integration:** Integrationstests in der `verify`-Phase laufen gegen einen externen Keycloak-Server. Für jeden Workflow-Lauf wird automatisch ein dedizierter Realm erstellt, um eine saubere Testumgebung zu gewährleisten. Nach Abschluss der Tests wird der Realm wieder gelöscht, wodurch keine persistenten Testdaten auf dem Keycloak-Server verbleiben.
+
+#### 4. Build and Package Backend (`build-backend-package.yml`)
+
+**Zweck:** Docker-Image-Erstellung und Veröffentlichung für Deployment
+
+**Trigger:** `workflow_run` - Wird **nur** ausgeführt nach erfolgreichem Abschluss des "Build and Test Backend (push/pr main)" Workflows **auf dem main-Branch**
+- **Warum `workflow_run`?** Stellt sicher, dass Docker-Images nur bei bestandenen Tests erstellt werden
+- **Warum nur main-Branch?** Produktions-Images sollen nur von stabilem main-Branch erstellt werden
+
+**Runner:** `ubuntu-latest` mit erweiterten Permissions für GitHub Container Registry
+
+**Funktionalität:**
+- Maven-Build: `./mvnw -B package -DskipTests` (Tests bereits in vorherigem Workflow)
+- Docker-Image-Erstellung mit Multi-Stage-Build
+- Veröffentlichung in GitHub Container Registry (ghcr.io)
+- Automatisches Tagging mit `latest` für main-Branch
+
+**Permissions:** `contents: read`, `packages: write` für Registry-Publishing
+
+#### Qualitätssicherung durch Maven-Integration
+
+**Checkstyle & JaCoCo Integration:** Bei **jeder** Ausführung von `mvn verify` (in allen Build-Workflows) werden automatisch ausgeführt:
+
+- **Checkstyle** (validate-Phase): Statische Code-Analyse mit 19 ERROR-Regeln und 28 WARNING-Regeln
+- **Spotless** (validate-Phase): Automatische Code-Formatierung nach Google Java Format
+- **JaCoCo** (test/verify-Phase): Code-Coverage-Messung mit konfigurierten Mindestabdeckungen
+
+#### Pipeline-Strategie
+
+**Feature-Branches:**
+- ⚡ Schnelle Tests ohne SonarQube für sofortiges Feedback
+- 📋 Automatisches Labeling bei Pull Requests
+
+**Main-Branch:**
+- 🔍 Umfassende Qualitätsanalyse mit SonarQube
+- 📊 Code-Coverage und statische Analyse
+- 🐳 Automatische Docker-Image-Erstellung bei erfolgreichen Tests
+
+**Vorteile:**
+- **Effizienz:** Keine redundanten SonarQube-Läufe auf Feature-Branches
+- **Qualität:** Vollständige Analyse vor Production-Deployment
+- **Sicherheit:** Docker-Images nur bei bestandenen Tests und Code-Quality-Checks

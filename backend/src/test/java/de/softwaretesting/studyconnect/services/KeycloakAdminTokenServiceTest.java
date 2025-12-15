@@ -10,6 +10,8 @@ import de.softwaretesting.studyconnect.dtos.response.KeycloakTokenResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
@@ -56,27 +58,11 @@ class KeycloakAdminTokenServiceTest {
             eq(KeycloakTokenResponseDTO.class));
   }
 
-  @Test
-  void init_shouldNotFetchToken_whenUsernameIsBlank() {
-    ReflectionTestUtils.setField(tokenService, "adminUsername", "");
-
-    tokenService.init();
-
-    verify(restTemplate, never()).postForEntity(anyString(), any(), any());
-  }
-
-  @Test
-  void init_shouldNotFetchToken_whenPasswordIsBlank() {
-    ReflectionTestUtils.setField(tokenService, "adminPassword", "");
-
-    tokenService.init();
-
-    verify(restTemplate, never()).postForEntity(anyString(), any(), any());
-  }
-
-  @Test
-  void init_shouldNotFetchToken_whenUsernameIsNull() {
-    ReflectionTestUtils.setField(tokenService, "adminUsername", null);
+  @ParameterizedTest
+  @CsvSource({"adminUsername, ''", "adminPassword, ''", "adminUsername, null"})
+  void init_shouldNotFetchToken_whenCredentialsAreInvalid(String fieldName, String fieldValue) {
+    Object value = "null".equals(fieldValue) ? null : fieldValue;
+    ReflectionTestUtils.setField(tokenService, fieldName, value);
 
     tokenService.init();
 

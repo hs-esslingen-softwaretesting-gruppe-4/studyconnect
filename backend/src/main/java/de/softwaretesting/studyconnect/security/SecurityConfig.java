@@ -145,7 +145,11 @@ public class SecurityConfig {
     return null;
   }
 
-  // Password encoder bean
+  /**
+   * Defines the PasswordEncoder bean using BCrypt hashing algorithm.
+   *
+   * @return PasswordEncoder instance
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -155,9 +159,10 @@ public class SecurityConfig {
   interface AuthoritiesConverter
       extends Converter<Map<String, Object>, Collection<GrantedAuthority>> {}
 
-  /*
-   * Extracts roles from the "realm_access" claim in the JWT and converts them to GrantedAuthority objects.
-   * This is used to enforce authorization rules based on the user's roles.
+  /**
+   * Converts Keycloak realm roles from JWT claims into GrantedAuthority collection.
+   *
+   * @return AuthoritiesConverter instance
    */
   @Bean
   AuthoritiesConverter realmRolesAuthoritiesConverter() {
@@ -173,8 +178,11 @@ public class SecurityConfig {
     };
   }
 
-  /*
-   * Configures a JwtAuthenticationConverter that uses the AuthoritiesConverter to extract authorities from the JWT.
+  /**
+   * Configures JwtAuthenticationConverter to use custom AuthoritiesConverter.
+   *
+   * @param authoritiesConverter Converter to extract authorities from JWT
+   * @return JwtAuthenticationConverter instance
    */
   @Bean
   JwtAuthenticationConverter authenticationConverter(AuthoritiesConverter authoritiesConverter) {

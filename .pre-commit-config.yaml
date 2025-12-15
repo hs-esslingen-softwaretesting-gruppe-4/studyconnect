@@ -9,7 +9,7 @@ repos:
     hooks:
       - id: maven-compile
         name: Maven Compile
-        entry: cmd /c 'cd backend && mvn clean compile -DskipTests -q'
+        entry: bash -c 'cd backend && mvn clean compile -DskipTests -q'
         language: system
         files: '\.java$'
         pass_filenames: false
