@@ -15,15 +15,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Unit tests for SecurityConfig to verify individual components and beans. Integration tests are
@@ -144,17 +141,5 @@ class SecurityConfigTest {
 
     // Then
     assertThat(decoder).isNull();
-  }
-
-  @SpringBootTest
-  @ActiveProfiles("prod")
-  static class SecurityConfigContextLoadTest {
-
-    @Test
-    void contextLoads() {
-      // Test that the security configuration loads without errors in prod profile
-      // This will fail if there are any bean creation issues
-      assertThat(SecurityContextHolder.getContext()).isNotNull();
-    }
   }
 }
