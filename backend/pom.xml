@@ -382,13 +382,10 @@
                 <!-- Exclude Files which are generally not tested
                     or should not be included due to ... reason -->
                 <exclude>**/StudyconnectApplication.class</exclude>
-                <exclude>**/GlobalExceptionHandler.class</exclude>
                 <exclude>**/dtos/**/*.class</exclude>
                 <exclude>**/mappers/**/*.class</exclude>
                 <exclude>**/config/*.class</exclude>
-                <exclude>**/security/*.class</exclude>
-                <!-- Excluded classes below should be tested later -->
-                <exclude>**/controller/*.class</exclude>
+                <exclude>**/security/SecurityConfigDev.class</exclude>
                 </excludes>
             </configuration>
         </plugin>
