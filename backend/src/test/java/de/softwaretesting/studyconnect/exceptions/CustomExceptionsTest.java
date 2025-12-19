@@ -77,11 +77,35 @@ class CustomExceptionsTest {
   }
 
   @Test
+  void keycloakTokenFetchExceptionConstructor_ShouldSetMessageCorrectly() {
+    // Given
+    String message = "Failed to fetch Keycloak token";
+
+    // When
+    KeycloakTokenFetchException exception = new KeycloakTokenFetchException(message);
+
+    // Then
+    assertThat(exception.getMessage()).isEqualTo(message);
+    assertThat(exception).isInstanceOf(RuntimeException.class);
+  }
+
+  @Test
+  void keycloakTokenFetchExceptionConstructor_ShouldHandleNullMessage() {
+    // When
+    KeycloakTokenFetchException exception = new KeycloakTokenFetchException(null);
+
+    // Then
+    assertThat(exception.getMessage()).isNull();
+    assertThat(exception).isInstanceOf(RuntimeException.class);
+  }
+
+  @Test
   void exceptionInheritance_ShouldExtendRuntimeException() {
     // Given & When & Then
     assertThat(new NotFoundException("test")).isInstanceOf(RuntimeException.class);
     assertThat(new BadRequestException("test")).isInstanceOf(RuntimeException.class);
     assertThat(new InternalServerErrorException("test")).isInstanceOf(RuntimeException.class);
+    assertThat(new KeycloakTokenFetchException("test")).isInstanceOf(RuntimeException.class);
   }
 
   @Test
@@ -93,10 +117,12 @@ class CustomExceptionsTest {
     NotFoundException notFound = new NotFoundException(testMessage);
     BadRequestException badRequest = new BadRequestException(testMessage);
     InternalServerErrorException serverError = new InternalServerErrorException(testMessage);
+    KeycloakTokenFetchException keycloakException = new KeycloakTokenFetchException(testMessage);
 
     // Then
     assertThat(notFound.getMessage()).isEqualTo(testMessage);
     assertThat(badRequest.getMessage()).isEqualTo(testMessage);
     assertThat(serverError.getMessage()).isEqualTo(testMessage);
+    assertThat(keycloakException.getMessage()).isEqualTo(testMessage);
   }
 }

@@ -18,65 +18,57 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  private ResponseEntity<Map<String, Object>> createResponseEntity(
+      HttpStatus status, String error, String message, HttpServletRequest request) {
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", Instant.now());
+    body.put("status", status.value());
+    body.put("error", error);
+    body.put("message", message);
+    body.put("path", request.getRequestURI());
+
+    return new ResponseEntity<>(body, status);
+  }
+
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseEntity<Map<String, Object>> handleNotFoundException(
       NotFoundException ex, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", Instant.now());
-    body.put("status", HttpStatus.NOT_FOUND.value());
-    body.put("error", "Not Found");
-    body.put("message", ex.getMessage());
-    body.put("path", request.getRequestURI());
-
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    return createResponseEntity(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage(), request);
   }
 
   @ExceptionHandler(BadRequestException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Map<String, Object>> handleBadRequestException(
       BadRequestException ex, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", Instant.now());
-    body.put("status", HttpStatus.BAD_REQUEST.value());
-    body.put("error", "Bad Request");
-    body.put("message", ex.getMessage());
-    body.put("path", request.getRequestURI());
-
-    return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    return createResponseEntity(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
   }
 
   @ExceptionHandler(InternalServerErrorException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<Map<String, Object>> handleInternalServerErrorException(
       InternalServerErrorException ex, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", Instant.now());
-    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    body.put("error", "Internal Server Error");
-    body.put("message", ex.getMessage());
-    body.put("path", request.getRequestURI());
-
-    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    return createResponseEntity(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage(), request);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Map<String, Object>> handleValidationException(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", Instant.now());
-    body.put("status", HttpStatus.BAD_REQUEST.value());
-    body.put("error", "Validation Failed");
-
     String message =
         ex.getBindingResult().getFieldErrors().stream()
             .map(error -> error.getField() + ": " + error.getDefaultMessage())
             .collect(Collectors.joining(", "));
+    return createResponseEntity(HttpStatus.BAD_REQUEST, "Validation Failed", message, request);
+  }
 
-    body.put("message", message);
-    body.put("path", request.getRequestURI());
+  @ExceptionHandler(KeycloakTokenFetchException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponseEntity<Map<String, Object>> handleKeycloakTokenFetchException(
+      KeycloakTokenFetchException ex, HttpServletRequest request) {
 
-    return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    throw new InternalServerErrorException(
+        "An internal error occurred while fetching the Keycloak token.");
   }
 }

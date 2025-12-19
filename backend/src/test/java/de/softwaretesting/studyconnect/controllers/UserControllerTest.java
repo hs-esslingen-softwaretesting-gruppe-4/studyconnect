@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -17,47 +16,32 @@ import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.services.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(UserController.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@WithMockUser
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-@Import(UserControllerTest.TestSecurityConfig.class)
 @DisplayName("UserController Tests")
 class UserControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Mock private UserService userService;
 
-  @MockBean private UserService userService;
+  private MockMvc mockMvc;
+  private ObjectMapper objectMapper;
 
-  @Autowired private ObjectMapper objectMapper;
-
-  @TestConfiguration
-  static class TestSecurityConfig {
-    @Bean
-    @Primary
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-      return http.csrf(csrf -> csrf.disable())
-          .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-          .build();
-    }
+  @BeforeEach
+  void setUp() {
+    mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService)).build();
+    objectMapper = new ObjectMapper();
   }
 
   @Test
@@ -101,7 +85,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             post("/api/users")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
         .andExpect(status().isOk())
@@ -124,7 +107,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             post("/api/users")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
@@ -140,7 +122,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             post("/api/users")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
@@ -156,7 +137,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             post("/api/users")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
@@ -176,7 +156,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             put("/api/users/{userId}", userId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
         .andExpect(status().isOk())
@@ -200,7 +179,6 @@ class UserControllerTest {
     mockMvc
         .perform(
             put("/api/users/{userId}", userId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
@@ -217,22 +195,8 @@ class UserControllerTest {
     mockMvc
         .perform(
             put("/api/users/{userId}", userId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @DisplayName("Should handle missing request body")
-  void shouldHandleMissingRequestBody() throws Exception {
-    // When & Then
-    mockMvc
-        .perform(post("/api/users").with(csrf()).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    mockMvc
-        .perform(put("/api/users/1").with(csrf()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 

@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;
 import de.softwaretesting.studyconnect.models.Task;
@@ -22,47 +22,34 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(TaskController.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@WithMockUser
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-@Import(TaskControllerTest.TestSecurityConfig.class)
 @DisplayName("TaskController Tests")
 class TaskControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Mock private TaskService taskService;
 
-  @MockBean private TaskService taskService;
+  private MockMvc mockMvc;
+  private ObjectMapper objectMapper;
 
-  @Autowired private ObjectMapper objectMapper;
-
-  @TestConfiguration
-  static class TestSecurityConfig {
-    @Bean
-    @Primary
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-      return http.csrf(csrf -> csrf.disable())
-          .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-          .build();
-    }
+  // Setup to avoid deprecated @MockBean usage
+  @BeforeEach
+  void setUp() {
+    mockMvc = MockMvcBuilders.standaloneSetup(new TaskController(taskService)).build();
+    objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
   }
 
   @Test
@@ -121,7 +108,6 @@ class TaskControllerTest {
     mockMvc
         .perform(
             post("/api/tasks/groups/{groupId}", groupId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
         .andExpect(status().isOk())
@@ -145,7 +131,6 @@ class TaskControllerTest {
     mockMvc
         .perform(
             post("/api/tasks/groups/{groupId}", groupId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
@@ -165,7 +150,6 @@ class TaskControllerTest {
     mockMvc
         .perform(
             put("/api/tasks/{taskId}", taskId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)))
         .andExpect(status().isOk())
@@ -187,7 +171,6 @@ class TaskControllerTest {
     mockMvc
         .perform(
             put("/api/tasks/{taskId}", taskId)
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest());
