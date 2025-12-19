@@ -236,7 +236,7 @@ class GlobalExceptionHandlerTest {
    * Integration tests that verify the GlobalExceptionHandler works correctly in a Spring MVC
    * context.
    */
-  @WebMvcTest(TestController.class)
+  @WebMvcTest(GlobalExceptionHandlerIntegrationTest.TestController.class)
   @ActiveProfiles("test")
   @Import({GlobalExceptionHandler.class, TestConfiguration.class})
   static class GlobalExceptionHandlerIntegrationTest {
