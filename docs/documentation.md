@@ -454,7 +454,7 @@ In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusam
 
 #### Automated API Tests
 
-Die automatisierten API-Tests verwenden **Spring MockMvc** zur isolierten Testung der REST-Controller-Ebene. Diese Tests prüfen die HTTP-Endpunkte ohne vollständige Anwendungsinstanz und laufen standardmäßig während der `mvn test`-Phase als Teil der Unit-Tests.
+Die automatisierten API-Tests verwenden **Spring MockMvc** zur isolierten Testung der REST-Controller-Ebene. Diese Controller-Tests prüfen die HTTP-Endpunkte ohne vollständige Anwendungsinstanz und laufen standardmäßig während der `mvn test`-Phase als Teil der Unit-Tests. Echte Integrationstests (mit dem Suffix `IntegrationTest`) werden hingegen vom Surefire-Plugin ausgeschlossen und erst in der `mvn verify`-Phase ausgeführt.
 
 **Testumfang und Zweck:**
 - Validierung der HTTP-Endpunkte und Request/Response-Verhalten
@@ -526,7 +526,7 @@ mvn test
 mvn verify
 ```
 
-Die Tests verwenden H2-In-Memory-Database für isolierte Test-Ausführung und mocken externe Dependencies für schnelle und zuverlässige Testläufe.
+Die Controller-Tests verwenden gemockte Services und greifen nicht auf eine Datenbank zu; nur die Integrations-Tests nutzen eine H2-In-Memory-Database für isolierte Test-Ausführung und mocken externe Dependencies für schnelle und zuverlässige Testläufe.
 
 ---
 
