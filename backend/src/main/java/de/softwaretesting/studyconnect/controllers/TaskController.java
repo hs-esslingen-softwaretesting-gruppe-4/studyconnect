@@ -1,4 +1,4 @@
-package de.softwaretesting.studyconnect.controller;
+package de.softwaretesting.studyconnect.controllers;
 
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;

@@ -37,7 +37,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("prod")
+@Profile("!dev")
 public class SecurityConfig {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);

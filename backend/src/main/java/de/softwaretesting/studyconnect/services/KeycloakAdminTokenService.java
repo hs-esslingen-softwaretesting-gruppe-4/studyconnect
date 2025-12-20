@@ -1,6 +1,7 @@
 package de.softwaretesting.studyconnect.services;
 
 import de.softwaretesting.studyconnect.dtos.response.KeycloakTokenResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.KeycloakTokenFetchException;
 import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
@@ -146,8 +147,7 @@ public class KeycloakAdminTokenService {
         LOGGER.info("Successfully fetched new Keycloak admin token");
       }
     } catch (Exception e) {
-      LOGGER.error("Failed to fetch new token from Keycloak: {}", e.getMessage());
-      throw new RuntimeException("Failed to fetch Keycloak admin token", e);
+      throw new KeycloakTokenFetchException("Failed to fetch Keycloak admin token");
     }
   }
 

@@ -451,6 +451,83 @@ In diesem Integrationstest prüfen wir das Verhalten des TaskRepository im Zusam
 - Nutzung von JUnit-Assertions (assertEquals, assertNotNull, assertTrue) zur Validierung der Testergebnisse.
 - Sicherstellung, dass Testdaten vor jedem Test korrekt initialisiert werden und nach Abschluss keine Abhängigkeiten zwischen Tests bestehen.
 
+
+#### Automated API Tests
+
+Die automatisierten API-Tests verwenden **Spring MockMvc** zur isolierten Testung der REST-Controller-Ebene. Diese Controller-Tests prüfen die HTTP-Endpunkte ohne vollständige Anwendungsinstanz und laufen standardmäßig während der `mvn test`-Phase als Teil der Unit-Tests. Echte Integrationstests (mit dem Suffix `IntegrationTest`) werden hingegen vom Surefire-Plugin ausgeschlossen und erst in der `mvn verify`-Phase ausgeführt.
+
+**Testumfang und Zweck:**
+- Validierung der HTTP-Endpunkte und Request/Response-Verhalten
+- Prüfung der Eingabevalidierung und Fehlerbehandlung auf Controller-Ebene
+- Sicherstellung korrekter JSON-Serialisierung/-Deserialisierung
+- Verifikation der Service-Layer-Integration mit Mocks
+
+**Technische Umsetzung:**
+- `@WebMvcTest`: Lädt nur die Web-Layer-Komponenten (Controller, nicht Service/Repository)
+- `@MockBean`: Service-Layer wird gemockt für isolierte Controller-Tests
+- `@WithMockUser`: Simuliert authentifizierte Benutzer für Security-Tests
+- `MockMvc`: Simuliert HTTP-Requests ohne echten Webserver
+
+##### **`TaskControllerTest.java` (Kurzbeschreibung)**
+
+Die Klasse `TaskControllerTest` testet alle REST-Endpunkte des TaskControllers mit verschiedenen Szenarien:
+
+**GET-Endpunkte:**
+- `shouldGetAllTasksByGroupId` — prüft `GET /api/tasks/groups/{groupId}` und validiert, dass Tasks einer Gruppe korrekt als JSON-Array zurückgegeben werden
+- `shouldGetTasksByUserId` — testet `GET /api/tasks/users/{userId}` zur Abfrage von Tasks, die einem Benutzer zugewiesen sind
+- `shouldHandleInvalidPathVariables` — validiert Fehlerbehandlung bei ungültigen Path-Parametern (400 Bad Request)
+
+**POST-Endpunkte (Task-Erstellung):**
+- `shouldCreateTaskSuccessfully` — testet `POST /api/tasks/groups/{groupId}` mit gültigen Daten und prüft erfolgreiche Task-Erstellung
+- `shouldFailToCreateTaskWithInvalidData` — validiert Eingabevalidierung mit ungültigen Daten (leerer Titel, vergangenes Fälligkeitsdatum, null-Werte)
+
+**PUT-Endpunkte (Task-Update):**
+- `shouldUpdateTaskSuccessfully` — prüft `PUT /api/tasks/{taskId}` mit gültigen Daten
+- `shouldFailToUpdateTaskWithInvalidData` — testet Fehlerbehandlung bei ungültigen Update-Daten
+
+**DELETE-Endpunkte:**
+- `shouldDeleteTaskSuccessfully` — testet `DELETE /api/tasks/{taskId}` und erwartet 204 No Content
+
+**Testdatenvalidierung:**
+Jeder Test prüft spezifische JSON-Felder (`jsonPath`) wie `id`, `title`, `priority`, `status` und validiert HTTP-Status-Codes.
+
+##### **`UserControllerTest.java` (Kurzbeschreibung)**
+
+Die Klasse `UserControllerTest` testet alle REST-Endpunkte des UserControllers mit Fokus auf Benutzervalidierung:
+
+**GET-Endpunkte:**
+- `shouldGetUserByIdSuccessfully` — prüft `GET /api/users/{userId}` und validiert korrekte Benutzerdetails in der JSON-Response
+- `shouldHandleInvalidUserId` — testet Fehlerbehandlung bei ungültiger User-ID (400 Bad Request)
+
+**POST-Endpunkte (Benutzer-Erstellung):**
+- `shouldCreateUserSuccessfully` — testet `POST /api/users` mit gültigen Benutzerdaten
+- `shouldFailToCreateUserWithInvalidEmail` — validiert E-Mail-Format-Prüfung
+- `shouldFailToCreateUserWithWeakPassword` — prüft Passwort-Stärke-Validierung
+- `shouldFailToCreateUserWithBlankFields` — testet Pflichtfeld-Validierung
+
+**PUT-Endpunkte (Benutzer-Update):**
+- `shouldUpdateUserSuccessfully` — prüft `PUT /api/users/{userId}` mit gültigen Update-Daten
+- `shouldFailToUpdateUserWithInvalidEmail` — validiert E-Mail-Format bei Updates
+- `shouldFailToUpdateUserWithBlankFields` — testet Pflichtfeld-Validierung bei Updates
+
+**Edge-Case-Tests:**
+- `shouldHandleMissingRequestBody` — prüft Verhalten bei fehlenden Request-Bodies (400 Bad Request)
+
+**Validierungsregeln:**
+Die Tests prüfen verschiedene Bean-Validation-Constraints wie E-Mail-Format, Passwort-Stärke und Not-Blank-Validierungen.
+
+**Ausführung:**
+Diese API-Tests laufen automatisch während der Maven-Test-Phase:
+```bash
+# Ausführung aller Unit-Tests (inkl. Controller-Tests)
+mvn test
+
+# Ausführung aller Tests (Unit + Integration)
+mvn verify
+```
+
+Die Controller-Tests verwenden gemockte Services und greifen nicht auf eine Datenbank zu; nur die Integrations-Tests nutzen eine H2-In-Memory-Database für isolierte Test-Ausführung und mocken externe Dependencies für schnelle und zuverlässige Testläufe.
+
 ---
 
 ### Entwicklungs-Tools

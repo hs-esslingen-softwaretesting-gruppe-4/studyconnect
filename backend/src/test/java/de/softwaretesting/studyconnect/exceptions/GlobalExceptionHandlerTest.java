@@ -6,8 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -235,14 +236,12 @@ class GlobalExceptionHandlerTest {
    * Integration tests that verify the GlobalExceptionHandler works correctly in a Spring MVC
    * context.
    */
-  @WebMvcTest(TestController.class)
+  @WebMvcTest(GlobalExceptionHandlerIntegrationTest.TestController.class)
   @ActiveProfiles("test")
   @Import({GlobalExceptionHandler.class, TestConfiguration.class})
   static class GlobalExceptionHandlerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
-
-    @Autowired private ObjectMapper objectMapper;
 
     @Test
     void notFoundException_ShouldReturn404WithCorrectBody() throws Exception {
@@ -299,36 +298,56 @@ class GlobalExceptionHandlerTest {
           .andExpect(jsonPath("$.path").value("/test/validate"))
           .andExpect(jsonPath("$.timestamp").exists());
     }
-  }
 
-  /** Test controller for integration tests */
-  @RestController
-  static class TestController {
+    /** Test controller for integration tests */
+    @RestController
+    static class TestController {
 
-    @GetMapping("/test/not-found")
-    public String triggerNotFoundException() {
-      throw new NotFoundException("Resource not found");
+      @GetMapping("/test/not-found")
+      public String triggerNotFoundException() {
+        throw new NotFoundException("Resource not found");
+      }
+
+      @GetMapping("/test/bad-request")
+      public String triggerBadRequestException() {
+        throw new BadRequestException("Invalid parameters");
+      }
+
+      @GetMapping("/test/server-error")
+      public String triggerServerErrorException() {
+        throw new InternalServerErrorException("Something went wrong");
+      }
+
+      @PostMapping("/test/validate")
+      public String triggerValidationException(
+          @jakarta.validation.Valid @RequestBody TestDto testDto) {
+        return "success";
+      }
     }
 
-    @GetMapping("/test/bad-request")
-    public String triggerBadRequestException() {
-      throw new BadRequestException("Invalid parameters");
-    }
+    /** Test DTO for validation tests */
+    static class TestDto {
+      @NotBlank(message = "must not be blank")
+      private String name;
 
-    @GetMapping("/test/server-error")
-    public String triggerServerErrorException() {
-      throw new InternalServerErrorException("Something went wrong");
-    }
+      @Email(message = "must be a valid email")
+      private String email;
 
-    @PostMapping("/test/validate")
-    public String triggerValidationException(@RequestBody TestDto testDto) {
-      return "success";
-    }
-  }
+      public String getName() {
+        return name;
+      }
 
-  /** Test DTO for validation tests */
-  static class TestDto {
-    private String name;
-    private String email;
+      public void setName(String name) {
+        this.name = name;
+      }
+
+      public String getEmail() {
+        return email;
+      }
+
+      public void setEmail(String email) {
+        this.email = email;
+      }
+    }
   }
 }

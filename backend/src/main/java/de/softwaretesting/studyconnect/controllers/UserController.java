@@ -1,4 +1,4 @@
-package de.softwaretesting.studyconnect.controller;
+package de.softwaretesting.studyconnect.controllers;
 
 import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
@@ -33,6 +33,13 @@ public class UserController {
     return userService.getUserById(userId);
   }
 
+  /**
+   * Updates a user by their ID.
+   *
+   * @param userId the id of the user
+   * @param userRequestDTO the updated user data
+   * @return the updated user
+   */
   @PutMapping("/{userId}")
   public ResponseEntity<UserResponseDTO> updateUser(
       @PathVariable("userId") Long userId,
@@ -40,6 +47,12 @@ public class UserController {
     return userService.updateUserWithId(userId, userRequestDTO);
   }
 
+  /**
+   * Creates a new user.
+   *
+   * @param userRequestDTO the user data
+   * @return the created user
+   */
   @PostMapping
   public ResponseEntity<UserResponseDTO> createUser(
       @Valid @RequestBody UserCreateRequestDTO userRequestDTO) {
