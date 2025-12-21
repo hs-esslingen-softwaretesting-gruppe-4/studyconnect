@@ -97,8 +97,10 @@ public class AssignTaskSteps {
       g.addMember(user);
 
       if ("admin".equalsIgnoreCase(role)) {
-        g.setAdmin(user);
-        g.setCreatedBy(user);
+        g.addAdmin(user);
+        if (g.getCreatedBy() == null) {
+          g.setCreatedBy(user);
+        }
       }
     }
     groupRepository.save(g);
@@ -199,7 +201,9 @@ public class AssignTaskSteps {
         return;
       }
 
-      if (g.getAdmin() == null || !g.getAdmin().getId().equals(this.currentUser.getId())) {
+      if (this.currentUser == null
+          || g.getId() == null
+          || !groupRepository.existsAdminByGroupIdAndUserId(g.getId(), this.currentUser.getId())) {
         lastMessage = "authorization";
         return;
       }
@@ -270,8 +274,9 @@ public class AssignTaskSteps {
       // also accept that current user is not admin as an authorization condition
       Group g = this.currentGroup;
       if (g != null
-          && g.getAdmin() != null
-          && !g.getAdmin().getId().equals(this.currentUser.getId())) {
+          && this.currentUser != null
+          && g.getId() != null
+          && !groupRepository.existsAdminByGroupIdAndUserId(g.getId(), this.currentUser.getId())) {
         return;
       }
       throw new AssertionError("Expected authorization error but got: " + lastMessage);

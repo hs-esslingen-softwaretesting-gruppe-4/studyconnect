@@ -10,6 +10,7 @@ import de.softwaretesting.studyconnect.mappers.response.GroupResponseMapper;
 import de.softwaretesting.studyconnect.models.Group;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.GroupRepository;
+import java.beans.JavaBean;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@JavaBean
 public class GroupService {
 
   private static final int INVITE_CODE_SAVE_RETRY_ATTEMPTS = 2;
@@ -139,6 +141,13 @@ public class GroupService {
       }
     }
     if (dto.getAdminIds() != null) {
+      Set<Long> prospectiveMemberIds = new HashSet<>();
+      for (User member : patchGroup.getMembers()) {
+        prospectiveMemberIds.add(member.getId());
+      }
+      if (dto.getMemberIds() != null) {
+        prospectiveMemberIds.addAll(dto.getMemberIds());
+      }
       // Ensure admin is not already an admin
       for (Long adminId : dto.getAdminIds()) {
         boolean isAlreadyAdmin =
@@ -150,8 +159,7 @@ public class GroupService {
       }
       // Ensure admin is already a member
       for (Long adminId : dto.getAdminIds()) {
-        boolean isMember =
-            patchGroup.getMembers().stream().anyMatch(user -> user.getId().equals(adminId));
+        boolean isMember = prospectiveMemberIds.contains(adminId);
         if (!isMember) {
           throw new BadRequestException(
               "User with id " + adminId + " must be a member to be an admin of the group");
@@ -246,6 +254,36 @@ public class GroupService {
             .findById(groupId)
             .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
     groupRepository.delete(group);
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Allows a user to join a group using an invitation code.
+   *
+   * @param inviteCode the invitation code of the group
+   * @param userId the ID of the user attempting to join
+   * @return a ResponseEntity with no content
+   * @throws NotFoundException if the group with the specified invite code does not exist
+   * @throws BadRequestException if the group is full or the user is already a member
+   */
+  public ResponseEntity<Void> joinGroupByInvitationCode(String inviteCode, Long userId) {
+    Group group =
+        groupRepository
+            .findByInviteCode(inviteCode)
+            .orElseThrow(
+                () -> new NotFoundException("Group not found with invite code: " + inviteCode));
+
+    if (group.getMemberCount() >= group.getMaxMembers()) {
+      throw new BadRequestException("Group has reached its maximum member limit");
+    }
+
+    User user = userService.retrieveUserById(userId);
+    boolean added = group.addMember(user);
+    if (!added) {
+      throw new BadRequestException("User with id " + userId + " is already a member of the group");
+    }
+
+    groupRepository.save(group);
     return ResponseEntity.noContent().build();
   }
 

@@ -73,4 +73,10 @@ public class GroupController {
   ResponseEntity<Void> removeAdminFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
     return groupService.removeAdminFromGroup(groupId, userId);
   }
+
+  @PostMapping("/join/{inviteCode}/{userId}")
+  ResponseEntity<Void> joinGroupByInvitationCode(
+      @PathVariable String inviteCode, @PathVariable Long userId) {
+    return groupService.joinGroupByInvitationCode(inviteCode, userId);
+  }
 }

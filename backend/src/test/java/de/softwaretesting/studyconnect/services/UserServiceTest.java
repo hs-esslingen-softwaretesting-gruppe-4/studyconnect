@@ -14,6 +14,7 @@ import de.softwaretesting.studyconnect.dtos.request.UserCreateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.mappers.request.UserRequestMapper;
@@ -21,9 +22,13 @@ import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +37,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -75,6 +84,11 @@ class UserServiceTest {
             null,
             null,
             null);
+  }
+
+  @AfterEach
+  void tearDown() {
+    SecurityContextHolder.clearContext();
   }
 
   // ==================== getUserById Tests ====================
@@ -398,5 +412,168 @@ class UserServiceTest {
 
     verify(keycloakService).retrieveAllUsersInRealm();
     verify(userRepository, never()).save(any(User.class));
+  }
+
+  // ==================== getUserByIdEntity Tests ====================
+
+  @Test
+  void getUserByIdEntity_shouldReturnOptionalFromRepository() {
+    when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+    Optional<User> result = userService.getUserByIdEntity(1L);
+
+    assertNotNull(result);
+    assertEquals(true, result.isPresent());
+    assertEquals(1L, result.get().getId());
+    verify(userRepository).findById(1L);
+  }
+
+  // ==================== retrieveUserById Tests ====================
+
+  @Test
+  void retrieveUserById_shouldReturnUser_whenExists() {
+    when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+    User result = userService.retrieveUserById(1L);
+
+    assertNotNull(result);
+    assertEquals(1L, result.getId());
+    verify(userRepository).findById(1L);
+  }
+
+  @Test
+  void retrieveUserById_shouldThrowNotFoundException_whenMissing() {
+    when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+    NotFoundException ex =
+        assertThrows(NotFoundException.class, () -> userService.retrieveUserById(999L));
+
+    assertEquals("User not found with id: 999", ex.getMessage());
+    verify(userRepository).findById(999L);
+  }
+
+  // ==================== getUsersByIdMap Tests ====================
+
+  @Test
+  void getUsersByIdMap_shouldReturnEmptyMap_whenNullOrEmpty() {
+    assertEquals(Map.of(), userService.getUsersByIdMap(null));
+    assertEquals(Map.of(), userService.getUsersByIdMap(Set.of()));
+  }
+
+  @Test
+  void getUsersByIdMap_shouldMapExistingUsersById_andSkipNulls() {
+    User userWithId = new User();
+    userWithId.setId(10L);
+    userWithId.setEmail("u10@example.com");
+    userWithId.setSurname("U10");
+    userWithId.setLastname("User");
+
+    User userWithoutId = new User();
+    userWithoutId.setId(null);
+    userWithoutId.setEmail("noid@example.com");
+    userWithoutId.setSurname("No");
+    userWithoutId.setLastname("Id");
+
+    List<User> repositoryResult = new ArrayList<>();
+    repositoryResult.add(userWithId);
+    repositoryResult.add(userWithoutId);
+    repositoryResult.add(null);
+
+    when(userRepository.findAllById(Set.of(10L, 11L))).thenReturn(repositoryResult);
+
+    Map<Long, User> result = userService.getUsersByIdMap(Set.of(10L, 11L));
+
+    assertEquals(1, result.size());
+    assertEquals(true, result.containsKey(10L));
+    assertEquals("u10@example.com", result.get(10L).getEmail());
+    verify(userRepository).findAllById(Set.of(10L, 11L));
+  }
+
+  // ==================== getUsersByIds Tests ====================
+
+  @Test
+  void getUsersByIds_shouldReturnEmptyList_whenNullOrEmpty() {
+    assertEquals(List.of(), userService.getUsersByIds(null));
+    assertEquals(List.of(), userService.getUsersByIds(Set.of()));
+  }
+
+  @Test
+  void getUsersByIds_shouldReturnRepositoryResult_whenProvided() {
+    when(userRepository.findAllById(Set.of(1L))).thenReturn(List.of(testUser));
+
+    List<User> users = userService.getUsersByIds(Set.of(1L));
+
+    assertEquals(1, users.size());
+    assertEquals(1L, users.get(0).getId());
+    verify(userRepository).findAllById(Set.of(1L));
+  }
+
+  // ==================== getUserByAccessToken Tests ====================
+
+  @Test
+  void getUserByAccessToken_shouldThrowBadRequest_whenNoJwtAuthenticationToken() {
+    Authentication nonJwtAuth = org.mockito.Mockito.mock(Authentication.class);
+    SecurityContextHolder.getContext().setAuthentication(nonJwtAuth);
+
+    BadRequestException ex =
+        assertThrows(BadRequestException.class, () -> userService.getUserByAccessToken());
+
+    assertEquals("No JWT access token found", ex.getMessage());
+  }
+
+  @Test
+  void getUserByAccessToken_shouldThrowBadRequest_whenSubjectBlank() {
+    Jwt jwt =
+        Jwt.withTokenValue("token").header("alg", "none").subject(" ").claim("sub", " ").build();
+    JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    BadRequestException ex =
+        assertThrows(BadRequestException.class, () -> userService.getUserByAccessToken());
+
+    assertEquals("Access token missing subject (sub)", ex.getMessage());
+  }
+
+  @Test
+  void getUserByAccessToken_shouldReturnUser_whenUserExistsLocally() {
+    Jwt jwt =
+        Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject("keycloak-uuid-123")
+            .claim("sub", "keycloak-uuid-123")
+            .build();
+    JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    when(userRepository.findByKeycloakUUID("keycloak-uuid-123")).thenReturn(Optional.of(testUser));
+    when(userResponseMapper.toDto(testUser)).thenReturn(testUserResponseDTO);
+
+    ResponseEntity<UserResponseDTO> response = userService.getUserByAccessToken();
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("test@example.com", response.getBody().getEmail());
+    verify(userRepository).findByKeycloakUUID("keycloak-uuid-123");
+    verify(userResponseMapper).toDto(testUser);
+  }
+
+  @Test
+  void getUserByAccessToken_shouldThrowNotFound_whenUserNotFoundLocally() {
+    Jwt jwt =
+        Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject("missing-uuid")
+            .claim("sub", "missing-uuid")
+            .build();
+    JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    when(userRepository.findByKeycloakUUID("missing-uuid")).thenReturn(Optional.empty());
+
+    NotFoundException ex =
+        assertThrows(NotFoundException.class, () -> userService.getUserByAccessToken());
+
+    assertEquals("User not found", ex.getMessage());
+    verify(userRepository).findByKeycloakUUID("missing-uuid");
   }
 }

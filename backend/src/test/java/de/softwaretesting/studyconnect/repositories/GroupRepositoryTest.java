@@ -2,7 +2,9 @@ package de.softwaretesting.studyconnect.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,7 +69,9 @@ class GroupRepositoryTest {
     assertEquals(savedAdmin.getId(), saved.getCreatedBy().getId());
     assertNotNull(saved.getCreatedAt(), "createdAt should be auto-set");
     assertNotNull(saved.getUpdatedAt(), "updatedAt should be auto-set");
-    assertEquals(savedAdmin.getId(), saved.getAdmin().getId());
+    assertEquals(1, saved.getAdmins().size(), "Group should have exactly one admin");
+    assertTrue(
+        saved.getAdmins().contains(savedAdmin), "Admins should contain the saved admin user");
     assertTrue(saved.getMembers().contains(savedAdmin));
   }
 
@@ -187,6 +191,9 @@ class GroupRepositoryTest {
     Group saved = groupRepository.saveAndFlush(group);
 
     assertFalse(saved.isPublic(), "isPublic should default to false");
+    assertEquals(1, saved.getAdmins().size(), "Admins should contain exactly the configured admin");
+    assertTrue(
+        saved.getAdmins().contains(savedAdmin), "Admins should contain the configured admin");
   }
 
   /**
@@ -226,6 +233,139 @@ class GroupRepositoryTest {
     // Assert: all members are persisted regardless of maxMembers
     assertEquals(26, saved.getMembers().size(), "All members including admin should be saved");
     assertTrue(saved.getMembers().contains(savedAdmin));
+  }
+
+  @Test
+  void shouldInitializeInviteCodeAndMemberCountOnPersist() {
+    User admin = new User();
+    admin.setEmail("invite-membercount-admin@example.com");
+    admin.setSurname("Admin");
+    admin.setLastname("InviteMemberCount");
+    User savedAdminUser = userRepository.save(admin);
+
+    User member = new User();
+    member.setEmail("invite-membercount-member@example.com");
+    member.setSurname("Member");
+    member.setLastname("InviteMemberCount");
+    User savedMember = userRepository.save(member);
+
+    Group group = new Group();
+    group.setName("Invite Code Group");
+    group.setCreatedBy(savedAdminUser);
+    group.setAdmin(savedAdminUser);
+    group.addMember(savedAdminUser);
+    group.addMember(savedMember);
+
+    Group saved = groupRepository.saveAndFlush(group);
+
+    assertNotNull(saved.getInviteCode(), "Invite code should be generated on persist");
+    assertFalse(saved.getInviteCode().isBlank(), "Invite code should not be blank");
+    assertEquals(2, saved.getMemberCount(), "Member count should reflect added members");
+  }
+
+  @Test
+  void shouldUpdateMemberCountWhenRemovingMember() {
+    User admin = new User();
+    admin.setEmail("remove-member-admin@example.com");
+    admin.setSurname("Admin");
+    admin.setLastname("RemoveMember");
+    User savedAdminUser = userRepository.save(admin);
+
+    User member1 = new User();
+    member1.setEmail("remove-member-1@example.com");
+    member1.setSurname("Member");
+    member1.setLastname("One");
+    member1 = userRepository.save(member1);
+
+    User member2 = new User();
+    member2.setEmail("remove-member-2@example.com");
+    member2.setSurname("Member");
+    member2.setLastname("Two");
+    member2 = userRepository.save(member2);
+
+    Group group = new Group();
+    group.setName("Remove Member Group");
+    group.setCreatedBy(savedAdminUser);
+    group.setAdmin(savedAdminUser);
+    group.addMember(savedAdminUser);
+    group.addMember(member1);
+    group.addMember(member2);
+
+    Group saved = groupRepository.saveAndFlush(group);
+    assertEquals(3, saved.getMemberCount(), "Member count should include admin and two members");
+
+    boolean removed = saved.removeMember(member1);
+    groupRepository.saveAndFlush(saved);
+    Group reloaded = groupRepository.findById(saved.getId()).orElseThrow();
+
+    assertTrue(removed, "Existing member should be removed");
+    assertEquals(2, reloaded.getMemberCount(), "Member count should decrement after removal");
+    assertFalse(reloaded.getMembers().contains(member1), "Removed member should not be present");
+  }
+
+  @Test
+  void shouldManageAdminsThroughAccessors() {
+    User admin1 = new User();
+    admin1.setEmail("admin-accessors-1@example.com");
+    admin1.setSurname("Admin");
+    admin1.setLastname("One");
+    admin1 = userRepository.save(admin1);
+
+    User admin2 = new User();
+    admin2.setEmail("admin-accessors-2@example.com");
+    admin2.setSurname("Admin");
+    admin2.setLastname("Two");
+    admin2 = userRepository.save(admin2);
+
+    Group group = new Group();
+    group.setName("Admin Accessor Group");
+    group.setCreatedBy(admin1);
+    group.setAdmin(admin1);
+
+    Group saved = groupRepository.saveAndFlush(group);
+    assertEquals(admin1.getId(), saved.getAdmin().getId(), "getAdmin should return the set admin");
+    assertTrue(saved.isAdmin(admin1), "isAdmin should be true for configured admin");
+    assertFalse(saved.isAdmin(admin2), "isAdmin should be false for non-admin");
+
+    saved.setAdmin(admin2);
+    groupRepository.saveAndFlush(saved);
+    Group reloaded = groupRepository.findById(saved.getId()).orElseThrow();
+    assertEquals(admin2.getId(), reloaded.getAdmin().getId(), "setAdmin should replace admins");
+    assertTrue(reloaded.isAdmin(admin2), "New admin should be recognized");
+    assertFalse(reloaded.isAdmin(admin1), "Previous admin should no longer be marked as admin");
+
+    reloaded.removeAdmin(admin2);
+    groupRepository.saveAndFlush(reloaded);
+    Group afterRemoval = groupRepository.findById(reloaded.getId()).orElseThrow();
+    assertTrue(afterRemoval.getAdmins().isEmpty(), "Admins should be empty after removal");
+    assertNull(afterRemoval.getAdmin(), "getAdmin should return null when no admins remain");
+  }
+
+  @Test
+  void shouldRegenerateInviteCode() {
+    User admin = new User();
+    admin.setEmail("invite-code-regenerate@example.com");
+    admin.setSurname("Admin");
+    admin.setLastname("InviteCode");
+    admin = userRepository.save(admin);
+
+    Group group = new Group();
+    group.setName("Invite Code Regenerate Group");
+    group.setCreatedBy(admin);
+    group.setAdmin(admin);
+
+    Group saved = groupRepository.saveAndFlush(group);
+    String initialInviteCode = saved.getInviteCode();
+    assertNotNull(initialInviteCode);
+
+    saved.regenerateInviteCode();
+    groupRepository.saveAndFlush(saved);
+    Group reloaded = groupRepository.findById(saved.getId()).orElseThrow();
+
+    assertNotNull(reloaded.getInviteCode());
+    assertFalse(reloaded.getInviteCode().isBlank(), "Regenerated invite code should not be blank");
+    assertNotEquals(
+        initialInviteCode, reloaded.getInviteCode(), "Regenerated invite code should change");
   }
 
   // ========== BOUNDARY VALUE ANALYSIS TESTS ==========
@@ -506,5 +646,37 @@ class GroupRepositoryTest {
 
     // Act & Assert
     assertThrows(DataIntegrityViolationException.class, () -> groupRepository.saveAndFlush(group));
+  }
+
+  /** Tests repository query for admin membership without initializing the admins collection. */
+  @Test
+  void shouldDetectAdminByGroupIdAndUserId() {
+    // Arrange: create and save users
+    User admin = new User();
+    admin.setEmail("admin-query@example.com");
+    admin.setSurname("Admin");
+    admin.setLastname("Query");
+    User savedAdminUser = userRepository.save(admin);
+
+    User nonAdmin = new User();
+    nonAdmin.setEmail("nonadmin-query@example.com");
+    nonAdmin.setSurname("Non");
+    nonAdmin.setLastname("Admin");
+    User savedNonAdminUser = userRepository.save(nonAdmin);
+
+    Group group = new Group();
+    group.setName("Admin Query Group");
+    group.setCreatedBy(savedAdminUser);
+    group.setAdmin(savedAdminUser);
+    Group savedGroup = groupRepository.saveAndFlush(group);
+
+    // Act & Assert
+    assertTrue(
+        groupRepository.existsAdminByGroupIdAndUserId(savedGroup.getId(), savedAdminUser.getId()),
+        "Admin user should be detected as admin of the group");
+    assertFalse(
+        groupRepository.existsAdminByGroupIdAndUserId(
+            savedGroup.getId(), savedNonAdminUser.getId()),
+        "Non-admin user should not be detected as admin of the group");
   }
 }
