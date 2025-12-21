@@ -1,6 +1,7 @@
 package de.softwaretesting.studyconnect.services;
 
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.GroupResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,81 +120,121 @@ public class GroupService {
     }
   }
 
-  public ResponseEntity<GroupResponseDTO> updateGroup(
-      Long groupId, de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO dto) {
+  /**
+   * Updates an existing group with the specified details.
+   *
+   * @param groupId the ID of the group to update
+   * @param dto the data transfer object containing updated group details
+   * @return a ResponseEntity containing the updated group's response DTO
+   * @throws NotFoundException if the group with the specified ID does not exist
+   * @throws BadRequestException if validation fails for member or admin updates
+   */
+  public ResponseEntity<GroupResponseDTO> updateGroup(Long groupId, UpdateGroupRequestDTO dto) {
 
     Group patchGroup =
         groupRepository
             .findById(groupId)
             .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
-    // First, check if group can be updated as a whole
-    if (dto.getMemberIds() != null) {
-      if (patchGroup.getMemberCount() >= patchGroup.getMaxMembers()) {
-        throw new BadRequestException("Group has reached its maximum member limit");
-      }
-      // Ensure member is not already in group
-      for (Long memberId : dto.getMemberIds()) {
-        boolean isAlreadyMember =
-            patchGroup.getMembers().stream().anyMatch(user -> user.getId().equals(memberId));
-        if (isAlreadyMember) {
-          throw new BadRequestException(
-              "User with id " + memberId + " is already a member of the group");
-        }
-      }
-    }
-    if (dto.getAdminIds() != null) {
-      Set<Long> prospectiveMemberIds = new HashSet<>();
-      for (User member : patchGroup.getMembers()) {
-        prospectiveMemberIds.add(member.getId());
-      }
-      if (dto.getMemberIds() != null) {
-        prospectiveMemberIds.addAll(dto.getMemberIds());
-      }
-      // Ensure admin is not already an admin
-      for (Long adminId : dto.getAdminIds()) {
-        boolean isAlreadyAdmin =
-            patchGroup.getAdmins().stream().anyMatch(user -> user.getId().equals(adminId));
-        if (isAlreadyAdmin) {
-          throw new BadRequestException(
-              "User with id " + adminId + " is already an admin of the group");
-        }
-      }
-      // Ensure admin is already a member
-      for (Long adminId : dto.getAdminIds()) {
-        boolean isMember = prospectiveMemberIds.contains(adminId);
-        if (!isMember) {
-          throw new BadRequestException(
-              "User with id " + adminId + " must be a member to be an admin of the group");
-        }
-      }
+
+    validateMemberUpdate(patchGroup, dto);
+    validateAdminUpdate(patchGroup, dto);
+    applyPatch(patchGroup, dto);
+
+    Group updatedGroup = groupRepository.save(patchGroup);
+    GroupResponseDTO responseDTO = groupResponseMapper.toDto(updatedGroup);
+    return ResponseEntity.ok(responseDTO);
+  }
+
+  /**
+   * Validates that new members in the update request do not exceed the group's maximum member limit
+   * and are not already members.
+   *
+   * @param group the group being updated
+   * @param dto the update request DTO
+   * @throws BadRequestException if adding new members would exceed the limit or if any new member
+   *     is already a member
+   */
+  private void validateMemberUpdate(Group group, UpdateGroupRequestDTO dto) {
+    if (dto.getMemberIds() == null) {
+      return;
     }
 
-    // Now apply the patch
+    if (group.getMemberCount() >= group.getMaxMembers()) {
+      throw new BadRequestException("Group has reached its maximum member limit");
+    }
+
+    Set<Long> existingMemberIds =
+        group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
+
+    for (Long memberId : dto.getMemberIds()) {
+      if (existingMemberIds.contains(memberId)) {
+        throw new BadRequestException(
+            "User with id " + memberId + " is already a member of the group");
+      }
+    }
+  }
+
+  /**
+   * Validates that all new admins in the update request are also members (either existing or new).
+   *
+   * @param group the group being updated
+   * @param dto the update request DTO
+   * @throws BadRequestException if any new admin is not a member or is already an
+   */
+  private void validateAdminUpdate(Group group, UpdateGroupRequestDTO dto) {
+    if (dto.getAdminIds() == null) {
+      return;
+    }
+
+    Set<Long> prospectiveMemberIds =
+        group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
+    if (dto.getMemberIds() != null) {
+      prospectiveMemberIds.addAll(dto.getMemberIds());
+    }
+
+    Set<Long> existingAdminIds =
+        group.getAdmins().stream().map(User::getId).collect(Collectors.toSet());
+
+    for (Long adminId : dto.getAdminIds()) {
+      if (existingAdminIds.contains(adminId)) {
+        throw new BadRequestException(
+            "User with id " + adminId + " is already an admin of the group");
+      }
+      if (!prospectiveMemberIds.contains(adminId)) {
+        throw new BadRequestException(
+            "User with id " + adminId + " must be a member to be an admin of the group");
+      }
+    }
+  }
+
+  /**
+   * Applies the updates from the DTO to the group entity.
+   *
+   * @param group the group entity to update
+   * @param dto the update request DTO containing the new values
+   */
+  private void applyPatch(Group group, UpdateGroupRequestDTO dto) {
     if (dto.getName() != null) {
-      patchGroup.setName(dto.getName());
+      group.setName(dto.getName());
     }
     if (dto.getDescription() != null) {
-      patchGroup.setDescription(dto.getDescription());
+      group.setDescription(dto.getDescription());
     }
     if (dto.getIsPublic() != null) {
-      patchGroup.setPublic(dto.getIsPublic());
+      group.setPublic(dto.getIsPublic());
     }
     if (dto.getMemberIds() != null) {
       for (Long memberId : dto.getMemberIds()) {
         User member = userService.retrieveUserById(memberId);
-        patchGroup.getMembers().add(member);
+        group.getMembers().add(member);
       }
     }
     if (dto.getAdminIds() != null) {
       for (Long adminId : dto.getAdminIds()) {
         User admin = userService.retrieveUserById(adminId);
-        patchGroup.getAdmins().add(admin);
+        group.getAdmins().add(admin);
       }
     }
-
-    Group updatedGroup = groupRepository.save(patchGroup);
-    GroupResponseDTO responseDTO = groupResponseMapper.toDto(updatedGroup);
-    return ResponseEntity.ok(responseDTO);
   }
 
   /**

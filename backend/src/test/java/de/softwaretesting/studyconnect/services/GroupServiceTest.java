@@ -155,8 +155,9 @@ class GroupServiceTest {
     Group mappedGroup = new Group();
     when(groupRequestMapper.toEntity(createDto)).thenReturn(mappedGroup);
     when(userService.getUsersByIdMap(Set.of(1L, 2L))).thenReturn(Map.of(1L, user1));
+    CreateGroupRequestDTO dto = createDto;
 
-    assertThrows(BadRequestException.class, () -> groupService.createGroup(createDto));
+    assertThrows(BadRequestException.class, () -> groupService.createGroup(dto));
     verify(groupRepository, never()).saveAndFlush(any());
   }
 
@@ -218,10 +219,10 @@ class GroupServiceTest {
     group.setMaxMembers(5);
     UpdateGroupRequestDTO updateDto =
         new UpdateGroupRequestDTO("New", "desc", false, Set.of(3L), null);
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    Long groupId = group.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
-    assertThrows(
-        BadRequestException.class, () -> groupService.updateGroup(group.getId(), updateDto));
+    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
   }
 
   @Test
@@ -230,30 +231,30 @@ class GroupServiceTest {
     group.setMemberCount(1);
     UpdateGroupRequestDTO updateDto =
         new UpdateGroupRequestDTO("New", "desc", false, Set.of(1L), null);
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    Long groupId = group.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
-    assertThrows(
-        BadRequestException.class, () -> groupService.updateGroup(group.getId(), updateDto));
+    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
   }
 
   @Test
   void updateGroup_adminAlreadyAdmin_throwsBadRequest() {
     UpdateGroupRequestDTO updateDto =
         new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(1L));
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    Long groupId = group.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
-    assertThrows(
-        BadRequestException.class, () -> groupService.updateGroup(group.getId(), updateDto));
+    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
   }
 
   @Test
   void updateGroup_adminNotMember_throwsBadRequest() {
     UpdateGroupRequestDTO updateDto =
         new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(2L));
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    Long groupId = group.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
-    assertThrows(
-        BadRequestException.class, () -> groupService.updateGroup(group.getId(), updateDto));
+    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
   }
 
   @Test
@@ -279,12 +280,13 @@ class GroupServiceTest {
   void removeMemberFromGroup_notMember_throwsBadRequest() {
     User other = new User();
     other.setId(99L);
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
-    when(userService.retrieveUserById(other.getId())).thenReturn(other);
+    Long groupId = group.getId();
+    Long otherId = other.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(otherId)).thenReturn(other);
 
     assertThrows(
-        BadRequestException.class,
-        () -> groupService.removeMemberFromGroup(group.getId(), other.getId()));
+        BadRequestException.class, () -> groupService.removeMemberFromGroup(groupId, otherId));
     verify(groupRepository, never()).save(any(Group.class));
   }
 
@@ -301,12 +303,13 @@ class GroupServiceTest {
 
   @Test
   void removeAdminFromGroup_notAdmin_throwsBadRequest() {
-    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
-    when(userService.retrieveUserById(user2.getId())).thenReturn(user2);
+    Long groupId = group.getId();
+    Long user2Id = user2.getId();
+    when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(user2Id)).thenReturn(user2);
 
     assertThrows(
-        BadRequestException.class,
-        () -> groupService.removeAdminFromGroup(group.getId(), user2.getId()));
+        BadRequestException.class, () -> groupService.removeAdminFromGroup(groupId, user2Id));
     verify(groupRepository, never()).save(any(Group.class));
   }
 
