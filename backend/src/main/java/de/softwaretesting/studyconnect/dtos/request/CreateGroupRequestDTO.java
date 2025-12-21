@@ -19,10 +19,10 @@ public class CreateGroupRequestDTO {
   @Size(max = 500, message = "Description must not exceed 500 characters")
   private String description;
 
-  @NotNull(message = "Privacy setting is required")
+  @NotNull(message = "Privacy setting is_public is required")
   private Boolean isPublic;
 
-  @NotNull(message = "Maximum members is required")
+  @NotNull(message = "max_members is required")
   private Integer maxMembers;
 
   @NotEmpty(message = "At least one member ID is required")
@@ -31,15 +31,15 @@ public class CreateGroupRequestDTO {
   @NotEmpty(message = "At least one admin ID is required")
   private Set<Long> adminIds;
 
-  @NotNull(message = "Creator ID is required")
+  @NotNull(message = "created_by_id is required")
   private Long createdById;
 
-  @AssertTrue(message = "Creator must be included in memberIds")
+  @AssertTrue(message = "Creator must be included in member_ids")
   private boolean isCreatorInMembers() {
     return memberIds != null && createdById != null && memberIds.contains(createdById);
   }
 
-  @AssertTrue(message = "Admin IDs must be a subset of memberIds")
+  @AssertTrue(message = "Admin IDs must be a subset of member_ids")
   private boolean areAdminsSubsetOfMembers() {
     return memberIds != null && adminIds != null && memberIds.containsAll(adminIds);
   }

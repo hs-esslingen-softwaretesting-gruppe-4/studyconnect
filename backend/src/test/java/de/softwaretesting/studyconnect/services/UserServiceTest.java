@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -186,8 +188,9 @@ class UserServiceTest {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Max", "Mustermann", "Password123!", "test@example.com");
 
-    when(keycloakService.createUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(true);
+    doNothing()
+        .when(keycloakService)
+        .createUserInRealm(anyString(), anyString(), anyString(), anyString());
     when(keycloakService.retrieveUserByEmail("test@example.com"))
         .thenReturn(testKeycloakUserResponseDTO);
     when(userRepository.save(any(User.class))).thenReturn(testUser);
@@ -208,10 +211,11 @@ class UserServiceTest {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Max", "Mustermann", "Password123!", "test@example.com");
 
-    when(keycloakService.createUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(false);
+    doThrow(new BadRequestException("KC down"))
+        .when(keycloakService)
+        .createUserInRealm(anyString(), anyString(), anyString(), anyString());
 
-    assertThrows(InternalServerErrorException.class, () -> userService.createUser(createRequest));
+    assertThrows(BadRequestException.class, () -> userService.createUser(createRequest));
     verify(keycloakService).createUserInRealm(anyString(), anyString(), anyString(), anyString());
     verify(userRepository, never()).save(any(User.class));
   }
@@ -221,16 +225,12 @@ class UserServiceTest {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Max", "Mustermann", "Password123!", "test@example.com");
 
-    when(keycloakService.createUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(true);
+    doNothing()
+        .when(keycloakService)
+        .createUserInRealm(anyString(), anyString(), anyString(), anyString());
     when(keycloakService.retrieveUserByEmail("test@example.com")).thenReturn(null);
 
-    InternalServerErrorException exception =
-        assertThrows(
-            InternalServerErrorException.class, () -> userService.createUser(createRequest));
-
-    assertEquals(
-        "Internal error: Error retrieving created user from Keycloak", exception.getMessage());
+    assertThrows(InternalServerErrorException.class, () -> userService.createUser(createRequest));
     verify(keycloakService)
         .createUserInRealm("Password123!", "test@example.com", "Max", "Mustermann");
     verify(keycloakService).retrieveUserByEmail("test@example.com");
@@ -242,8 +242,9 @@ class UserServiceTest {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Max", "Mustermann", "Password123!", "test@example.com");
 
-    when(keycloakService.createUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(true);
+    doNothing()
+        .when(keycloakService)
+        .createUserInRealm(anyString(), anyString(), anyString(), anyString());
     when(keycloakService.retrieveUserByEmail("test@example.com"))
         .thenReturn(testKeycloakUserResponseDTO);
     when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -296,10 +297,11 @@ class UserServiceTest {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Admin", "User", "AdminPass123!", "admin@example.com");
 
-    when(keycloakService.createAdminUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(false);
+    doThrow(new BadRequestException("conflict"))
+        .when(keycloakService)
+        .createAdminUserInRealm(anyString(), anyString(), anyString(), anyString());
 
-    assertThrows(InternalServerErrorException.class, () -> userService.createAdmin(createRequest));
+    assertThrows(BadRequestException.class, () -> userService.createAdmin(createRequest));
     verify(userRepository, never()).save(any(User.class));
   }
 
@@ -317,7 +319,8 @@ class UserServiceTest {
             InternalServerErrorException.class, () -> userService.createAdmin(createRequest));
 
     assertEquals(
-        "Internal error: Error retrieving created admin from Keycloak", exception.getMessage());
+        "Internal error during admin user creation in Keycloak: Cannot invoke \"de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO.getKeycloakUUID()\" because \"createdKeycloakUser\" is null",
+        exception.getMessage());
     verify(keycloakService)
         .createAdminUserInRealm("AdminPass123!", "admin@example.com", "Admin", "User");
     verify(keycloakService).retrieveUserByEmail("admin@example.com");
@@ -325,42 +328,33 @@ class UserServiceTest {
   }
 
   @Test
-  void createUser_shouldHandleRetrievalFailureAfterMultipleRetries() {
+  void createUser_shouldWrapUnexpectedExceptions() {
     UserCreateRequestDTO createRequest =
         new UserCreateRequestDTO("Max", "Mustermann", "Password123!", "test@example.com");
 
-    when(keycloakService.createUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(true);
-    // Simulate multiple calls returning null (as if retries were implemented)
-    when(keycloakService.retrieveUserByEmail("test@example.com")).thenReturn(null);
+    doThrow(new RuntimeException("boom"))
+        .when(keycloakService)
+        .createUserInRealm(anyString(), anyString(), anyString(), anyString());
 
-    InternalServerErrorException exception =
+    InternalServerErrorException ex =
         assertThrows(
             InternalServerErrorException.class, () -> userService.createUser(createRequest));
-
-    assertEquals(
-        "Internal error: Error retrieving created user from Keycloak", exception.getMessage());
-    verify(keycloakService).retrieveUserByEmail("test@example.com");
+    assertEquals("Internal error during user creation in Keycloak: boom", ex.getMessage());
   }
 
   @Test
-  void createAdmin_shouldHandleRetrievalFailureAfterSuccessfulCreation() {
+  void createAdmin_shouldWrapUnexpectedExceptions() {
     UserCreateRequestDTO createRequest =
-        new UserCreateRequestDTO("SuperAdmin", "User", "AdminPass123!", "super@admin.com");
+        new UserCreateRequestDTO("Admin", "User", "AdminPass123!", "admin@example.com");
 
-    when(keycloakService.createAdminUserInRealm(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(true);
-    when(keycloakService.retrieveUserByEmail("super@admin.com")).thenReturn(null);
+    doThrow(new RuntimeException("boom"))
+        .when(keycloakService)
+        .createAdminUserInRealm(anyString(), anyString(), anyString(), anyString());
 
-    InternalServerErrorException exception =
+    InternalServerErrorException ex =
         assertThrows(
             InternalServerErrorException.class, () -> userService.createAdmin(createRequest));
-
-    assertEquals(
-        "Internal error: Error retrieving created admin from Keycloak", exception.getMessage());
-    verify(keycloakService)
-        .createAdminUserInRealm("AdminPass123!", "super@admin.com", "SuperAdmin", "User");
-    verify(userRepository, never()).save(any(User.class));
+    assertEquals("Internal error during admin user creation in Keycloak: boom", ex.getMessage());
   }
 
   // ==================== init Tests ====================

@@ -53,7 +53,8 @@ public class UserService {
       return;
     }
 
-    // Retrieve all existing users in the realm and create their local representations if they don't
+    // Retrieve all existing users in the realm and create their local
+    // representations if they don't
     // exist
     List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm();
     for (KeycloakUserResponseDTO user : users) {
@@ -127,49 +128,36 @@ public class UserService {
     User newUser = new User();
     LOGGER.info("Starting user creation for email: {}", userCreateRequestDTO.getEmail());
 
-    boolean successfulUserCreation =
-        keycloakService.createUserInRealm(
-            userCreateRequestDTO.getPassword(),
-            userCreateRequestDTO.getEmail(),
-            userCreateRequestDTO.getSurname(),
-            userCreateRequestDTO.getLastname());
+    try {
+      keycloakService.createUserInRealm(
+          userCreateRequestDTO.getPassword(),
+          userCreateRequestDTO.getEmail(),
+          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getLastname());
 
-    LOGGER.info("User creation in Keycloak result: {}", successfulUserCreation);
+      // On successful creation in Keycloak, proceed with local user creation
+      LOGGER.info(
+          "User creation in Keycloak successful for email: {}", userCreateRequestDTO.getEmail());
 
-    if (!successfulUserCreation) {
-      LOGGER.error(
-          "User creation failed in Keycloak for email: {}", userCreateRequestDTO.getEmail());
+      KeycloakUserResponseDTO createdKeycloakUser =
+          keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
 
-      // Check if user already exists locally to provide better error message
-      Optional<User> existingUser = userRepository.findByEmail(userCreateRequestDTO.getEmail());
-      if (existingUser.isPresent()) {
-        throw new BadRequestException(
-            "User with email " + userCreateRequestDTO.getEmail() + " already exists");
-      } else {
-        throw new InternalServerErrorException("Internal error during user creation in Keycloak");
-      }
-    }
+      newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
+      newUser.setEmail(createdKeycloakUser.getEmail());
+      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setLastname(createdKeycloakUser.getLastName());
+      userRepository.save(newUser);
+      UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+      return ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
 
-    // On successful creation in Keycloak, create local user
-    LOGGER.info("Attempting to retrieve user by email: {}", userCreateRequestDTO.getEmail());
-    KeycloakUserResponseDTO createdKeycloakUser =
-        keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
-    if (createdKeycloakUser == null) {
-      LOGGER.error("Failed to retrieve user from Keycloak after creation");
+    } catch (BadRequestException e) {
+      LOGGER.error("Exception during user creation in Keycloak: {}", e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      LOGGER.error("Unexpected exception during user creation in Keycloak: {}", e.getMessage());
       throw new InternalServerErrorException(
-          "Internal error: Error retrieving created user from Keycloak");
+          "Internal error during user creation in Keycloak: " + e.getMessage());
     }
-
-    LOGGER.info("Successfully retrieved user from Keycloak: {}", createdKeycloakUser.getEmail());
-
-    newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
-    newUser.setEmail(createdKeycloakUser.getEmail());
-    newUser.setSurname(createdKeycloakUser.getFirstName());
-    newUser.setLastname(createdKeycloakUser.getLastName());
-    userRepository.save(newUser);
-
-    UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
-    return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
   }
 
   /**
@@ -181,33 +169,36 @@ public class UserService {
   public ResponseEntity<UserResponseDTO> createAdmin(UserCreateRequestDTO userCreateRequestDTO) {
 
     User newUser = new User();
-    boolean successfulUserCreation =
-        keycloakService.createAdminUserInRealm(
-            userCreateRequestDTO.getPassword(),
-            userCreateRequestDTO.getEmail(),
-            userCreateRequestDTO.getSurname(),
-            userCreateRequestDTO.getLastname());
 
-    if (!successfulUserCreation) {
-      throw new InternalServerErrorException("Internal error during admin creation in Keycloak");
-    }
+    try {
+      this.keycloakService.createAdminUserInRealm(
+          userCreateRequestDTO.getPassword(),
+          userCreateRequestDTO.getEmail(),
+          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getLastname());
 
-    // On successful creation in Keycloak, create local user
-    KeycloakUserResponseDTO createdKeycloakUser =
-        keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
-    if (createdKeycloakUser == null) {
+      // On successful creation in Keycloak, proceed with local user creation
+      KeycloakUserResponseDTO createdKeycloakUser =
+          keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
+
+      newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
+      newUser.setEmail(createdKeycloakUser.getEmail());
+      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setLastname(createdKeycloakUser.getLastName());
+      userRepository.save(newUser);
+
+      UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+      return ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
+
+    } catch (BadRequestException e) {
+      throw e;
+    } catch (Exception e) {
+      // Log unexpected exceptions
+      LOGGER.error(
+          "Unexpected exception during admin user creation in Keycloak: {}", e.getMessage());
       throw new InternalServerErrorException(
-          "Internal error: Error retrieving created admin from Keycloak");
+          "Internal error during admin user creation in Keycloak: " + e.getMessage());
     }
-
-    newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
-    newUser.setEmail(createdKeycloakUser.getEmail());
-    newUser.setSurname(createdKeycloakUser.getFirstName());
-    newUser.setLastname(createdKeycloakUser.getLastName());
-    userRepository.save(newUser);
-
-    UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
-    return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
   }
 
   /**
@@ -224,7 +215,7 @@ public class UserService {
    * Retrieves the user associated with the current access token.
    *
    * @return a ResponseEntity containing the user's response DTO
-   * @throws BadRequestException if the access token is invalid or missing required claims
+   * @throws BadRequestExcepti n if the access token is invalid or missing required claims
    * @throws NotFoundException if the user is not found
    */
   public ResponseEntity<UserResponseDTO> getUserByAccessToken() {

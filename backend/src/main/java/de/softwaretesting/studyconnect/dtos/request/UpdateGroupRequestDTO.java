@@ -1,6 +1,5 @@
 package de.softwaretesting.studyconnect.dtos.request;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
 import lombok.Value;
@@ -15,7 +14,6 @@ public class UpdateGroupRequestDTO {
   @Size(max = 500, message = "Description must not exceed 500 characters")
   private String description;
 
-  @NotNull(message = "Privacy setting is required")
   private Boolean isPublic;
 
   private Set<Long> memberIds;
