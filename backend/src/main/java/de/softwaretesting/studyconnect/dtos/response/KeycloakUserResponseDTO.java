@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Value;
 
+/** Data Transfer Object for Keycloak user responses. */
 @Value
 public class KeycloakUserResponseDTO {
 

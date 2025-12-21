@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Value;
 
+/** Data Transfer Object for creating or updating a task. */
 @Value
 public class TaskRequestDTO implements Serializable {
   @NotBlank(message = "Title is required")

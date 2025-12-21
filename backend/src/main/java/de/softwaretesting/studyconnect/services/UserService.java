@@ -12,13 +12,20 @@ import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -199,5 +206,77 @@ public class UserService {
 
     UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
     return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
+  }
+
+  /**
+   * Retrieves a user entity by its ID.
+   *
+   * @param userId the ID of the user
+   * @return an Optional containing the user entity if found, or empty if not found
+   */
+  public Optional<User> getUserByIdEntity(Long userId) {
+    return userRepository.findById(userId);
+  }
+
+  /**
+   * Retrieves the user associated with the current access token.
+   *
+   * @return a ResponseEntity containing the user's response DTO
+   * @throws BadRequestException if the access token is invalid or missing required claims
+   * @throws NotFoundException if the user is not found
+   */
+  public ResponseEntity<UserResponseDTO> getUserByAccessToken() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
+      throw new BadRequestException("No JWT access token found");
+    }
+
+    Jwt jwt = jwtAuth.getToken();
+    String keycloakUuid = jwt.getSubject();
+    if (keycloakUuid == null || keycloakUuid.isBlank()) {
+      throw new BadRequestException("Access token missing subject (sub)");
+    }
+
+    Optional<User> byUuid = userRepository.findByKeycloakUUID(keycloakUuid);
+    if (byUuid.isPresent()) {
+      return ResponseEntity.ok(userResponseMapper.toDto(byUuid.get()));
+    } else {
+      LOGGER.warn("User with Keycloak UUID {} not found locally.", keycloakUuid);
+      throw new NotFoundException("User not found");
+    }
+  }
+
+  /**
+   * Retrieves multiple user entities by their IDs in a single query.
+   *
+   * @param userIds the user IDs to fetch
+   * @return a map of userId -> User for all users that exist
+   */
+  public Map<Long, User> getUsersByIdMap(Set<Long> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return Map.of();
+    }
+
+    List<User> users = userRepository.findAllById(userIds);
+    Map<Long, User> result = new HashMap<>();
+    for (User user : users) {
+      if (user != null && user.getId() != null) {
+        result.put(user.getId(), user);
+      }
+    }
+    return result;
+  }
+
+  public List<User> getUsersByIds(Set<Long> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return List.of();
+    }
+    return userRepository.findAllById(userIds);
+  }
+
+  public User retrieveUserById(Long userId) {
+    return userRepository
+        .findById(userId)
+        .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
   }
 }

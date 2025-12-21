@@ -58,4 +58,14 @@ public class UserController {
       @Valid @RequestBody UserCreateRequestDTO userRequestDTO) {
     return userService.createUser(userRequestDTO);
   }
+
+  /**
+   * Retrieves the user associated with the current access token.
+   *
+   * @return a ResponseEntity containing the user's response DTO
+   */
+  @GetMapping("/me")
+  public ResponseEntity<UserResponseDTO> getUserByAccessToken() {
+    return userService.getUserByAccessToken();
+  }
 }

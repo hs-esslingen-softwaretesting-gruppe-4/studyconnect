@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Value;
 
+/** Data Transfer Object for task responses. */
 @Value
 public class TaskResponseDTO implements Serializable {
   private Long id;
