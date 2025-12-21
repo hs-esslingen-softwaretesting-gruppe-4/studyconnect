@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
+@ToString(exclude = {"tasks", "members", "admins", "createdBy"})
 @Table(name = "groups")
 public class Group {
   private static final SecureRandom INVITE_CODE_RANDOM = new SecureRandom();

@@ -486,19 +486,19 @@ class UserServiceTest {
   // ==================== getUsersByIds Tests ====================
 
   @Test
-  void getUsersByIds_shouldReturnEmptyList_whenNullOrEmpty() {
-    assertEquals(List.of(), userService.getUsersByIds(null));
-    assertEquals(List.of(), userService.getUsersByIds(Set.of()));
+  void getUsersByIds_shouldReturnEmptySet_whenNullOrEmpty() {
+    assertEquals(Set.of(), userService.getUsersByIds(null));
+    assertEquals(Set.of(), userService.getUsersByIds(Set.of()));
   }
 
   @Test
   void getUsersByIds_shouldReturnRepositoryResult_whenProvided() {
     when(userRepository.findAllById(Set.of(1L))).thenReturn(List.of(testUser));
 
-    List<User> users = userService.getUsersByIds(Set.of(1L));
+    Set<User> users = userService.getUsersByIds(Set.of(1L));
 
     assertEquals(1, users.size());
-    assertEquals(1L, users.get(0).getId());
+    assertEquals(1L, users.iterator().next().getId());
     verify(userRepository).findAllById(Set.of(1L));
   }
 

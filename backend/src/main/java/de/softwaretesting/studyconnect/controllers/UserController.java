@@ -22,6 +22,11 @@ public class UserController {
 
   private final UserService userService;
 
+  @GetMapping
+  public ResponseEntity<java.util.List<UserResponseDTO>> getAllUsers() {
+    return userService.getAllUsers();
+  }
+
   /**
    * Retrieves a user by their ID.
    *

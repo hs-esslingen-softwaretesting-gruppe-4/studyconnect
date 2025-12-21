@@ -28,6 +28,7 @@ public class KeycloakService {
 
   private final KeycloakAdminTokenService keycloakAdminTokenService;
   private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakService.class);
+  private static final String KEYCLOAK_REALM_PATH = "/admin/realms/";
   private final RestTemplate restTemplate;
 
   @Value("${KEYCLOAK_AUTH_SERVER_URL}")
@@ -105,7 +106,7 @@ public class KeycloakService {
    * @return true if the role was added successfully, false otherwise
    */
   public boolean addRoleToRealm(String roleName) {
-    String roleUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/roles";
+    String roleUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/roles";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -132,7 +133,7 @@ public class KeycloakService {
    * @return true if the realm was deleted successfully, false otherwise
    */
   public boolean deleteRealm() {
-    String deleteUrl = keycloakServerUrl + "/admin/realms/" + realmName;
+    String deleteUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName;
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -163,7 +164,7 @@ public class KeycloakService {
    */
   public void createUserInRealm(String password, String email, String surname, String lastname) {
 
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -233,7 +234,7 @@ public class KeycloakService {
    */
   public boolean createAdminUserInRealm(
       String password, String email, String surname, String lastname) {
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -291,7 +292,7 @@ public class KeycloakService {
    * @return the user DTO, or null if not found
    */
   public KeycloakUserResponseDTO retrieveUserByUUID(String userId) {
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users/" + userId;
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users/" + userId;
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -357,7 +358,7 @@ public class KeycloakService {
    * @return list of user DTOs, or empty list if none found
    */
   public List<KeycloakUserResponseDTO> retrieveAllUsersInRealm() {
-    String usersUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String usersUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -371,7 +372,6 @@ public class KeycloakService {
               org.springframework.http.HttpMethod.GET,
               request,
               KeycloakUserResponseDTO[].class);
-      LOGGER.info("All users retrieved successfully from realm '{}'", realmName);
       return response.getBody() != null
           ? Arrays.asList(response.getBody())
           : Collections.emptyList();

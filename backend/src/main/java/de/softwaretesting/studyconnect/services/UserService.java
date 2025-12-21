@@ -14,6 +14,7 @@ import de.softwaretesting.studyconnect.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import java.beans.JavaBean;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -260,16 +261,64 @@ public class UserService {
     return result;
   }
 
-  public List<User> getUsersByIds(Set<Long> userIds) {
+  /**
+   * Retrieves a set of users by their IDs.
+   *
+   * @param userIds the IDs of the users to retrieve
+   * @return a set of User entities
+   */
+  public Set<User> getUsersByIds(Set<Long> userIds) {
     if (userIds == null || userIds.isEmpty()) {
-      return List.of();
+      return Set.of();
     }
-    return userRepository.findAllById(userIds);
+    Set<User> users = new HashSet<>(userRepository.findAllById(userIds));
+    if (users.isEmpty()) {
+      throw new NotFoundException("No users found for the provided IDs");
+    } else if (users.size() < userIds.size()) {
+      throw new NotFoundException("Some users not found for the provided IDs");
+    }
+    return users;
   }
 
+  /**
+   * Retrieves a set of UserResponseDTOs by their IDs.
+   *
+   * @param userIds the IDs of the users to retrieve
+   * @return a set of UserResponseDTOs
+   */
+  public Set<UserResponseDTO> getUsersByIdsDTOs(Set<Long> userIds) {
+    try {
+      Set<User> users = getUsersByIds(userIds);
+      Set<UserResponseDTO> userDTOs = new HashSet<>();
+      for (User user : users) {
+        userDTOs.add(userResponseMapper.toDto(user));
+      }
+      return userDTOs;
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      LOGGER.error("Error retrieving users by IDs: {}", e.getMessage());
+      throw new InternalServerErrorException(
+          "Internal error retrieving users by IDs: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves a user entity by its ID, throwing NotFoundException if not found.
+   *
+   * @param userId the ID of the user
+   * @return the user entity
+   * @throws NotFoundException if the user is not found
+   */
   public User retrieveUserById(Long userId) {
     return userRepository
         .findById(userId)
         .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+  }
+
+  public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+    List<User> users = userRepository.findAll();
+    List<UserResponseDTO> userDTOs = users.stream().map(userResponseMapper::toDto).toList();
+    return ResponseEntity.ok(userDTOs);
   }
 }

@@ -3,9 +3,11 @@ package de.softwaretesting.studyconnect.controllers;
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.GroupResponseDTO;
+import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.services.GroupService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,6 +63,16 @@ public class GroupController {
   @DeleteMapping("{groupId}")
   ResponseEntity<Void> deleteGroup(@PathVariable Long groupId) {
     return groupService.deleteGroup(groupId);
+  }
+
+  @GetMapping("{groupId}/members")
+  ResponseEntity<Set<UserResponseDTO>> getMembersByGroupId(@PathVariable Long groupId) {
+    return groupService.getMembersByGroupId(groupId);
+  }
+
+  @GetMapping("{groupId}/admins")
+  ResponseEntity<Set<UserResponseDTO>> getAdminsByGroupId(@PathVariable Long groupId) {
+    return groupService.getAdminsByGroupId(groupId);
   }
 
   @DeleteMapping("{groupId}/members/{userId}")

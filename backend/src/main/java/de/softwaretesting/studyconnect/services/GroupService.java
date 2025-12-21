@@ -3,6 +3,7 @@ package de.softwaretesting.studyconnect.services;
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.GroupResponseDTO;
+import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class GroupService {
 
   private static final int INVITE_CODE_SAVE_RETRY_ATTEMPTS = 2;
   private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
+  private static final String GROUP_NOT_FOUND_MESSAGE = "Group not found with id: ";
 
   private final GroupRepository groupRepository;
   private final UserService userService;
@@ -61,7 +64,7 @@ public class GroupService {
     Group group =
         groupRepository
             .findById(groupId)
-            .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
     GroupResponseDTO dto = groupResponseMapper.toDto(group);
     return ResponseEntity.ok(dto);
   }
@@ -129,12 +132,13 @@ public class GroupService {
    * @throws NotFoundException if the group with the specified ID does not exist
    * @throws BadRequestException if validation fails for member or admin updates
    */
+  @Transactional
   public ResponseEntity<GroupResponseDTO> updateGroup(Long groupId, UpdateGroupRequestDTO dto) {
 
     Group patchGroup =
         groupRepository
             .findById(groupId)
-            .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
 
     validateMemberUpdate(patchGroup, dto);
     validateAdminUpdate(patchGroup, dto);
@@ -186,6 +190,7 @@ public class GroupService {
       return;
     }
 
+    // Concatenate existing members and new members from the DTO
     Set<Long> prospectiveMemberIds =
         group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
     if (dto.getMemberIds() != null) {
@@ -250,7 +255,7 @@ public class GroupService {
     Group group =
         groupRepository
             .findById(groupId)
-            .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
     User user = userService.retrieveUserById(userId);
     boolean removed = group.removeMember(user);
     if (!removed) {
@@ -273,7 +278,7 @@ public class GroupService {
     Group group =
         groupRepository
             .findById(groupId)
-            .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
     User user = userService.retrieveUserById(userId);
     boolean removed = group.removeAdmin(user);
     if (!removed) {
@@ -294,7 +299,7 @@ public class GroupService {
     Group group =
         groupRepository
             .findById(groupId)
-            .orElseThrow(() -> new NotFoundException("Group not found with id: " + groupId));
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
     groupRepository.delete(group);
     return ResponseEntity.noContent().build();
   }
@@ -327,6 +332,40 @@ public class GroupService {
 
     groupRepository.save(group);
     return ResponseEntity.noContent().build();
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<Set<UserResponseDTO>> getMembersByGroupId(Long groupId) {
+    try {
+      Set<Long> memberIds =
+          groupRepository
+              .findMemberIdsByGroupId(groupId)
+              .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
+
+      Set<UserResponseDTO> memberDTOs = userService.getUsersByIdsDTOs(memberIds);
+      return ResponseEntity.ok(memberDTOs);
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new InternalServerErrorException("Error retrieving group members: " + e.getMessage());
+    }
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<Set<UserResponseDTO>> getAdminsByGroupId(Long groupId) {
+    try {
+      Set<Long> adminIds =
+          groupRepository
+              .findAdminIdsByGroupId(groupId)
+              .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
+
+      Set<UserResponseDTO> adminDTOs = userService.getUsersByIdsDTOs(adminIds);
+      return ResponseEntity.ok(adminDTOs);
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new InternalServerErrorException("Error retrieving group admins: " + e.getMessage());
+    }
   }
 
   /**

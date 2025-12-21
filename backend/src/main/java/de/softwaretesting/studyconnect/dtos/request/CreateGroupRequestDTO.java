@@ -1,5 +1,6 @@
 package de.softwaretesting.studyconnect.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -19,6 +20,7 @@ public class CreateGroupRequestDTO {
   @Size(max = 500, message = "Description must not exceed 500 characters")
   private String description;
 
+  @JsonProperty("is_public")
   @NotNull(message = "Privacy setting is_public is required")
   private Boolean isPublic;
 

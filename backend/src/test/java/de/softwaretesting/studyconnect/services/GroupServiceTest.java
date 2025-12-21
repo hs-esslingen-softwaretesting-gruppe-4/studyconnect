@@ -77,8 +77,7 @@ class GroupServiceTest {
     group.getAdmins().add(user1);
 
     responseDto =
-        new GroupResponseDTO(
-            10L, "Test Group", "desc", false, 1L, null, null, 1, 5, "invite", Set.of(1L));
+        new GroupResponseDTO(10L, "Test Group", "desc", false, 1L, null, null, 1, 5, "invite");
 
     createDto =
         new CreateGroupRequestDTO(

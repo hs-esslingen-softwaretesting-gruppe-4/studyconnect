@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AssignTaskSteps {
@@ -194,7 +195,7 @@ public class AssignTaskSteps {
       User member = userOpt.get();
       // fetch member ids for this group without initializing the group's members
       // collection
-      Optional<List<Long>> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
+      Optional<Set<Long>> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
       boolean isMember = memberIds.map(ids -> ids.contains(member.getId())).orElse(false);
       if (!isMember) {
         lastMessage = "Selected user is not a group member";
