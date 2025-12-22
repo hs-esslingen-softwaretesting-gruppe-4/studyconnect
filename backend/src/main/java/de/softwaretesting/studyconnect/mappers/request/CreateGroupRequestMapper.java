@@ -15,6 +15,7 @@ public interface CreateGroupRequestMapper extends EntityMapper<CreateGroupReques
   @org.mapstruct.Mapping(target = "createdById", ignore = true)
   @org.mapstruct.Mapping(target = "adminIds", ignore = true)
   @org.mapstruct.Mapping(target = "memberIds", ignore = true)
+  @Override
   CreateGroupRequestDTO toDto(Group entity);
 
   @org.mapstruct.Mapping(target = "id", ignore = true)
@@ -27,5 +28,6 @@ public interface CreateGroupRequestMapper extends EntityMapper<CreateGroupReques
   @org.mapstruct.Mapping(target = "admins", ignore = true)
   @org.mapstruct.Mapping(target = "tasks", ignore = true)
   @org.mapstruct.Mapping(target = "public", source = "isPublic")
+  @Override
   Group toEntity(CreateGroupRequestDTO dto);
 }

@@ -27,7 +27,7 @@ public class GroupController {
   private final GroupService groupService;
 
   @GetMapping
-  ResponseEntity<List<GroupResponseDTO>> getAllGroupsPublicGroups() {
+  ResponseEntity<List<GroupResponseDTO>> getAllPublicGroups() {
     return groupService.getAllPublicGroups();
   }
 
@@ -36,7 +36,7 @@ public class GroupController {
     return this.groupService.createGroup(dto);
   }
 
-  @GetMapping("{groupId}")
+  @GetMapping("/{groupId}")
   ResponseEntity<GroupResponseDTO> getGroupById(@PathVariable Long groupId) {
     return groupService.getGroupById(groupId);
   }
@@ -52,36 +52,36 @@ public class GroupController {
    *
    * @param groupId the ID of the group to update
    * @param dto the UpdateGroupRequestDTO containing the updated group data
-   * @returns a ResponseEntity containing the updated GroupResponseDTO
+   * @return a ResponseEntity containing the updated GroupResponseDTO
    */
-  @PatchMapping("{groupId}")
+  @PatchMapping("/{groupId}")
   ResponseEntity<GroupResponseDTO> updateGroup(
       @PathVariable Long groupId, @RequestBody @Valid UpdateGroupRequestDTO dto) {
     return groupService.updateGroup(groupId, dto);
   }
 
-  @DeleteMapping("{groupId}")
+  @DeleteMapping("/{groupId}")
   ResponseEntity<Void> deleteGroup(@PathVariable Long groupId) {
     return groupService.deleteGroup(groupId);
   }
 
-  @GetMapping("{groupId}/members")
+  @GetMapping("/{groupId}/members")
   ResponseEntity<Set<UserResponseDTO>> getMembersByGroupId(@PathVariable Long groupId) {
     return groupService.getMembersByGroupId(groupId);
   }
 
-  @GetMapping("{groupId}/admins")
+  @GetMapping("/{groupId}/admins")
   ResponseEntity<Set<UserResponseDTO>> getAdminsByGroupId(@PathVariable Long groupId) {
     return groupService.getAdminsByGroupId(groupId);
   }
 
-  @DeleteMapping("{groupId}/members/{userId}")
+  @DeleteMapping("/{groupId}/members/{userId}")
   ResponseEntity<Void> removeMemberFromGroup(
       @PathVariable Long groupId, @PathVariable Long userId) {
     return groupService.removeMemberFromGroup(groupId, userId);
   }
 
-  @DeleteMapping("{groupId}/admins/{userId}")
+  @DeleteMapping("/{groupId}/admins/{userId}")
   ResponseEntity<Void> removeAdminFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
     return groupService.removeAdminFromGroup(groupId, userId);
   }

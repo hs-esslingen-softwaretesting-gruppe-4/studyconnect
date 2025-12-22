@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -323,14 +322,20 @@ class GroupRepositoryTest {
     group.setAdmin(admin1);
 
     Group saved = groupRepository.saveAndFlush(group);
-    assertEquals(admin1.getId(), saved.getAdmin().getId(), "getAdmin should return the set admin");
+    assertEquals(
+        admin1.getId(),
+        saved.getAdmins().stream().findFirst().orElseThrow().getId(),
+        "getAdmin should return the set admin");
     assertTrue(saved.isAdmin(admin1), "isAdmin should be true for configured admin");
     assertFalse(saved.isAdmin(admin2), "isAdmin should be false for non-admin");
 
     saved.setAdmin(admin2);
     groupRepository.saveAndFlush(saved);
     Group reloaded = groupRepository.findById(saved.getId()).orElseThrow();
-    assertEquals(admin2.getId(), reloaded.getAdmin().getId(), "setAdmin should replace admins");
+    assertEquals(
+        admin2.getId(),
+        reloaded.getAdmins().stream().findFirst().orElseThrow().getId(),
+        "setAdmin should replace admins");
     assertTrue(reloaded.isAdmin(admin2), "New admin should be recognized");
     assertFalse(reloaded.isAdmin(admin1), "Previous admin should no longer be marked as admin");
 
@@ -338,7 +343,9 @@ class GroupRepositoryTest {
     groupRepository.saveAndFlush(reloaded);
     Group afterRemoval = groupRepository.findById(reloaded.getId()).orElseThrow();
     assertTrue(afterRemoval.getAdmins().isEmpty(), "Admins should be empty after removal");
-    assertNull(afterRemoval.getAdmin(), "getAdmin should return null when no admins remain");
+    assertFalse(
+        afterRemoval.getAdmins().iterator().hasNext(),
+        "Admins iterator should have no next element when no admins remain");
   }
 
   @Test

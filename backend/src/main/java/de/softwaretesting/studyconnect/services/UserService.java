@@ -12,7 +12,6 @@ import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
-import java.beans.JavaBean;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@JavaBean
 public class UserService {
 
   private final UserRepository userRepository;
@@ -216,7 +214,7 @@ public class UserService {
    * Retrieves the user associated with the current access token.
    *
    * @return a ResponseEntity containing the user's response DTO
-   * @throws BadRequestExcepti n if the access token is invalid or missing required claims
+   * @throws BadRequestException if the access token is invalid or missing required claims
    * @throws NotFoundException if the user is not found
    */
   public ResponseEntity<UserResponseDTO> getUserByAccessToken() {

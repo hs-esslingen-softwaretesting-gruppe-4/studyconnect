@@ -158,10 +158,6 @@ public class Group {
     return this.admins.add(user);
   }
 
-  public User getAdmin() {
-    return this.admins.stream().findFirst().orElse(null);
-  }
-
   public void setAdmin(User user) {
     this.admins.clear();
     if (user != null) {

@@ -12,7 +12,6 @@ import de.softwaretesting.studyconnect.mappers.response.GroupResponseMapper;
 import de.softwaretesting.studyconnect.models.Group;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.GroupRepository;
-import java.beans.JavaBean;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@JavaBean
 public class GroupService {
 
   private static final int INVITE_CODE_SAVE_RETRY_ATTEMPTS = 2;
@@ -87,7 +85,8 @@ public class GroupService {
    *
    * @param dto the data transfer object containing group details
    * @return a ResponseEntity containing the created group's response DTO
-   * @throws
+   * @throws BadRequestException if any referenced users do not exist
+   * @throws InternalServerErrorException if there is an error saving the group
    */
   public ResponseEntity<GroupResponseDTO> createGroup(CreateGroupRequestDTO dto) {
 
@@ -163,8 +162,9 @@ public class GroupService {
       return;
     }
 
-    if (group.getMemberCount() >= group.getMaxMembers()) {
-      throw new BadRequestException("Group has reached its maximum member limit");
+    if (group.getMemberCount() + dto.getMemberIds().size() > group.getMaxMembers()) {
+      throw new BadRequestException(
+          "Adding these member(s) would exceed the group's maximum member limit");
     }
 
     Set<Long> existingMemberIds =
@@ -317,11 +317,7 @@ public class GroupService {
    * @throws NotFoundException if the group with the specified ID does not exist
    */
   public ResponseEntity<Void> deleteGroup(Long groupId) {
-    try {
-      deleteGroupById(groupId);
-    } catch (Exception e) {
-      throw e;
-    }
+    deleteGroupById(groupId);
     return ResponseEntity.noContent().build();
   }
 
@@ -396,7 +392,7 @@ public class GroupService {
    * @param group the group to save
    * @return the saved group
    * @throws DataIntegrityViolationException if a non-invite-code-related database error occurs
-   * @throws IllegalStateException if unable to save after the configured number o attempts
+   * @throws IllegalStateException if unable to save after the configured number of attempts
    */
   private Group saveWithInviteCodeRetry(Group group) {
     if (group == null) {
