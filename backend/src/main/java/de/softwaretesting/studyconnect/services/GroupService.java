@@ -231,37 +231,57 @@ public class GroupService {
     if (dto.getMemberIds() != null) {
       for (Long memberId : dto.getMemberIds()) {
         User member = userService.retrieveUserById(memberId);
-        group.getMembers().add(member);
+        group.addMember(member);
       }
     }
     if (dto.getAdminIds() != null) {
       for (Long adminId : dto.getAdminIds()) {
         User admin = userService.retrieveUserById(adminId);
-        group.getAdmins().add(admin);
+        group.addAdmin(admin);
       }
     }
   }
 
   /**
-   * Removes a member from a group.
+   * Removes a member from a group. If the member is also an admin, that role is removed as well. If
+   * the group has no members left after removal, the group is deleted. If there are still members
+   * but no admins, the first member is promoted to admin.
    *
    * @param groupId the ID of the group
-   * @param userId the ID of the user to remove
+   * @param userId the ID of the user to remove as member
    * @return a ResponseEntity with no content
    * @throws NotFoundException if the group or user does not exist
    * @throws BadRequestException if the user is not a member of the group
    */
+  @Transactional
   public ResponseEntity<Void> removeMemberFromGroup(Long groupId, Long userId) {
     Group group =
         groupRepository
             .findById(groupId)
             .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
     User user = userService.retrieveUserById(userId);
+    // First, check if the member is also an admin and remove that role if so
+    group.removeAdmin(user);
     boolean removed = group.removeMember(user);
     if (!removed) {
       throw new BadRequestException("User with id " + userId + " is not a member of the group");
     }
-    groupRepository.save(group);
+    // Check if the group still has any members after removal
+    if (group.getMemberCount() == 0) {
+      groupRepository.delete(group);
+    } else {
+      // If no admins remain but there are still members, promote the first member to admin
+      if (group.getAdmins().isEmpty() && group.getMemberCount() > 0) {
+        try {
+          User newAdmin = group.getMembers().iterator().next();
+          group.addAdmin(newAdmin);
+        } catch (Exception e) {
+          throw new InternalServerErrorException(
+              "Error promoting member to admin after admin removal: " + e.getMessage());
+        }
+      }
+      groupRepository.save(group);
+    }
     return ResponseEntity.noContent().build();
   }
 
@@ -274,6 +294,7 @@ public class GroupService {
    * @throws NotFoundException if the group or user does not exist
    * @throws BadRequestException if the user is not an admin of the group
    */
+  @Transactional
   public ResponseEntity<Void> removeAdminFromGroup(Long groupId, Long userId) {
     Group group =
         groupRepository
@@ -296,11 +317,11 @@ public class GroupService {
    * @throws NotFoundException if the group with the specified ID does not exist
    */
   public ResponseEntity<Void> deleteGroup(Long groupId) {
-    Group group =
-        groupRepository
-            .findById(groupId)
-            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
-    groupRepository.delete(group);
+    try {
+      deleteGroupById(groupId);
+    } catch (Exception e) {
+      throw e;
+    }
     return ResponseEntity.noContent().build();
   }
 
@@ -434,5 +455,19 @@ public class GroupService {
       current = current.getCause();
     }
     return false;
+  }
+
+  private boolean deleteGroupById(Long groupId) {
+    Group group =
+        groupRepository
+            .findById(groupId)
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
+    try {
+      groupRepository.delete(group);
+      return true;
+    } catch (Exception e) {
+      LOGGER.error("Error deleting group with id {}: {}", groupId, e.getMessage());
+      throw new InternalServerErrorException("Error deleting group with id: " + groupId);
+    }
   }
 }

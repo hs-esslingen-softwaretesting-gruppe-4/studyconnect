@@ -318,7 +318,7 @@ public class UserService {
 
   public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
     List<User> users = userRepository.findAll();
-    List<UserResponseDTO> userDTOs = users.stream().map(userResponseMapper::toDto).toList();
+    List<UserResponseDTO> userDTOs = userResponseMapper.toDtoList(users);
     return ResponseEntity.ok(userDTOs);
   }
 }
