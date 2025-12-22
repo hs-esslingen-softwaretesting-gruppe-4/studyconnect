@@ -43,6 +43,7 @@ repos:
     hooks:
       - id: check-json
         name: Check JSON
+        exclude: '^frontend/tsconfig.*\.json$'
       - id: check-yaml
         name: Check YAML
       - id: check-merge-conflict
