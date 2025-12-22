@@ -1,17 +1,13 @@
 package de.softwaretesting.studyconnect.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.GroupResponseDTO;
+import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
@@ -98,6 +94,18 @@ class GroupServiceTest {
   }
 
   @Test
+  void getAllPublicGroups_noPublicGroups_returnsEmptyList() {
+    when(groupRepository.findByIsPublicTrue()).thenReturn(Optional.empty());
+    when(groupResponseMapper.toDtoList(List.of())).thenReturn(List.of());
+
+    ResponseEntity<List<GroupResponseDTO>> result = groupService.getAllPublicGroups();
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(0, result.getBody().size());
+    verify(groupRepository).findByIsPublicTrue();
+  }
+
+  @Test
   void getGroupById_existingGroup_returnsDto() {
     when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
     when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
@@ -126,6 +134,17 @@ class GroupServiceTest {
     assertEquals(1, result.getBody().size());
     verify(groupRepository).findByMembersId(1L);
     verify(groupResponseMapper).toDtoList(List.of(group));
+  }
+
+  @Test
+  void getGroupsByUserId_noGroups_returnsEmptyList() {
+    when(groupRepository.findByMembersId(1L)).thenReturn(Optional.empty());
+    when(groupResponseMapper.toDtoList(List.of())).thenReturn(List.of());
+
+    ResponseEntity<List<GroupResponseDTO>> result = groupService.getGroupsByUserId(1L);
+
+    assertEquals(0, result.getBody().size());
+    verify(groupRepository).findByMembersId(1L);
   }
 
   @Test
@@ -291,6 +310,33 @@ class GroupServiceTest {
 
   @Test
   void removeMemberFromGroup_successPersists() {
+    group.getMembers().add(user2);
+    group.setMemberCount(2);
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(user2.getId())).thenReturn(user2);
+
+    ResponseEntity<Void> result = groupService.removeMemberFromGroup(group.getId(), user2.getId());
+
+    assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    verify(groupRepository).save(group);
+  }
+
+  @Test
+  void removeMemberFromGroup_lastMember_deletesGroup() {
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(user1.getId())).thenReturn(user1);
+
+    ResponseEntity<Void> result = groupService.removeMemberFromGroup(group.getId(), user1.getId());
+
+    assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    verify(groupRepository).delete(group);
+    verify(groupRepository, never()).save(any());
+  }
+
+  @Test
+  void removeMemberFromGroup_removesAdminToo() {
+    group.getMembers().add(user2);
+    group.setMemberCount(2);
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
     when(userService.retrieveUserById(user1.getId())).thenReturn(user1);
 
@@ -298,6 +344,52 @@ class GroupServiceTest {
 
     assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
     verify(groupRepository).save(group);
+    assertFalse(group.getAdmins().contains(user1));
+  }
+
+  @Test
+  void removeMemberFromGroup_lastAdminRemoved_promotesFirstMember() {
+    group.getMembers().add(user2);
+    group.setMemberCount(2);
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(user1.getId())).thenReturn(user1);
+
+    ResponseEntity<Void> result = groupService.removeMemberFromGroup(group.getId(), user1.getId());
+
+    assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    verify(groupRepository).save(group);
+    assertEquals(1, group.getAdmins().size());
+    assertTrue(group.getAdmins().contains(user2));
+  }
+
+  @Test
+  void removeMemberFromGroup_groupNotFound_throwsNotFoundException() {
+    when(groupRepository.findById(999L)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class, () -> groupService.removeMemberFromGroup(999L, 1L));
+  }
+
+  @Test
+  void removeMemberFromGroup_promotionFails_throwsInternalServerError() {
+    // Create group with problematic state
+    Group problematicGroup =
+        new Group() {
+          @Override
+          public boolean addAdmin(User admin) {
+            throw new RuntimeException("Cannot add admin");
+          }
+        };
+    problematicGroup.setId(10L);
+    problematicGroup.setMembers(new java.util.HashSet<>(Set.of(user1, user2)));
+    problematicGroup.setAdmins(new java.util.HashSet<>(Set.of(user1)));
+    problematicGroup.setMemberCount(2);
+
+    when(groupRepository.findById(10L)).thenReturn(Optional.of(problematicGroup));
+    when(userService.retrieveUserById(user1.getId())).thenReturn(user1);
+
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> groupService.removeMemberFromGroup(10L, user1.getId()));
   }
 
   @Test
@@ -340,6 +432,14 @@ class GroupServiceTest {
   }
 
   @Test
+  void deleteGroup_deletionFails_throwsInternalServerError() {
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    doThrow(new RuntimeException("Database error")).when(groupRepository).delete(group);
+
+    assertThrows(InternalServerErrorException.class, () -> groupService.deleteGroup(group.getId()));
+  }
+
+  @Test
   void joinGroupByInvitationCode_groupFull_throwsBadRequest() {
     group.setMemberCount(group.getMaxMembers());
     when(groupRepository.findByInviteCode("code")).thenReturn(Optional.of(group));
@@ -359,6 +459,14 @@ class GroupServiceTest {
   }
 
   @Test
+  void joinGroupByInvitationCode_invalidCode_throwsNotFoundException() {
+    when(groupRepository.findByInviteCode("invalid")).thenReturn(Optional.empty());
+
+    assertThrows(
+        NotFoundException.class, () -> groupService.joinGroupByInvitationCode("invalid", 1L));
+  }
+
+  @Test
   void joinGroupByInvitationCode_successAddsMember() {
     Group joinableGroup = new Group();
     joinableGroup.setMaxMembers(5);
@@ -373,5 +481,140 @@ class GroupServiceTest {
     verify(groupRepository).save(joinableGroup);
     assertNotNull(joinableGroup.getMembers());
     assertEquals(Set.of(user2), joinableGroup.getMembers());
+  }
+
+  @Test
+  void getMembersByGroupId_success_returnsMembers() {
+    Set<Long> memberIds = Set.of(1L, 2L);
+    UserResponseDTO userDto1 = new UserResponseDTO(1L, "user1@example.com", "User", "One");
+    UserResponseDTO userDto2 = new UserResponseDTO(2L, "user2@example.com", "User", "Two");
+    Set<UserResponseDTO> expectedDtos = Set.of(userDto1, userDto2);
+
+    when(groupRepository.findMemberIdsByGroupId(10L)).thenReturn(Optional.of(memberIds));
+    when(userService.getUsersByIdsDTOs(memberIds)).thenReturn(expectedDtos);
+
+    ResponseEntity<Set<UserResponseDTO>> result = groupService.getMembersByGroupId(10L);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(expectedDtos, result.getBody());
+    verify(groupRepository).findMemberIdsByGroupId(10L);
+    verify(userService).getUsersByIdsDTOs(memberIds);
+  }
+
+  @Test
+  void getMembersByGroupId_groupNotFound_throwsNotFoundException() {
+    when(groupRepository.findMemberIdsByGroupId(999L)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class, () -> groupService.getMembersByGroupId(999L));
+  }
+
+  @Test
+  void getMembersByGroupId_unexpectedError_throwsInternalServerError() {
+    when(groupRepository.findMemberIdsByGroupId(10L))
+        .thenThrow(new RuntimeException("Database error"));
+
+    assertThrows(InternalServerErrorException.class, () -> groupService.getMembersByGroupId(10L));
+  }
+
+  @Test
+  void getAdminsByGroupId_success_returnsAdmins() {
+    Set<Long> adminIds = Set.of(1L);
+    UserResponseDTO userDto1 = new UserResponseDTO(1L, "user1@example.com", "User", "One");
+    Set<UserResponseDTO> expectedDtos = Set.of(userDto1);
+
+    when(groupRepository.findAdminIdsByGroupId(10L)).thenReturn(Optional.of(adminIds));
+    when(userService.getUsersByIdsDTOs(adminIds)).thenReturn(expectedDtos);
+
+    ResponseEntity<Set<UserResponseDTO>> result = groupService.getAdminsByGroupId(10L);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(expectedDtos, result.getBody());
+    verify(groupRepository).findAdminIdsByGroupId(10L);
+    verify(userService).getUsersByIdsDTOs(adminIds);
+  }
+
+  @Test
+  void getAdminsByGroupId_groupNotFound_throwsNotFoundException() {
+    when(groupRepository.findAdminIdsByGroupId(999L)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class, () -> groupService.getAdminsByGroupId(999L));
+  }
+
+  @Test
+  void getAdminsByGroupId_unexpectedError_throwsInternalServerError() {
+    when(groupRepository.findAdminIdsByGroupId(10L))
+        .thenThrow(new RuntimeException("Database error"));
+
+    assertThrows(InternalServerErrorException.class, () -> groupService.getAdminsByGroupId(10L));
+  }
+
+  @Test
+  void updateGroup_nullMemberIds_doesNotValidate() {
+    UpdateGroupRequestDTO updateDto = new UpdateGroupRequestDTO("New", "desc", false, null, null);
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(groupRepository.save(group)).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
+
+    ResponseEntity<GroupResponseDTO> result = groupService.updateGroup(group.getId(), updateDto);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    verify(groupRepository).save(group);
+  }
+
+  @Test
+  void updateGroup_nullAdminIds_doesNotValidate() {
+    UpdateGroupRequestDTO updateDto =
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), null);
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(2L)).thenReturn(user2);
+    when(groupRepository.save(group)).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
+
+    ResponseEntity<GroupResponseDTO> result = groupService.updateGroup(group.getId(), updateDto);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    verify(groupRepository).save(group);
+  }
+
+  @Test
+  void updateGroup_groupNotFound_throwsNotFoundException() {
+    UpdateGroupRequestDTO updateDto = new UpdateGroupRequestDTO("New", "desc", false, null, null);
+    when(groupRepository.findById(999L)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class, () -> groupService.updateGroup(999L, updateDto));
+  }
+
+  @Test
+  void createGroup_inviteCodeViolationDetectedByMessageOnly() {
+    Group mappedGroup = new Group();
+    mappedGroup.setAdmins(new java.util.HashSet<>());
+    mappedGroup.setMembers(new java.util.HashSet<>());
+    DataIntegrityViolationException inviteConflict =
+        new DataIntegrityViolationException("Duplicate entry for invite_code");
+
+    when(groupRequestMapper.toEntity(createDto)).thenReturn(mappedGroup);
+    when(userService.getUsersByIdMap(Set.of(1L, 2L))).thenReturn(Map.of(1L, user1, 2L, user2));
+    when(groupRepository.saveAndFlush(mappedGroup)).thenThrow(inviteConflict).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
+
+    ResponseEntity<GroupResponseDTO> result = groupService.createGroup(createDto);
+
+    assertEquals(HttpStatus.CREATED, result.getStatusCode());
+    verify(groupRepository, times(2)).saveAndFlush(mappedGroup);
+  }
+
+  @Test
+  void updateGroup_adminBecomingMemberInSameRequest_succeeds() {
+    UpdateGroupRequestDTO updateDto =
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), Set.of(2L));
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(2L)).thenReturn(user2);
+    when(groupRepository.save(group)).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
+
+    ResponseEntity<GroupResponseDTO> result = groupService.updateGroup(group.getId(), updateDto);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    verify(groupRepository).save(group);
   }
 }

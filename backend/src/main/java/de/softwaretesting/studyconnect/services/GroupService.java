@@ -286,7 +286,7 @@ public class GroupService {
   }
 
   /**
-   * Removes an admin from a group.
+   * Removes admin role from a user in a group.
    *
    * @param groupId the ID of the group
    * @param userId the ID of the user to remove as admin
