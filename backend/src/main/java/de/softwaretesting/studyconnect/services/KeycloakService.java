@@ -1,6 +1,8 @@
 package de.softwaretesting.studyconnect.services;
 
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.BadRequestException;
+import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,6 +28,7 @@ public class KeycloakService {
 
   private final KeycloakAdminTokenService keycloakAdminTokenService;
   private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakService.class);
+  private static final String KEYCLOAK_REALM_PATH = "/admin/realms/";
   private final RestTemplate restTemplate;
 
   @Value("${KEYCLOAK_AUTH_SERVER_URL}")
@@ -101,7 +106,7 @@ public class KeycloakService {
    * @return true if the role was added successfully, false otherwise
    */
   public boolean addRoleToRealm(String roleName) {
-    String roleUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/roles";
+    String roleUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/roles";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -128,7 +133,7 @@ public class KeycloakService {
    * @return true if the realm was deleted successfully, false otherwise
    */
   public boolean deleteRealm() {
-    String deleteUrl = keycloakServerUrl + "/admin/realms/" + realmName;
+    String deleteUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName;
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -157,9 +162,9 @@ public class KeycloakService {
    * @param lastname the last name of the new user
    * @return true if the user was created successfully, false otherwise
    */
-  public boolean createUserInRealm(String password, String email, String surname, String lastname) {
+  public void createUserInRealm(String password, String email, String surname, String lastname) {
 
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -195,11 +200,26 @@ public class KeycloakService {
           response.getStatusCode());
       boolean isSuccessful = response.getStatusCode().is2xxSuccessful();
       LOGGER.debug("Status code is2xxSuccessful: {}", isSuccessful);
-      return isSuccessful;
+
+    } catch (HttpClientErrorException e) {
+      // Translate 409 conflicts into a BadRequestException so callers can return 4xx
+      if (e.getStatusCode().equals(HttpStatus.CONFLICT)) {
+        LOGGER.warn(
+            "Conflict creating user with email {} in realm {}: {}",
+            email,
+            realmName,
+            e.getResponseBodyAsString());
+        throw new BadRequestException("User with email " + email + " already exists");
+      }
+
+      LOGGER.error("HTTP error creating user in realm: {}", e.getMessage());
+      throw new InternalServerErrorException(
+          "Error during user creation in Keycloak: " + e.getMessage());
 
     } catch (Exception e) {
       LOGGER.error("Error creating user in realm: {}", e.getMessage());
-      return false;
+      throw new InternalServerErrorException(
+          "Unknown error during user creation in Keycloak: " + e.getMessage());
     }
   }
 
@@ -214,7 +234,7 @@ public class KeycloakService {
    */
   public boolean createAdminUserInRealm(
       String password, String email, String surname, String lastname) {
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -246,9 +266,22 @@ public class KeycloakService {
           "Admin user '{}' '{}' created successfully in realm '{}'", surname, lastname, realmName);
       return response.getStatusCode().is2xxSuccessful();
 
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode().equals(HttpStatus.CONFLICT)) {
+        LOGGER.warn(
+            "Conflict creating admin user with email {} in realm {}: {}",
+            email,
+            realmName,
+            e.getResponseBodyAsString());
+        throw new BadRequestException("Admin user with email " + email + " already exists");
+      }
+      LOGGER.error("HTTP error creating admin user in realm: {}", e.getMessage());
+      throw new InternalServerErrorException(
+          "Error during admin user creation in Keycloak: " + e.getMessage());
     } catch (Exception e) {
       LOGGER.error("Error creating admin user in realm: {}", e.getMessage());
-      return false;
+      throw new InternalServerErrorException(
+          "Unknown error during admin user creation in Keycloak: " + e.getMessage());
     }
   }
 
@@ -259,7 +292,7 @@ public class KeycloakService {
    * @return the user DTO, or null if not found
    */
   public KeycloakUserResponseDTO retrieveUserByUUID(String userId) {
-    String userUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users/" + userId;
+    String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users/" + userId;
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -310,8 +343,11 @@ public class KeycloakService {
         return null; // No user found
       }
 
+    } catch (HttpClientErrorException e) {
+      LOGGER.error("HTTP error retrieving user by email {}: {}", email, e.getMessage());
+      return null;
     } catch (Exception e) {
-      LOGGER.error("Error retrieving user by email: {}", e.getMessage());
+      LOGGER.error("Error retrieving user by email {}: {}", email, e.getMessage());
       return null;
     }
   }
@@ -322,7 +358,7 @@ public class KeycloakService {
    * @return list of user DTOs, or empty list if none found
    */
   public List<KeycloakUserResponseDTO> retrieveAllUsersInRealm() {
-    String usersUrl = keycloakServerUrl + "/admin/realms/" + realmName + "/users";
+    String usersUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(getAccessToken());
@@ -336,7 +372,6 @@ public class KeycloakService {
               org.springframework.http.HttpMethod.GET,
               request,
               KeycloakUserResponseDTO[].class);
-      LOGGER.info("All users retrieved successfully from realm '{}'", realmName);
       return response.getBody() != null
           ? Arrays.asList(response.getBody())
           : Collections.emptyList();

@@ -3,6 +3,7 @@ package de.softwaretesting.studyconnect.dtos.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Value;
 
+/** Data Transfer Object for Keycloak token responses. */
 @Value
 public class KeycloakTokenResponseDTO {
 

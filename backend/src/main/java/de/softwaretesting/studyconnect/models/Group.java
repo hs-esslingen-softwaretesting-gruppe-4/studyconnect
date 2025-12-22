@@ -16,19 +16,26 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
+@ToString(exclude = {"tasks", "members", "admins", "createdBy"})
 @Table(name = "groups")
 public class Group {
+  private static final SecureRandom INVITE_CODE_RANDOM = new SecureRandom();
+  private static final int INVITE_CODE_BYTES = 16;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
@@ -71,14 +78,27 @@ public class Group {
       inverseJoinColumns = @JoinColumn(name = "user_id"))
   private Set<User> members = new HashSet<>();
 
-  @ManyToOne
-  @JoinColumn(name = "admin_id")
-  private User admin;
+  @ManyToMany
+  @JoinTable(
+      name = "group_admins",
+      joinColumns = @JoinColumn(name = "group_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> admins = new HashSet<>();
+
+  @Column(name = "invite_code", nullable = false, unique = true, length = 50)
+  private String inviteCode;
+
+  @Column(name = "member_count", nullable = false)
+  private int memberCount;
 
   @PrePersist
   protected void onCreate() {
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now();
+    if (this.inviteCode == null || this.inviteCode.isBlank()) {
+      this.inviteCode = generateInviteCode();
+    }
+    this.memberCount = this.members == null ? 0 : this.members.size();
   }
 
   @PreUpdate
@@ -86,11 +106,33 @@ public class Group {
     this.updatedAt = LocalDateTime.now();
   }
 
+  private static String generateInviteCode() {
+    byte[] bytes = new byte[INVITE_CODE_BYTES];
+    INVITE_CODE_RANDOM.nextBytes(bytes);
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+  }
+
+  public void regenerateInviteCode() {
+    this.inviteCode = generateInviteCode();
+  }
+
   public boolean addMember(User user) {
     if (this.members.size() >= this.maxMembers) {
       return false;
     }
-    return this.members.add(user);
+    boolean added = this.members.add(user);
+    if (added) {
+      this.memberCount = this.members.size();
+    }
+    return added;
+  }
+
+  public boolean removeMember(User user) {
+    boolean removed = this.members.remove(user);
+    if (removed) {
+      this.memberCount = this.members.size();
+    }
+    return removed;
   }
 
   public void addTask(Task task) {
@@ -110,5 +152,24 @@ public class Group {
       // if orphanRemoval or cascade remove is desired, nulling group will allow removal
       task.setGroup(null);
     }
+  }
+
+  public boolean addAdmin(User user) {
+    return this.admins.add(user);
+  }
+
+  public void setAdmin(User user) {
+    this.admins.clear();
+    if (user != null) {
+      this.admins.add(user);
+    }
+  }
+
+  public boolean removeAdmin(User user) {
+    return this.admins.remove(user);
+  }
+
+  public boolean isAdmin(User user) {
+    return this.admins.contains(user);
   }
 }

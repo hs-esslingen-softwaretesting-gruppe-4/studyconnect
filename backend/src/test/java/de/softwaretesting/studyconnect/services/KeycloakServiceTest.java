@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.BadRequestException;
+import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -209,7 +212,7 @@ class KeycloakServiceTest {
   // ========== createUserInRealm() tests ==========
 
   @Test
-  void createUserInRealm_shouldReturnTrue_whenUserCreatedSuccessfully() {
+  void createUserInRealm_shouldSucceed_whenUserCreatedSuccessfully() {
     ResponseEntity<Void> response = new ResponseEntity<>(HttpStatus.CREATED);
     when(restTemplate.postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
@@ -217,10 +220,8 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenReturn(response);
 
-    boolean result =
-        keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe");
-
-    assertTrue(result);
+    assertDoesNotThrow(
+        () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
   }
 
   @Test
@@ -235,7 +236,8 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenReturn(response);
 
-    keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe");
+    assertDoesNotThrow(
+        () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
 
     Map<String, Object> body = captor.getValue().getBody();
     assertNotNull(body);
@@ -247,17 +249,31 @@ class KeycloakServiceTest {
   }
 
   @Test
-  void createUserInRealm_shouldReturnFalse_whenCreationFails() {
+  void createUserInRealm_shouldThrowBadRequest_whenConflictOccurs() {
+    HttpClientErrorException conflict =
+        HttpClientErrorException.create(HttpStatus.CONFLICT, "Conflict", null, null, null);
     when(restTemplate.postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
             any(HttpEntity.class),
             eq(Void.class)))
-        .thenThrow(new RestClientException("User already exists"));
+        .thenThrow(conflict);
 
-    boolean result =
-        keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe");
+    assertThrows(
+        BadRequestException.class,
+        () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
+  }
 
-    assertFalse(result);
+  @Test
+  void createUserInRealm_shouldThrowInternalServerError_whenOtherErrorOccurs() {
+    when(restTemplate.postForEntity(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
+            any(HttpEntity.class),
+            eq(Void.class)))
+        .thenThrow(new RestClientException("Connection issue"));
+
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
   }
 
   // ========== createAdminUserInRealm() tests ==========
@@ -297,17 +313,35 @@ class KeycloakServiceTest {
   }
 
   @Test
-  void createAdminUserInRealm_shouldReturnFalse_whenCreationFails() {
+  void createAdminUserInRealm_shouldThrowBadRequest_whenAdminWithSameEmailExists() {
+    HttpClientErrorException conflict =
+        HttpClientErrorException.create(HttpStatus.CONFLICT, "Conflict", null, null, null);
     when(restTemplate.postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
             any(HttpEntity.class),
             eq(Void.class)))
-        .thenThrow(new RestClientException("Admin already exists"));
+        .thenThrow(conflict);
 
-    boolean result =
-        keycloakService.createAdminUserInRealm("admin123", "admin@example.com", "Admin", "User");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            keycloakService.createAdminUserInRealm(
+                "admin123", "testadmin@studyconnect.test", "Test", "Admin"));
+  }
 
-    assertFalse(result);
+  @Test
+  void createAdminUserInRealm_shouldThrowInternalServerError_whenOtherErrorOccurs() {
+    when(restTemplate.postForEntity(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
+            any(HttpEntity.class),
+            eq(Void.class)))
+        .thenThrow(new RestClientException("Connection issue"));
+
+    assertThrows(
+        InternalServerErrorException.class,
+        () ->
+            keycloakService.createAdminUserInRealm(
+                "admin123", "admin@example.com", "Admin", "User"));
   }
 
   // ========== retrieveUserByUUID() tests ==========

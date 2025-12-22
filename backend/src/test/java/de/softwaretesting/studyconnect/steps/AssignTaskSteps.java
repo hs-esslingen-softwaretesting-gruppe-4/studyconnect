@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AssignTaskSteps {
@@ -97,8 +98,10 @@ public class AssignTaskSteps {
       g.addMember(user);
 
       if ("admin".equalsIgnoreCase(role)) {
-        g.setAdmin(user);
-        g.setCreatedBy(user);
+        g.addAdmin(user);
+        if (g.getCreatedBy() == null) {
+          g.setCreatedBy(user);
+        }
       }
     }
     groupRepository.save(g);
@@ -192,14 +195,16 @@ public class AssignTaskSteps {
       User member = userOpt.get();
       // fetch member ids for this group without initializing the group's members
       // collection
-      Optional<List<Long>> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
+      Optional<Set<Long>> memberIds = groupRepository.findMemberIdsByGroupId(g.getId());
       boolean isMember = memberIds.map(ids -> ids.contains(member.getId())).orElse(false);
       if (!isMember) {
         lastMessage = "Selected user is not a group member";
         return;
       }
 
-      if (g.getAdmin() == null || !g.getAdmin().getId().equals(this.currentUser.getId())) {
+      if (this.currentUser == null
+          || g.getId() == null
+          || !groupRepository.existsAdminByGroupIdAndUserId(g.getId(), this.currentUser.getId())) {
         lastMessage = "authorization";
         return;
       }
@@ -270,8 +275,9 @@ public class AssignTaskSteps {
       // also accept that current user is not admin as an authorization condition
       Group g = this.currentGroup;
       if (g != null
-          && g.getAdmin() != null
-          && !g.getAdmin().getId().equals(this.currentUser.getId())) {
+          && this.currentUser != null
+          && g.getId() != null
+          && !groupRepository.existsAdminByGroupIdAndUserId(g.getId(), this.currentUser.getId())) {
         return;
       }
       throw new AssertionError("Expected authorization error but got: " + lastMessage);

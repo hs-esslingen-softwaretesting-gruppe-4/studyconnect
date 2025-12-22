@@ -12,13 +12,21 @@ import de.softwaretesting.studyconnect.mappers.response.UserResponseMapper;
 import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,7 +52,8 @@ public class UserService {
       return;
     }
 
-    // Retrieve all existing users in the realm and create their local representations if they don't
+    // Retrieve all existing users in the realm and create their local
+    // representations if they don't
     // exist
     List<KeycloakUserResponseDTO> users = keycloakService.retrieveAllUsersInRealm();
     for (KeycloakUserResponseDTO user : users) {
@@ -118,49 +127,36 @@ public class UserService {
     User newUser = new User();
     LOGGER.info("Starting user creation for email: {}", userCreateRequestDTO.getEmail());
 
-    boolean successfulUserCreation =
-        keycloakService.createUserInRealm(
-            userCreateRequestDTO.getPassword(),
-            userCreateRequestDTO.getEmail(),
-            userCreateRequestDTO.getSurname(),
-            userCreateRequestDTO.getLastname());
+    try {
+      keycloakService.createUserInRealm(
+          userCreateRequestDTO.getPassword(),
+          userCreateRequestDTO.getEmail(),
+          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getLastname());
 
-    LOGGER.info("User creation in Keycloak result: {}", successfulUserCreation);
+      // On successful creation in Keycloak, proceed with local user creation
+      LOGGER.info(
+          "User creation in Keycloak successful for email: {}", userCreateRequestDTO.getEmail());
 
-    if (!successfulUserCreation) {
-      LOGGER.error(
-          "User creation failed in Keycloak for email: {}", userCreateRequestDTO.getEmail());
+      KeycloakUserResponseDTO createdKeycloakUser =
+          keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
 
-      // Check if user already exists locally to provide better error message
-      Optional<User> existingUser = userRepository.findByEmail(userCreateRequestDTO.getEmail());
-      if (existingUser.isPresent()) {
-        throw new BadRequestException(
-            "User with email " + userCreateRequestDTO.getEmail() + " already exists");
-      } else {
-        throw new InternalServerErrorException("Internal error during user creation in Keycloak");
-      }
-    }
+      newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
+      newUser.setEmail(createdKeycloakUser.getEmail());
+      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setLastname(createdKeycloakUser.getLastName());
+      userRepository.save(newUser);
+      UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+      return ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
 
-    // On successful creation in Keycloak, create local user
-    LOGGER.info("Attempting to retrieve user by email: {}", userCreateRequestDTO.getEmail());
-    KeycloakUserResponseDTO createdKeycloakUser =
-        keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
-    if (createdKeycloakUser == null) {
-      LOGGER.error("Failed to retrieve user from Keycloak after creation");
+    } catch (BadRequestException e) {
+      LOGGER.error("Exception during user creation in Keycloak: {}", e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      LOGGER.error("Unexpected exception during user creation in Keycloak: {}", e.getMessage());
       throw new InternalServerErrorException(
-          "Internal error: Error retrieving created user from Keycloak");
+          "Internal error during user creation in Keycloak: " + e.getMessage());
     }
-
-    LOGGER.info("Successfully retrieved user from Keycloak: {}", createdKeycloakUser.getEmail());
-
-    newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
-    newUser.setEmail(createdKeycloakUser.getEmail());
-    newUser.setSurname(createdKeycloakUser.getFirstName());
-    newUser.setLastname(createdKeycloakUser.getLastName());
-    userRepository.save(newUser);
-
-    UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
-    return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
   }
 
   /**
@@ -172,32 +168,155 @@ public class UserService {
   public ResponseEntity<UserResponseDTO> createAdmin(UserCreateRequestDTO userCreateRequestDTO) {
 
     User newUser = new User();
-    boolean successfulUserCreation =
-        keycloakService.createAdminUserInRealm(
-            userCreateRequestDTO.getPassword(),
-            userCreateRequestDTO.getEmail(),
-            userCreateRequestDTO.getSurname(),
-            userCreateRequestDTO.getLastname());
 
-    if (!successfulUserCreation) {
-      throw new InternalServerErrorException("Internal error during admin creation in Keycloak");
-    }
+    try {
+      this.keycloakService.createAdminUserInRealm(
+          userCreateRequestDTO.getPassword(),
+          userCreateRequestDTO.getEmail(),
+          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getLastname());
 
-    // On successful creation in Keycloak, create local user
-    KeycloakUserResponseDTO createdKeycloakUser =
-        keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
-    if (createdKeycloakUser == null) {
+      // On successful creation in Keycloak, proceed with local user creation
+      KeycloakUserResponseDTO createdKeycloakUser =
+          keycloakService.retrieveUserByEmail(userCreateRequestDTO.getEmail());
+
+      newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
+      newUser.setEmail(createdKeycloakUser.getEmail());
+      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setLastname(createdKeycloakUser.getLastName());
+      userRepository.save(newUser);
+
+      UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
+      return ResponseEntity.status(HttpStatus.CREATED).body(userResponseDTO);
+
+    } catch (BadRequestException e) {
+      throw e;
+    } catch (Exception e) {
+      // Log unexpected exceptions
+      LOGGER.error(
+          "Unexpected exception during admin user creation in Keycloak: {}", e.getMessage());
       throw new InternalServerErrorException(
-          "Internal error: Error retrieving created admin from Keycloak");
+          "Internal error during admin user creation in Keycloak: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves a user entity by its ID.
+   *
+   * @param userId the ID of the user
+   * @return an Optional containing the user entity if found, or empty if not found
+   */
+  public Optional<User> getUserByIdEntity(Long userId) {
+    return userRepository.findById(userId);
+  }
+
+  /**
+   * Retrieves the user associated with the current access token.
+   *
+   * @return a ResponseEntity containing the user's response DTO
+   * @throws BadRequestException if the access token is invalid or missing required claims
+   * @throws NotFoundException if the user is not found
+   */
+  public ResponseEntity<UserResponseDTO> getUserByAccessToken() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
+      throw new BadRequestException("No JWT access token found");
     }
 
-    newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
-    newUser.setEmail(createdKeycloakUser.getEmail());
-    newUser.setSurname(createdKeycloakUser.getFirstName());
-    newUser.setLastname(createdKeycloakUser.getLastName());
-    userRepository.save(newUser);
+    Jwt jwt = jwtAuth.getToken();
+    String keycloakUuid = jwt.getSubject();
+    if (keycloakUuid == null || keycloakUuid.isBlank()) {
+      throw new BadRequestException("Access token missing subject (sub)");
+    }
 
-    UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
-    return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
+    Optional<User> byUuid = userRepository.findByKeycloakUUID(keycloakUuid);
+    if (byUuid.isPresent()) {
+      return ResponseEntity.ok(userResponseMapper.toDto(byUuid.get()));
+    } else {
+      LOGGER.warn("User with Keycloak UUID {} not found locally.", keycloakUuid);
+      throw new NotFoundException("User not found");
+    }
+  }
+
+  /**
+   * Retrieves multiple user entities by their IDs in a single query.
+   *
+   * @param userIds the user IDs to fetch
+   * @return a map of userId -> User for all users that exist
+   */
+  public Map<Long, User> getUsersByIdMap(Set<Long> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return Map.of();
+    }
+
+    List<User> users = userRepository.findAllById(userIds);
+    Map<Long, User> result = new HashMap<>();
+    for (User user : users) {
+      if (user != null && user.getId() != null) {
+        result.put(user.getId(), user);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Retrieves a set of users by their IDs.
+   *
+   * @param userIds the IDs of the users to retrieve
+   * @return a set of User entities
+   */
+  public Set<User> getUsersByIds(Set<Long> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return Set.of();
+    }
+    Set<User> users = new HashSet<>(userRepository.findAllById(userIds));
+    if (users.isEmpty()) {
+      throw new NotFoundException("No users found for the provided IDs");
+    } else if (users.size() < userIds.size()) {
+      throw new NotFoundException("Some users not found for the provided IDs");
+    }
+    return users;
+  }
+
+  /**
+   * Retrieves a set of UserResponseDTOs by their IDs.
+   *
+   * @param userIds the IDs of the users to retrieve
+   * @return a set of UserResponseDTOs
+   */
+  public Set<UserResponseDTO> getUsersByIdsDTOs(Set<Long> userIds) {
+    try {
+      Set<User> users = getUsersByIds(userIds);
+      Set<UserResponseDTO> userDTOs = new HashSet<>();
+      for (User user : users) {
+        userDTOs.add(userResponseMapper.toDto(user));
+      }
+      return userDTOs;
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      LOGGER.error("Error retrieving users by IDs: {}", e.getMessage());
+      throw new InternalServerErrorException(
+          "Internal error retrieving users by IDs: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves a user entity by its ID, throwing NotFoundException if not found.
+   *
+   * @param userId the ID of the user
+   * @return the user entity
+   * @throws NotFoundException if the user is not found
+   */
+  public User retrieveUserById(Long userId) {
+    return userRepository
+        .findById(userId)
+        .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+  }
+
+  public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+    List<User> users = userRepository.findAll();
+    List<UserResponseDTO> userDTOs = userResponseMapper.toDtoList(users);
+    return ResponseEntity.ok(userDTOs);
   }
 }

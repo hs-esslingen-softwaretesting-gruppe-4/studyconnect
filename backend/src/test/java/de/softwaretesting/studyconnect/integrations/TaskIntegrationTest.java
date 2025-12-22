@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-public class TaskIntegrationTest {
+class TaskIntegrationTest {
   @Autowired private TaskRepository taskRepository;
 
   @Autowired private UserRepository userRepository;
