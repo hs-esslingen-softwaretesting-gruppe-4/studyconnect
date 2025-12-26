@@ -1,0 +1,135 @@
+/* StudyConnect Keycloak Login Theme CSS for Keycloak version 25.0 */
+
+:root {
+  /* StudyConnect palette (approx. from logo) */
+  --sc-bg: #DDF9FC;         /* very light cyan background */
+  --sc-navy: #11496A;       /* dark navy */
+  --sc-teal: #2DB0A9;       /* teal */
+  --sc-blue: #28A7C6;       /* blue accent */
+
+  --sc-card-bg: #ffffff;
+  --sc-border: rgba(17, 73, 106, 0.18);
+  --sc-shadow: rgba(17, 73, 106, 0.12);
+}
+
+/* ===== Page background ===== */
+body#keycloak-bg {
+  background: var(--sc-bg) !important;
+  color: var(--sc-navy) !important;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Realm name header (top-left) */
+#kc-header-wrapper {
+  color: var(--sc-navy) !important;
+  opacity: 0.85;
+}
+
+/* ===== Center the login area ===== */
+.pf-v5-c-login {
+  min-height: calc(100vh - 120px); /* keep space for #kc-header */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px !important;
+}
+
+/* Ensure container doesn't push content off-center */
+.pf-v5-c-login__container {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* Card */
+.pf-v5-c-login__main {
+  background: var(--sc-card-bg) !important;
+  border: 1px solid var(--sc-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 30px var(--sc-shadow) !important;
+
+  padding: 28px 28px 24px 28px !important;
+
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto !important;
+}
+
+/* ===== Header: logo above title, centered column ===== */
+.pf-v5-c-login__main-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 10px !important;
+
+  /* neutralize PF grid behavior on wider screens */
+  grid-template-columns: none !important;
+  grid-template-areas: none !important;
+
+  margin-bottom: 10px !important;
+}
+
+/* Logo (no template override; inject via CSS) */
+.pf-v5-c-login__main-header::before {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 110px;
+  background: url("../img/studyconnect-logo.png") center / contain no-repeat;
+  border-radius: 50% !important;
+}
+
+/* Title */
+.pf-v5-c-login__main-header .pf-v5-c-title {
+  text-align: center !important;
+  margin: 0 !important;
+  color: var(--sc-navy) !important;
+}
+
+/* ===== Inputs ===== */
+.pf-v5-c-form__label-text {
+  color: var(--sc-navy) !important;
+}
+
+.pf-v5-c-form-control input {
+  border-radius: 10px !important;
+}
+
+.pf-v5-c-form-control input:focus {
+  outline: none !important;
+  border-color: var(--sc-teal) !important;
+  box-shadow: 0 0 0 3px rgba(45, 176, 169, 0.25) !important;
+}
+
+/* ===== Primary button ===== */
+#kc-login {
+  background: var(--sc-teal) !important;
+  border-color: var(--sc-teal) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+#kc-login:hover {
+  background: #249C96 !important;
+  border-color: #249C96 !important;
+}
+
+/* ===== Links ===== */
+a {
+  color: var(--sc-blue) !important;
+}
+
+a:hover {
+  color: var(--sc-navy) !important;
+}
+
+/* ===== Small text / helper text ===== */
+.help-block,
+#kc-info-wrapper,
+#kc-form-options,
+.checkbox label {
+  color: rgba(17, 73, 106, 0.75) !important;
+}

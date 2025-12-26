@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
@@ -43,6 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -86,6 +88,9 @@ class UserServiceTest {
             null,
             null,
             null);
+
+    ReflectionTestUtils.setField(userService, "defaultClientRole", "user");
+    ReflectionTestUtils.setField(userService, "defaultAdminRole", "admin");
   }
 
   @AfterEach
@@ -362,6 +367,8 @@ class UserServiceTest {
   @Test
   void init_shouldCreateRealmAndSyncUsers() {
     when(keycloakService.createRealm()).thenReturn(true);
+    when(keycloakService.addRolesToRealm(anyList())).thenReturn(true);
+    when(keycloakService.createClients()).thenReturn(true);
     when(keycloakService.retrieveAllUsersInRealm())
         .thenReturn(List.of(testKeycloakUserResponseDTO));
     when(userRepository.findByKeycloakUUID("keycloak-uuid-123")).thenReturn(Optional.empty());
@@ -388,6 +395,8 @@ class UserServiceTest {
   @Test
   void init_shouldSkipExistingUsers() {
     when(keycloakService.createRealm()).thenReturn(true);
+    when(keycloakService.addRolesToRealm(anyList())).thenReturn(true);
+    when(keycloakService.createClients()).thenReturn(true);
     when(keycloakService.retrieveAllUsersInRealm())
         .thenReturn(List.of(testKeycloakUserResponseDTO));
     when(userRepository.findByKeycloakUUID("keycloak-uuid-123")).thenReturn(Optional.of(testUser));
@@ -400,6 +409,8 @@ class UserServiceTest {
   @Test
   void init_shouldHandleEmptyUserList() {
     when(keycloakService.createRealm()).thenReturn(true);
+    when(keycloakService.addRolesToRealm(anyList())).thenReturn(true);
+    when(keycloakService.createClients()).thenReturn(true);
     when(keycloakService.retrieveAllUsersInRealm()).thenReturn(Collections.emptyList());
 
     userService.init();
