@@ -52,9 +52,6 @@ public class KeycloakService {
   @Value("${ALLOWED_ORIGIN}")
   private String allowedOrigin;
 
-  @Value("${KEYCLOAK_CLIENT_SECRET}")
-  private String clientSecret;
-
   /**
    * Returns a valid access token from the token service.
    *
