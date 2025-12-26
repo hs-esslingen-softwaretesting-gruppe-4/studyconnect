@@ -56,7 +56,6 @@ export class RegisterComponent {
       try {
         await this.usersService.createUser(this.registerForm.value);
       } catch (error: any) {
-        console.log('Registration error:', error);
         this.ngZone.run(() => {
           this.errorMessage =
             error?.error?.message || 'Registration failed. Please try again.';

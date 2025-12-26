@@ -74,7 +74,6 @@ export class ToastComponent {
     let position: DOMRect;
     afterNextRender({
       earlyRead: () => {
-        console.log('setting up toast position', typeof this.elementRef);
         position = this.elementRef.nativeElement.parentElement.getBoundingClientRect();
       },
       write: () => {
@@ -111,7 +110,6 @@ export class ToastComponent {
   /** Toggles the visibility of the toast notifications. */
   toggleToasts(): void {
     this.showToasts.set(!this.showToasts());
-    console.log(this.showToasts());
   }
 
   /** Checks if there are any error toasts present. */
