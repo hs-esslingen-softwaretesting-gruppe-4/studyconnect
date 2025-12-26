@@ -33,6 +33,7 @@ jobs:
       KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
       KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
       KEYCLOAK_DEVELOPMENT_CLIENT_ID: ${{ secrets.KEYCLOAK_DEVELOPMENT_CLIENT_ID }}
+      ALLOWED_ORIGIN: ${{ secrets.ALLOWED_ORIGIN }}
 
     defaults:
       run:
