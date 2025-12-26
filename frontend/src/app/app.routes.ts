@@ -25,10 +25,6 @@ export const routes: Routes = [
     component: UnauthorizedComponent
   },
   {
-    path: 'not-allowed',
-    component: UnauthorizedComponent
-  },
-  {
     path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full',

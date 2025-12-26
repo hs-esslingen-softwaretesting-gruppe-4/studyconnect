@@ -43,7 +43,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       surname: ['', Validators.required],
       lastname: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]], // Atleast 8 characters, one uppercase, one lowercase, one number, one special character
     });
   }
 
