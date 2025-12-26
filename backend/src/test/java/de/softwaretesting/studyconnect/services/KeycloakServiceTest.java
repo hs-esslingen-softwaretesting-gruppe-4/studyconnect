@@ -160,7 +160,7 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenReturn(response);
 
-    boolean result = keycloakService.addRoleToRealm("test-role");
+    boolean result = keycloakService.addRolesToRealm(List.of("test-role"));
 
     assertTrue(result);
   }
@@ -173,7 +173,7 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenThrow(new RestClientException("Role already exists"));
 
-    boolean result = keycloakService.addRoleToRealm("test-role");
+    boolean result = keycloakService.addRolesToRealm(List.of("test-role"));
 
     assertFalse(result);
   }

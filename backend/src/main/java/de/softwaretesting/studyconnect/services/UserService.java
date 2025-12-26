@@ -5,6 +5,7 @@ import de.softwaretesting.studyconnect.dtos.request.UserUpdateRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
 import de.softwaretesting.studyconnect.dtos.response.UserResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.BadRequestException;
+import de.softwaretesting.studyconnect.exceptions.ConflictException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.mappers.request.UserRequestMapper;
@@ -21,6 +22,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -39,6 +41,12 @@ public class UserService {
   private final KeycloakService keycloakService;
   private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
+  @Value("${keycloak.default-client-role}")
+  private String defaultClientRole;
+
+  @Value("${keycloak.default-admin-role}")
+  private String defaultAdminRole;
+
   /**
    * Initializes the service by ensuring the Keycloak realm exists and syncing users. This method is
    * called after the service is constructed.
@@ -49,6 +57,21 @@ public class UserService {
     // Create the configured realm
     boolean created = keycloakService.createRealm();
     if (!created) {
+      LOGGER.error("Failed to create Keycloak realm");
+      return;
+    }
+
+    boolean rolesCreated =
+        keycloakService.addRolesToRealm(List.of(defaultClientRole, defaultAdminRole));
+    if (!rolesCreated) {
+      LOGGER.error("Failed to create Keycloak roles");
+      return;
+    }
+
+    // Create the configured clients
+    boolean clientsCreated = keycloakService.createClients();
+    if (!clientsCreated) {
+      LOGGER.error("Failed to create Keycloak clients");
       return;
     }
 
@@ -126,6 +149,14 @@ public class UserService {
 
     User newUser = new User();
     LOGGER.info("Starting user creation for email: {}", userCreateRequestDTO.getEmail());
+
+    // Check if user already exists locally
+    Optional<User> existingUser = userRepository.findByEmail(userCreateRequestDTO.getEmail());
+    if (existingUser.isPresent()) {
+      LOGGER.info("User with email {} already exists locally.", userCreateRequestDTO.getEmail());
+      throw new ConflictException(
+          "User with email " + userCreateRequestDTO.getEmail() + " already exists");
+    }
 
     try {
       keycloakService.createUserInRealm(

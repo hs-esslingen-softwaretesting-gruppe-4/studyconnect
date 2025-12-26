@@ -239,6 +239,37 @@ Falls die Anwendung keine Verbindung zur Datenbank herstellen kann, prüfen Sie 
 
 ---
 
+#### Installation der erfoderlichen Voraussetzungen für das Frontend (Angular)
+Eine Kurzliste der benötigten Werkzeuge und Schritte, um das Angular-Frontend lokal zu entwickeln und zu starten.
+
+- Node.js & npm: Installieren Sie eine aktuelle LTS-Version von Node.js (empfohlen: Node 18+). npm wird zusammen mit Node installiert.
+- Angular CLI (optional): Für das globale CLI-Tool: `npm install -g @angular/cli` — alternativ können Sie `npx @angular/cli` verwenden.
+- Projektabhängigkeiten installieren: Wechseln Sie in das Verzeichnis `frontend` und führen Sie `npm install` aus, um alle Abhängigkeiten zu installieren.
+
+- Verwendete Angular-Version: Diese Anwendung wurde mit Angular v21 entwickelt (Dependencies und CLI Version befinden sich in `frontend/package.json`).
+
+Kurz erklärt:
+- `Node.js` stellt die Laufzeitumgebung bereit; `npm` verwaltet Pakete.
+- Die `Angular CLI` erleichtert das Entwickeln und Starten der Anwendung, ist aber nicht zwingend, wenn `npm`-Scripte vorhanden sind.
+
+#### Starten des Frontends
+
+Nachdem die Voraussetzungen installiert und `npm install` im Ordner `frontend` ausgeführt wurde, starten Sie die Anwendung lokal wie folgt:
+
+- Mit Angular CLI direkt:
+
+  - `ng serve` — startet die Entwicklungs-Server und stellt die App typischerweise unter `http://localhost:4200` bereit.
+
+- Über npm (falls `package.json` ein Start-Skript definiert):
+
+  - `npm start` oder `npm run start` — führt das konfigurierte Start-Skript aus (meistens `ng serve`).
+
+  Hinweis: In diesem Projekt ist in `frontend/package.json` ein `start`-Script definiert, das `ng serve` ausführt. Sie können daher einfach `npm start` im `frontend`-Ordner verwenden.
+
+Hinweise:
+- Öffnen Sie nach erfolgreichem Start die Anwendung im Browser unter `http://localhost:4200` (oder dem in der Konsole angezeigten Port).
+- Für Produktions-Builds verwenden Sie `ng build --prod` bzw. `npm run build` und deployen die erzeugten Dateien aus dem Ordner `dist/`.
+
 ### Starten von Tests im Backend
 
 Die Tests laufen lokal standardmäßig gegen eine H2 In-Memory-Datenbank. Die Konfiguration befindet sich in `backend/src/main/resources/application-test.properties`.

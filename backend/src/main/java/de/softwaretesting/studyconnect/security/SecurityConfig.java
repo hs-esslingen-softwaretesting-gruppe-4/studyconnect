@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Security configuration for production profile. - Configures JWT-based authentication and
@@ -49,24 +51,32 @@ public class SecurityConfig {
       HttpSecurity http, Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
-        .cors(
-            cors ->
-                cors.configurationSource(
-                    request -> {
-                      CorsConfiguration config = new CorsConfiguration();
-                      config.addAllowedOrigin(env.getProperty("allowed.origin"));
-                      config.setAllowedMethods(
-                          Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                      config.addAllowedHeader("*");
-                      return config;
-                    }))
+        .cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorize -> {
               final String requiredAuthority =
                   env.getProperty("required.keycloak.role", "studyconnect");
+              final String allowedOrigin =
+                  Optional.ofNullable(env.getProperty("allowed.origin"))
+                      .orElse("http://localhost:4200");
+
+              // Allow POST /api/users only when the Origin header matches allowed.origin
+              authorize
+                  .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users")
+                  .access(
+                      (authentication, requestContext) -> {
+                        String origin =
+                            requestContext
+                                .getRequest()
+                                .getHeader(org.springframework.http.HttpHeaders.ORIGIN);
+                        boolean allowed = origin != null && origin.equals(allowedOrigin);
+                        return new org.springframework.security.authorization.AuthorizationDecision(
+                            allowed);
+                      });
+
+              // All other requests require the configured authority
               authorize.anyRequest().hasAuthority(requiredAuthority);
-            })
-        .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication
+            });
 
     // Only configure OAuth2 if JwtDecoder is available
     try {
@@ -86,6 +96,26 @@ public class SecurityConfig {
     }
 
     return http.build();
+  }
+
+  @Bean
+  UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(
+        Optional.ofNullable(env.getProperty("allowed.origin"))
+            .map(origins -> Arrays.asList(origins.split(",")))
+            .orElse(List.of("http://localhost:4200")));
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "DELETE", "OPTIONS", "PUT", "PATCH"));
+    configuration.setAllowedHeaders(
+        Arrays.asList(
+            HttpHeaders.ORIGIN,
+            HttpHeaders.CONTENT_TYPE,
+            HttpHeaders.ACCEPT,
+            HttpHeaders.AUTHORIZATION));
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   @Bean

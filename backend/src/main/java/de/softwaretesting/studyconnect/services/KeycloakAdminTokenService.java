@@ -123,7 +123,7 @@ public class KeycloakAdminTokenService {
 
   /** Fetches a new access token using the admin credentials. */
   private void fetchNewToken() {
-    LOGGER.debug("Fetching new Keycloak admin token");
+    LOGGER.info("Fetching new Keycloak admin token");
 
     String tokenUrl = keycloakServerUrl + "/realms/master/protocol/openid-connect/token";
 
@@ -147,6 +147,7 @@ public class KeycloakAdminTokenService {
         LOGGER.info("Successfully fetched new Keycloak admin token");
       }
     } catch (Exception e) {
+      LOGGER.error("Failed to fetch Keycloak admin token: {}", e.getMessage());
       throw new KeycloakTokenFetchException("Failed to fetch Keycloak admin token");
     }
   }
