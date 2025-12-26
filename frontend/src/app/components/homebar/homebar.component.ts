@@ -30,7 +30,7 @@ export class HomebarComponent {
   activeMenuItem = signal(0);
 
   links = [
-    {name: 'Dashboard', path: '/dashbaord'},
+    {name: 'Dashboard', path: '/dashboard'},
     {name: 'Groups', path: '/groups'}
   ];
 }
