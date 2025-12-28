@@ -43,10 +43,10 @@ public class KeycloakService {
   @Value("${keycloak.default-admin-role}")
   private String defaultAdminRole;
 
-  @Value("${KEYCLOAK_CLIENT_ID}")
+  @Value("${keycloak.client-id}")
   private String clientId;
 
-  @Value("${KEYCLOAK_DEVELOPMENT_CLIENT_ID}")
+  @Value("${keycloak.development.client-id}")
   private String developmentClientId;
 
   @Value("${ALLOWED_ORIGIN}")
