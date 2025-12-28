@@ -24,19 +24,30 @@ WORKDIR /app
 COPY --from=backend-build /app/backend/target/studyconnect-*.jar app.jar
 RUN chown -R studyconnect:studyconnect /app
 USER studyconnect
+
+# Environment variables with defaults
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV PORT=8080
 ENV JVM_OPTS="-Xmx512m -Xms256m"
+ENV STUDYCONNECT_REQUIRED_ROLE=studyconnect
+ENV ALLOWED_ORIGIN=http://localhost:4200
+
+# Database configuration (override in production)
 ENV POSTGRES_HOST=localhost
 ENV POSTGRES_PORT=5432
 ENV POSTGRES_DB=studyconnectdb
 ENV POSTGRES_USER=studyconnect
 ENV POSTGRES_PASSWORD=secret
 ENV JPA_HIBERNATE_DDL_AUTO=validate
+
+# Keycloak configuration
 ENV KEYCLOAK_AUTH_SERVER_URL=https://keycloak.example.com
 ENV KEYCLOAK_REALM=studyconnect
-ENV STUDYCONNECT_REQUIRED_ROLE=studyconnect
-ENV ALLOWED_ORIGIN=http://localhost:4200
+ENV KEYCLOAK_DEFAULT_CLIENT_ROLE=${STUDYCONNECT_REQUIRED_ROLE}
+ENV KEYCLOAK_DEFAULT_ADMIN_ROLE=admin
+ENV KEYCLOAK_CLIENT_ID=studyconnect-frontend
+ENV KEYCLOAK_DEVELOPMENT_CLIENT_ID=studyconnect-frontend-dev
+
 EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT}/actuator/health || exit 1
