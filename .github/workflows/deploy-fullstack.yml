@@ -12,39 +12,65 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Validate deploy secrets
+      shell: bash
+      run: |
+        set -euo pipefail
+        missing=0
+        for name in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY GHCR_USERNAME GHCR_TOKEN; do
+          if [ -z "${!name:-}" ]; then
+            echo "Missing required secret: $name" >&2
+            missing=1
+          fi
+        done
+        if [ "$missing" -ne 0 ]; then
+          exit 1
+        fi
 
     - name: Prepare SSH
       shell: bash
       run: |
         set -euo pipefail
+        : "${DEPLOY_PORT:=22}"
         mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+        printf '%s' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+        ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
     - name: Upload docker-compose.yml and env template
       shell: bash
       run: |
         set -euo pipefail
-        ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p \"\$HOME/docker/studyconnect\""
-        scp -P "${{ secrets.DEPLOY_PORT || 22 }}" deploy/studyconnect/docker-compose.yml "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:docker/studyconnect/docker-compose.yml"
-        scp -P "${{ secrets.DEPLOY_PORT || 22 }}" deploy/studyconnect/.env.example "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:docker/studyconnect/.env.example"
+        : "${DEPLOY_PORT:=22}"
+        ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p \"\$HOME/docker/studyconnect\""
+        scp -P "$DEPLOY_PORT" deploy/studyconnect/docker-compose.yml "$DEPLOY_USER@$DEPLOY_HOST:~/docker/studyconnect/docker-compose.yml"
+        scp -P "$DEPLOY_PORT" deploy/studyconnect/.env.example "$DEPLOY_USER@$DEPLOY_HOST:~/docker/studyconnect/.env.example"
 
     - name: Login to GHCR on server
       shell: bash
       run: |
         set -euo pipefail
-        printf '%s' "${{ secrets.GHCR_TOKEN }}" | ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-          "docker login ghcr.io -u '${{ secrets.GHCR_USERNAME }}' --password-stdin"
+        : "${DEPLOY_PORT:=22}"
+        printf '%s' "$GHCR_TOKEN" | ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" \
+          "docker login ghcr.io -u '$GHCR_USERNAME' --password-stdin"
 
     - name: Deploy (pull latest + restart)
       shell: bash
       run: |
         set -euo pipefail
-        ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" <<'EOF'
+        : "${DEPLOY_PORT:=22}"
+        ssh -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
           set -euo pipefail
           cd "$HOME/docker/studyconnect"
           if [ ! -f .env ]; then
