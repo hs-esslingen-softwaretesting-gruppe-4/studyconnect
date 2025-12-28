@@ -77,6 +77,24 @@ jobs:
             echo "Missing $HOME/docker/studyconnect/.env (copy from .env.example and fill values)." >&2
             exit 1
           fi
-          docker compose pull
+          # Pull images with retries (GHCR pulls can be flaky on some networks).
+          images="$(docker compose config --images | sort -u)"
+          for image in $images; do
+            echo "Pulling $image"
+            pulled=0
+            for attempt in 1 2 3 4; do
+              if docker pull "$image"; then
+                pulled=1
+                break
+              fi
+              sleep_seconds=$((attempt * 10))
+              echo "Pull failed for $image (attempt $attempt). Retrying in ${sleep_seconds}s..." >&2
+              sleep "$sleep_seconds"
+            done
+            if [ "$pulled" -ne 1 ]; then
+              echo "Failed to pull $image after multiple attempts." >&2
+              exit 1
+            fi
+          done
           docker compose up -d --remove-orphans
         EOF
