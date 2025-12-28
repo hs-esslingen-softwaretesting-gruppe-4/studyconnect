@@ -1,0 +1,47 @@
+services:
+  app:
+    image: ghcr.io/${IMAGE_REPO}:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      PORT: "8080"
+
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.studyconnect.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.studyconnect.entrypoints=websecure
+      - traefik.http.routers.studyconnect.tls=true
+      - traefik.http.services.studyconnect.loadbalancer.server.port=8080
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+
+volumes:
+  postgres_data:

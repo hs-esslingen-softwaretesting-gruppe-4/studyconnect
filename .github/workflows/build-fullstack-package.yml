@@ -46,6 +46,11 @@ jobs:
           }
 
           core.setOutput('ready', ready ? 'true' : 'false');
+    - name: Stop if prerequisites not met
+      if: steps.gate.outputs.ready != 'true'
+      run: |
+        echo "Prerequisite workflows have not both succeeded for this commit; skipping."
+        exit 1
     - name: Log in to GitHub Container Registry
       if: steps.gate.outputs.ready == 'true'
       uses: docker/login-action@v3
