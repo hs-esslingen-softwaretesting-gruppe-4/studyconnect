@@ -1,0 +1,16 @@
+<div class="unauthorized">
+  <div class="unauthorized__card">
+    <img class="sorry-image" src="assets/sorry.gif" alt="Unauthorized Access" />
+    <h1 class="unauthorized__title">Unauthorized</h1>
+    <p class="sorry-text">Sorry, you are not authorized to view this page.</p>
+    @if (!isAuthorized()) {
+    <button mat-raised-button class="login-button" color="primary" (click)="handleLogIn()">
+      Try logging in
+    </button>
+    <p class="info-text">or</p>
+    <button mat-raised-button class="register-button" color="accent" routerLink="/register">
+      Register now
+    </button>
+    }
+  </div>
+</div>

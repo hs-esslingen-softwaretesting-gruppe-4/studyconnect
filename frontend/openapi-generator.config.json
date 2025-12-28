@@ -1,0 +1,14 @@
+{
+  "generatorName": "typescript-angular",
+  "inputSpec": "../backend/openapi.yaml",
+  "output": "src/app/api-services/api",
+  "additionalProperties": {
+    "ngVersion": "21.0.0",
+    "providedInRoot": true,
+    "modelPropertyNaming": "original",
+    "fileNaming": "kebab-case",
+    "serviceSuffix": "Service",
+    "stringEnums": true,
+    "supportsES6": true
+  }
+}

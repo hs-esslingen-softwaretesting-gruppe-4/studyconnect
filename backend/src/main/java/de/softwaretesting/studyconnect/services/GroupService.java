@@ -266,6 +266,9 @@ public class GroupService {
     if (!removed) {
       throw new BadRequestException("User with id " + userId + " is not a member of the group");
     }
+
+    // ! ToDo: Remove user from tasks he is assigned to as well
+
     // Check if the group still has any members after removal
     if (group.getMemberCount() == 0) {
       groupRepository.delete(group);

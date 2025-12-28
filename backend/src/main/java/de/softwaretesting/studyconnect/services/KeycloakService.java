@@ -43,6 +43,15 @@ public class KeycloakService {
   @Value("${keycloak.default-admin-role}")
   private String defaultAdminRole;
 
+  @Value("${KEYCLOAK_CLIENT_ID}")
+  private String clientId;
+
+  @Value("${KEYCLOAK_DEVELOPMENT_CLIENT_ID}")
+  private String developmentClientId;
+
+  @Value("${ALLOWED_ORIGIN}")
+  private String allowedOrigin;
+
   /**
    * Returns a valid access token from the token service.
    *
@@ -86,9 +95,6 @@ public class KeycloakService {
       ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
       if (response.getStatusCode().is2xxSuccessful()) {
         LOGGER.info("Realm '{}' created successfully in Keycloak", realmName);
-        // Create default roles
-        addRoleToRealm(defaultClientRole);
-        addRoleToRealm(defaultAdminRole);
         return true;
       }
       return false;
@@ -105,25 +111,63 @@ public class KeycloakService {
    * @param roleName the name of the role to add
    * @return true if the role was added successfully, false otherwise
    */
-  public boolean addRoleToRealm(String roleName) {
+  public boolean addRolesToRealm(List<String> roles) {
     String roleUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/roles";
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setBearerAuth(getAccessToken());
-
-    Map<String, Object> body = Map.of("name", roleName);
-
-    HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-
+    LOGGER.info("Roles to add: {}", roles);
+    List<String> existingRoles = getAllRoles();
     try {
-      ResponseEntity<Void> response = restTemplate.postForEntity(roleUrl, request, Void.class);
-      LOGGER.info("Role '{}' added successfully to realm '{}'", roleName, realmName);
-      return response.getStatusCode().is2xxSuccessful();
+      for (String roleName : roles) {
+        if (existingRoles.contains(roleName)) {
+          LOGGER.info("Role '{}' already exists in realm '{}'", roleName, realmName);
+          continue; // Role already exists
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(getAccessToken());
 
+        Map<String, Object> body = Map.of("name", roleName);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        restTemplate.postForEntity(roleUrl, request, Void.class);
+        LOGGER.info("Role '{}' added successfully to realm '{}'", roleName, realmName);
+      }
+      return true;
     } catch (Exception e) {
-      LOGGER.error("Error adding role to realm: {}", e.getMessage());
+      LOGGER.error("Error adding roles to realm");
       return false;
+    }
+  }
+
+  /**
+   * Creates the configured clients in Keycloak if they do not already exist.
+   *
+   * @return true if the clients were created successfully or already exist, false otherwise
+   */
+  public boolean createClients() {
+
+    // Check if client already exists
+    List<String> existingClients = getAllClients();
+    if (!existingClients.contains(clientId) && !existingClients.contains(developmentClientId)) {
+      LOGGER.info(
+          "Clients '{}' or '{}' do not exist in realm '{}'",
+          clientId,
+          developmentClientId,
+          realmName);
+      return createClientsInRealm(List.of(clientId, developmentClientId));
+    } else if (!existingClients.contains(clientId)) {
+      LOGGER.info("Client '{}' does not exist in realm '{}'", clientId, realmName);
+      return createClientsInRealm(List.of(clientId));
+    } else if (!existingClients.contains(developmentClientId)) {
+      LOGGER.info("Client '{}' does not exist in realm '{}'", developmentClientId, realmName);
+      return createClientsInRealm(List.of(developmentClientId));
+    } else {
+      LOGGER.info(
+          "Clients '{}' and '{}' already exist in realm '{}'",
+          clientId,
+          developmentClientId,
+          realmName);
+      return true;
     }
   }
 
@@ -418,6 +462,111 @@ public class KeycloakService {
     } catch (Exception e) {
       LOGGER.error("Error retrieving all realms: {}", e.getMessage());
       return Collections.emptyList();
+    }
+  }
+
+  /**
+   * Retrieves all clients from the configured realm.
+   *
+   * @return list of client IDs, or empty list if none found
+   */
+  public List<String> getAllClients() {
+    String clientsUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/clients";
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(getAccessToken());
+    HttpEntity<Void> request = new HttpEntity<>(headers);
+
+    try {
+      ResponseEntity<Map[]> response =
+          restTemplate.exchange(
+              clientsUrl, org.springframework.http.HttpMethod.GET, request, Map[].class);
+      if (response.getBody() != null) {
+
+        return Arrays.stream(response.getBody())
+            .map(client -> (String) client.get("clientId"))
+            .toList();
+      } else {
+        return Collections.emptyList();
+      }
+
+    } catch (Exception e) {
+      LOGGER.error("Error retrieving all clients: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
+  private List<String> getAllRoles() {
+    String rolesUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/roles";
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(getAccessToken());
+    HttpEntity<Void> request = new HttpEntity<>(headers);
+
+    try {
+      ResponseEntity<Map[]> response =
+          restTemplate.exchange(
+              rolesUrl, org.springframework.http.HttpMethod.GET, request, Map[].class);
+      if (response.getBody() != null) {
+
+        return Arrays.stream(response.getBody()).map(role -> (String) role.get("name")).toList();
+      } else {
+        return Collections.emptyList();
+      }
+
+    } catch (Exception e) {
+      LOGGER.error("Error retrieving all roles: {}", e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
+  /**
+   * Creates clients in the configured realm.
+   *
+   * @param clientIds the list of client IDs to create
+   * @return true if the clients were created successfully, false otherwise
+   */
+  private boolean createClientsInRealm(List<String> clientIds) {
+
+    String clientUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/clients";
+    try {
+      for (String id : clientIds) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(getAccessToken());
+
+        Map<String, Object> attributes =
+            Map.ofEntries(
+                Map.entry("pkce.code.challenge.method", "S256"),
+                Map.entry("pkce.supported", "true"),
+                Map.entry("post.logout.redirect.uris", allowedOrigin + "/*"),
+                Map.entry("frontchannel.logout.session.required", "true"),
+                Map.entry("frontchannel.logout.url", allowedOrigin + "/logout"));
+
+        Map<String, Object> body =
+            Map.ofEntries(
+                Map.entry("clientId", id),
+                Map.entry("enabled", true),
+                Map.entry("publicClient", true),
+                Map.entry("description", "Client for Studyconnect frontend application"),
+                Map.entry("redirectUris", (Object) List.of(allowedOrigin, allowedOrigin + "/*")),
+                Map.entry("standardFlowEnabled", true),
+                Map.entry("directAccessGrantsEnabled", false),
+                Map.entry("implicitFlowEnabled", false),
+                Map.entry("serviceAccountsEnabled", false),
+                Map.entry("authorizationServicesEnabled", false),
+                Map.entry("attributes", attributes),
+                Map.entry(
+                    "defaultClientScopes", (Object) List.of("openid", "profile", "email", "roles")),
+                Map.entry("webOrigins", (Object) List.of(allowedOrigin)),
+                Map.entry("protocol", "openid-connect"));
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        restTemplate.postForEntity(clientUrl, request, Void.class);
+        LOGGER.info("Client '{}' created successfully in realm '{}'", id, realmName);
+      }
+      return true;
+    } catch (Exception e) {
+      LOGGER.error("Error creating clients in realm: {}", e.getMessage());
+      return false;
     }
   }
 }

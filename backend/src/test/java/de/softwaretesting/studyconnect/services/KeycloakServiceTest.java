@@ -87,7 +87,7 @@ class KeycloakServiceTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void createRealm_shouldCreateRealmAndRoles_whenRealmDoesNotExist() {
+  void createRealm_shouldCreateRealm_whenRealmDoesNotExist() {
     // Mock getAllRealms to return empty list
     Map<String, Object>[] realmsArray = new Map[] {};
     ResponseEntity<Map[]> realmsResponse = new ResponseEntity<>(realmsArray, HttpStatus.OK);
@@ -104,13 +104,6 @@ class KeycloakServiceTest {
             eq(TEST_KEYCLOAK_URL + "/admin/realms"), any(HttpEntity.class), eq(Void.class)))
         .thenReturn(createResponse);
 
-    // Mock role creation
-    when(restTemplate.postForEntity(
-            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
-            any(HttpEntity.class),
-            eq(Void.class)))
-        .thenReturn(createResponse);
-
     boolean result = keycloakService.createRealm();
 
     assertTrue(result);
@@ -118,8 +111,7 @@ class KeycloakServiceTest {
     verify(restTemplate)
         .postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms"), any(HttpEntity.class), eq(Void.class));
-    // Verify both roles were created
-    verify(restTemplate, times(2))
+    verify(restTemplate, never())
         .postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
             any(HttpEntity.class),
@@ -160,7 +152,7 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenReturn(response);
 
-    boolean result = keycloakService.addRoleToRealm("test-role");
+    boolean result = keycloakService.addRolesToRealm(List.of("test-role"));
 
     assertTrue(result);
   }
@@ -173,7 +165,7 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenThrow(new RestClientException("Role already exists"));
 
-    boolean result = keycloakService.addRoleToRealm("test-role");
+    boolean result = keycloakService.addRolesToRealm(List.of("test-role"));
 
     assertFalse(result);
   }

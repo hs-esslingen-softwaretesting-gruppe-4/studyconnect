@@ -71,4 +71,11 @@ public class GlobalExceptionHandler {
     throw new InternalServerErrorException(
         "An internal error occurred while fetching the Keycloak token.");
   }
+
+  @ExceptionHandler(ConflictException.class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  public ResponseEntity<Map<String, Object>> handleConflictException(
+      ConflictException ex, HttpServletRequest request) {
+    return createResponseEntity(HttpStatus.CONFLICT, "Conflict", ex.getMessage(), request);
+  }
 }

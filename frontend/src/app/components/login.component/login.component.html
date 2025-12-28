@@ -1,0 +1,15 @@
+<div class="login-component">
+    @if (authService.isAuthenticated()) {
+    <div class="initials"
+                [matTooltip]="'Logged in as ' + fullname">
+                {{ initials }}
+    </div>
+    }
+    <button mat-button color="accent" (click)="handleLogInOut()">
+        @if (authService.isAuthenticated()) {
+        Logout
+        } @else {
+        Login
+        }
+    </button>
+</div>

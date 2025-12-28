@@ -1,0 +1,77 @@
+name: Build and Package Fullstack (push main)
+
+on:
+  workflow_run:
+    workflows: ["Build and Test Frontend (push/pr main)", "Build and Test Backend (push/pr main)"]
+    types:
+      - completed
+    branches: [ "main" ]
+
+jobs:
+  build-package:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check workflow prerequisites
+      id: gate
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const workflows = [
+            'build-and-test-frontend.yml',
+            'build-and-test-backend.yml',
+          ];
+          const sha = context.payload.workflow_run.head_sha;
+          let ready = true;
+
+          for (const workflowId of workflows) {
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              head_sha: sha,
+              per_page: 5,
+            });
+
+            const hasSuccess = data.workflow_runs?.some((run) => run.conclusion === 'success');
+            if (!hasSuccess) {
+              ready = false;
+              core.notice(`No successful run for ${workflowId} on ${sha}.`);
+            }
+          }
+
+          core.setOutput('ready', ready ? 'true' : 'false');
+    - name: Stop if prerequisites not met
+      if: steps.gate.outputs.ready != 'true'
+      run: |
+        echo "Prerequisite workflows have not both succeeded for this commit; skipping."
+        exit 1
+    - name: Log in to GitHub Container Registry
+      if: steps.gate.outputs.ready == 'true'
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata
+      if: steps.gate.outputs.ready == 'true'
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=raw,value=latest,enable={{is_default_branch}}
+    - name: Build and push Docker image
+      if: steps.gate.outputs.ready == 'true'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.fullstack
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}

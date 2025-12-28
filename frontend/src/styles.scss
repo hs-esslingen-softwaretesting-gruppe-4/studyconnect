@@ -1,0 +1,92 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Angular Material Theme */
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+/* Define the theme object */
+$studyconnect-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+  ),
+  typography: (
+    brand-family: 'Roboto',
+    plain-family: 'Roboto',
+  ),
+  density: (
+    scale: 0,
+  )
+));
+
+/* Apply the theme */
+html {
+  @include mat.all-component-themes($studyconnect-theme);
+}
+
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Toast notification styles */
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.info-snackbar {
+  background-color: #2196f3 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.warning-snackbar {
+  background-color: #ff9800 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}

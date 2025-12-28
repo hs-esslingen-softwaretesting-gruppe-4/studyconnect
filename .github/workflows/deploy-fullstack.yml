@@ -1,0 +1,56 @@
+name: Deploy Fullstack (push main)
+
+on:
+  workflow_run:
+    workflows: ["Build and Package Fullstack (push main)"]
+    types: [completed]
+    branches: ["main"]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Prepare SSH
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+    - name: Upload docker-compose.yml and env template
+      shell: bash
+      run: |
+        set -euo pipefail
+        ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p \"\$HOME/docker/studyconnect\""
+        scp -P "${{ secrets.DEPLOY_PORT || 22 }}" deploy/studyconnect/docker-compose.yml "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:docker/studyconnect/docker-compose.yml"
+        scp -P "${{ secrets.DEPLOY_PORT || 22 }}" deploy/studyconnect/.env.example "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:docker/studyconnect/.env.example"
+
+    - name: Login to GHCR on server
+      shell: bash
+      run: |
+        set -euo pipefail
+        printf '%s' "${{ secrets.GHCR_TOKEN }}" | ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+          "docker login ghcr.io -u '${{ secrets.GHCR_USERNAME }}' --password-stdin"
+
+    - name: Deploy (pull latest + restart)
+      shell: bash
+      run: |
+        set -euo pipefail
+        ssh -p "${{ secrets.DEPLOY_PORT || 22 }}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" <<'EOF'
+          set -euo pipefail
+          cd "$HOME/docker/studyconnect"
+          if [ ! -f .env ]; then
+            echo "Missing $HOME/docker/studyconnect/.env (copy from .env.example and fill values)." >&2
+            exit 1
+          fi
+          docker compose pull
+          docker compose up -d --remove-orphans
+        EOF

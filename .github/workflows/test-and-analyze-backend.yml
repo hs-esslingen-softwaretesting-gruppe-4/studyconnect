@@ -31,6 +31,9 @@ jobs:
       KEYCLOAK_AUTH_SERVER_URL: ${{ secrets.KEYCLOAK_AUTH_SERVER_URL }}
       KEYCLOAK_ISSUER_URI: ${{ secrets.KEYCLOAK_ISSUER_URI }}
       KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+      KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+      KEYCLOAK_DEVELOPMENT_CLIENT_ID: ${{ secrets.KEYCLOAK_DEVELOPMENT_CLIENT_ID }}
+      ALLOWED_ORIGIN: ${{ secrets.ALLOWED_ORIGIN }}
 
     defaults:
       run:

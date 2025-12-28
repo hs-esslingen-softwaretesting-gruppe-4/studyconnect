@@ -1,0 +1,44 @@
+<div class="homebar">
+  <a class="homebar__brand" routerLink="/dashboard">
+    <img
+      class="homebar__logo"
+      src="assets/studyconnect_logo.jpeg"
+      alt="StudyConnect Logo"
+    />
+  </a>
+
+  <div class="homebar__mobile">
+    <button mat-icon-button class="homebar__menu-button" [matMenuTriggerFor]="menu">
+      <mat-icon class="homebar__menu-icon">menu</mat-icon>
+    </button>
+
+    <a class="homebar__mobile-link" [routerLink]="links[activeMenuItem()].path">{{
+      links[activeMenuItem()].name
+    }}</a>
+  </div>
+
+  <mat-menu #menu="matMenu">
+    @for (link of links; track $index) {
+      <a
+        mat-menu-item
+        [routerLink]="link.path"
+        (click)="activeMenuItem.set($index); isMobileMenuOpen.set(false)"
+      >
+        {{ link.name }}
+      </a>
+    }
+  </mat-menu>
+
+  <nav class="homebar__navigation">
+    @for (link of links; track $index) {
+      <app-navbar-button
+        label="{{ link.name }}"
+        routerLink="{{ link.path }}"
+        [isExact]="link.path === '/'"
+        [class]="link.name"
+      ></app-navbar-button>
+    }
+  </nav>
+
+  <app-login class="homebar__login"></app-login>
+</div>
