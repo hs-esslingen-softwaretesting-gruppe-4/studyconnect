@@ -24,7 +24,7 @@ jobs:
         script: |
           const workflows = [
             'build-and-test-frontend.yml',
-            'build-and-test-backend.yml',
+            'test-and-analyze-backend.yml',
           ];
           const sha = context.payload.workflow_run.head_sha;
           let ready = true;
