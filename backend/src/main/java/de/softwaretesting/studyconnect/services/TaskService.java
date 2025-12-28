@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Service class for managing tasks within the StudyConnect application. */
 @Service
@@ -70,6 +71,7 @@ public class TaskService {
    * @param groupId the ID of the group
    * @return a ResponseEntity containing a list of task response DTOs
    */
+  @Transactional(readOnly = true)
   public ResponseEntity<List<TaskResponseDTO>> getAllTasksInGroup(Long groupId) {
     List<Task> tasks = taskRepository.findByGroupId(groupId);
     List<TaskResponseDTO> taskResponseDTOs = tasks.stream().map(taskResponseMapper::toDto).toList();
@@ -82,6 +84,7 @@ public class TaskService {
    * @param userId the ID of the user
    * @return a ResponseEntity containing a list of task response DTOs
    */
+  @Transactional(readOnly = true)
   public ResponseEntity<List<TaskResponseDTO>> getAllTasksAssignedToUser(Long userId) {
     List<Task> tasks = taskRepository.findByAssigneesId(userId);
     List<TaskResponseDTO> taskResponseDTOs = tasks.stream().map(taskResponseMapper::toDto).toList();

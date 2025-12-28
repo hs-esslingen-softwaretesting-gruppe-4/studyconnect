@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { NavbarButtonComponent } from './navbar-button.component';
 
@@ -8,7 +9,8 @@ describe('NavbarButton', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavbarButtonComponent]
+      imports: [NavbarButtonComponent],
+      providers: [provideRouter([])],
     })
     .compileComponents();
 

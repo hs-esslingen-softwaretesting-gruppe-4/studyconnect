@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { RegisterComponent } from './register.component';
 import { UsersServiceWrapper } from '../../services/wrapper-services/users.service.wrapper';
@@ -14,10 +14,11 @@ describe('RegisterComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [RegisterComponent, RouterTestingModule],
+      imports: [RegisterComponent],
       providers: [
         { provide: UsersServiceWrapper, useValue: usersServiceSpy },
         { provide: AuthService, useValue: {} },
+        provideRouter([]),
       ],
     }).compileComponents();
   });
@@ -33,7 +34,7 @@ describe('RegisterComponent', () => {
       email: 'test@example.com',
       surname: 'Test',
       lastname: 'User',
-      password: 'password1',
+      password: 'Password1!',
     });
 
     await component.onSubmit();
