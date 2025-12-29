@@ -2,6 +2,8 @@ name: Build and Test Frontend (push/pr main)
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'frontend/**'
   pull_request:
     branches: [ "main" ]
     paths:

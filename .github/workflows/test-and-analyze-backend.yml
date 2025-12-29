@@ -13,6 +13,8 @@ name: Build and Test Backend (push/pr main)
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
   pull_request:
     branches: [ "main" ]
     paths:
