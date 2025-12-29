@@ -2,7 +2,7 @@ name: Deploy Fullstack (push main)
 
 on:
   workflow_run:
-    workflows: ["Build and Package Fullstack (push main)"]
+    workflows: ["Build and Package Fullstack (main)"]
     types: [completed]
     branches: ["main"]
 
