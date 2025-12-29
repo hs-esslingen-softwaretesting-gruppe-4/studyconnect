@@ -4,6 +4,7 @@ import { RegisterComponent } from './pages/register/register.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { GroupsComponent } from './pages/groups/groups.component';
 import { UnauthorizedComponent } from './pages/unauthorized.component/unauthorized.component';
+import { NotAllowedComponent } from './pages/not-allowed/not-allowed.component';
 
 export const routes: Routes = [
   {
@@ -23,6 +24,10 @@ export const routes: Routes = [
   {
     path: 'unauthorized',
     component: UnauthorizedComponent
+  },
+  {
+    path: 'not-allowed',
+    component: NotAllowedComponent,
   },
   {
     path: '',

@@ -2,6 +2,7 @@ const realmName = 'studyconnect';
 
 export const environment = {
   production: true,
+  debugAuth: false,
   apiBasePath: '',
   apiUrl: '/api',
   registerUserEndpoint: '/api/users',

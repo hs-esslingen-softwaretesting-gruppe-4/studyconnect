@@ -1,0 +1,9 @@
+.not-allowed {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.not-allowed__card {
+  width: min(640px, 100%);
+}
