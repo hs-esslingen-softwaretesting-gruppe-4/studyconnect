@@ -54,6 +54,9 @@ public class SecurityConfig {
       HttpSecurity http, Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
+        // Keycloak's silent SSO check loads /assets/silent-check-sso.html in a hidden iframe.
+        // Spring Security defaults to X-Frame-Options: DENY, which breaks this flow.
+        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
         .cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorize -> {
