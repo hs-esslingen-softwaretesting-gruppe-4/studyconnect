@@ -40,7 +40,7 @@ describe('RegisterComponent', () => {
     await component.onSubmit();
     fixture.detectChanges();
 
-    expect(component.isLoading).toBeFalsy();
+    expect(component.isLoading()).toBeFalsy();
     expect(component.errorMessage).toBe('Backend error');
     expect(fixture.nativeElement.querySelector('.error-banner')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
