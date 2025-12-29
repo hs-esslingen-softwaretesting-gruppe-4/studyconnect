@@ -8,6 +8,7 @@ import de.softwaretesting.studyconnect.dtos.response.KeycloakUserResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.BadRequestException;
 import de.softwaretesting.studyconnect.exceptions.InternalServerErrorException;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,12 +206,34 @@ class KeycloakServiceTest {
 
   @Test
   void createUserInRealm_shouldSucceed_whenUserCreatedSuccessfully() {
-    ResponseEntity<Void> response = new ResponseEntity<>(HttpStatus.CREATED);
+    ResponseEntity<Void> response =
+        ResponseEntity.created(
+                URI.create(
+                    TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users/created-user-id"))
+            .build();
     when(restTemplate.postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
             any(HttpEntity.class),
             eq(Void.class)))
         .thenReturn(response);
+
+    when(restTemplate.exchange(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(List.class)))
+        .thenReturn(
+            new ResponseEntity<>(
+                List.of(Map.of("id", "role-id", "name", TEST_CLIENT_ROLE)), HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            eq(
+                TEST_KEYCLOAK_URL
+                    + "/admin/realms/"
+                    + TEST_REALM
+                    + "/users/created-user-id/role-mappings/realm"),
+            any(HttpEntity.class),
+            eq(Void.class)))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
     assertDoesNotThrow(
         () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
@@ -219,7 +242,11 @@ class KeycloakServiceTest {
   @Test
   @SuppressWarnings("unchecked")
   void createUserInRealm_shouldSendCorrectPayload() {
-    ResponseEntity<Void> response = new ResponseEntity<>(HttpStatus.CREATED);
+    ResponseEntity<Void> response =
+        ResponseEntity.created(
+                URI.create(
+                    TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users/created-user-id"))
+            .build();
     ArgumentCaptor<HttpEntity<Map<String, Object>>> captor =
         ArgumentCaptor.forClass(HttpEntity.class);
     when(restTemplate.postForEntity(
@@ -227,6 +254,24 @@ class KeycloakServiceTest {
             captor.capture(),
             eq(Void.class)))
         .thenReturn(response);
+
+    when(restTemplate.exchange(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(List.class)))
+        .thenReturn(
+            new ResponseEntity<>(
+                List.of(Map.of("id", "role-id", "name", TEST_CLIENT_ROLE)), HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            eq(
+                TEST_KEYCLOAK_URL
+                    + "/admin/realms/"
+                    + TEST_REALM
+                    + "/users/created-user-id/role-mappings/realm"),
+            any(HttpEntity.class),
+            eq(Void.class)))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
     assertDoesNotThrow(
         () -> keycloakService.createUserInRealm("password123", "test@example.com", "John", "Doe"));
@@ -237,7 +282,7 @@ class KeycloakServiceTest {
     assertEquals("John", body.get("firstName"));
     assertEquals("Doe", body.get("lastName"));
     assertTrue((Boolean) body.get("enabled"));
-    assertEquals(List.of(TEST_CLIENT_ROLE), body.get("realmRoles"));
+    assertNull(body.get("realmRoles"));
   }
 
   @Test
@@ -272,12 +317,37 @@ class KeycloakServiceTest {
 
   @Test
   void createAdminUserInRealm_shouldReturnTrue_whenAdminCreatedSuccessfully() {
-    ResponseEntity<Void> response = new ResponseEntity<>(HttpStatus.CREATED);
+    ResponseEntity<Void> response =
+        ResponseEntity.created(
+                URI.create(
+                    TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users/created-admin-id"))
+            .build();
     when(restTemplate.postForEntity(
             eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users"),
             any(HttpEntity.class),
             eq(Void.class)))
         .thenReturn(response);
+
+    when(restTemplate.exchange(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(List.class)))
+        .thenReturn(
+            new ResponseEntity<>(
+                List.of(
+                    Map.of("id", "role-id-1", "name", TEST_CLIENT_ROLE),
+                    Map.of("id", "role-id-2", "name", TEST_ADMIN_ROLE)),
+                HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            eq(
+                TEST_KEYCLOAK_URL
+                    + "/admin/realms/"
+                    + TEST_REALM
+                    + "/users/created-admin-id/role-mappings/realm"),
+            any(HttpEntity.class),
+            eq(Void.class)))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
     boolean result =
         keycloakService.createAdminUserInRealm("admin123", "admin@example.com", "Admin", "User");
@@ -288,7 +358,11 @@ class KeycloakServiceTest {
   @Test
   @SuppressWarnings("unchecked")
   void createAdminUserInRealm_shouldAssignAdminRole() {
-    ResponseEntity<Void> response = new ResponseEntity<>(HttpStatus.CREATED);
+    ResponseEntity<Void> response =
+        ResponseEntity.created(
+                URI.create(
+                    TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/users/created-admin-id"))
+            .build();
     ArgumentCaptor<HttpEntity<Map<String, Object>>> captor =
         ArgumentCaptor.forClass(HttpEntity.class);
     when(restTemplate.postForEntity(
@@ -297,11 +371,41 @@ class KeycloakServiceTest {
             eq(Void.class)))
         .thenReturn(response);
 
+    when(restTemplate.exchange(
+            eq(TEST_KEYCLOAK_URL + "/admin/realms/" + TEST_REALM + "/roles"),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(List.class)))
+        .thenReturn(
+            new ResponseEntity<>(
+                List.of(
+                    Map.of("id", "role-id-1", "name", TEST_CLIENT_ROLE),
+                    Map.of("id", "role-id-2", "name", TEST_ADMIN_ROLE)),
+                HttpStatus.OK));
+
+    ArgumentCaptor<HttpEntity<List<Map<String, Object>>>> roleMapCaptor =
+        ArgumentCaptor.forClass(HttpEntity.class);
+    when(restTemplate.postForEntity(
+            eq(
+                TEST_KEYCLOAK_URL
+                    + "/admin/realms/"
+                    + TEST_REALM
+                    + "/users/created-admin-id/role-mappings/realm"),
+            roleMapCaptor.capture(),
+            eq(Void.class)))
+        .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+
     keycloakService.createAdminUserInRealm("admin123", "admin@example.com", "Admin", "User");
 
     Map<String, Object> body = captor.getValue().getBody();
     assertNotNull(body);
-    assertEquals(List.of(TEST_CLIENT_ROLE, TEST_ADMIN_ROLE), body.get("realmRoles"));
+    assertNull(body.get("realmRoles"));
+
+    List<Map<String, Object>> roleMappingsBody = roleMapCaptor.getValue().getBody();
+    assertNotNull(roleMappingsBody);
+    assertEquals(2, roleMappingsBody.size());
+    assertTrue(roleMappingsBody.stream().anyMatch(m -> TEST_CLIENT_ROLE.equals(m.get("name"))));
+    assertTrue(roleMappingsBody.stream().anyMatch(m -> TEST_ADMIN_ROLE.equals(m.get("name"))));
   }
 
   @Test

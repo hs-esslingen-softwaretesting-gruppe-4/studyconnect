@@ -228,7 +228,7 @@ export class AuthService {
       resourceRoles[client] = Array.isArray(roles) ? roles : [];
     }
 
-    console.info('[AuthService]', context, {
+    console.log('[AuthService]', context, {
       authenticated: this.keycloak.authenticated ?? false,
       realm: environment.realmName,
       clientId: environment.clientID,
