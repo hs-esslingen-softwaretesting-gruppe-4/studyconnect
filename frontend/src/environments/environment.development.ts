@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  debugAuth: false,
+  debugAuth: true,
   apiBasePath: 'http://localhost:8088',
   apiUrl: 'http://localhost:8088/api',
   registerUserEndpoint: 'http://localhost:8088/api/users',
