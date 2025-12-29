@@ -1,77 +1,159 @@
-name: Build and Package Fullstack (push main)
+name: Build and Package Fullstack (main)
 
 on:
   workflow_run:
-    workflows: ["Build and Test Frontend (push/pr main)", "Build and Test Backend (push/pr main)"]
-    types:
-      - completed
-    branches: [ "main" ]
+    workflows:
+      - Build and Test Frontend (push/pr main)
+      - Build and Test Backend (push/pr main)
+    types: [completed]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
+  gate:
+    if: >-
+      ${{
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.conclusion == 'success'
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      reason: ${{ steps.gate.outputs.reason }}
+      frontend_changed: ${{ steps.changes.outputs.frontend_changed }}
+      backend_changed: ${{ steps.changes.outputs.backend_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Detect changes in frontend/backend
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            changed_files="$(git diff --name-only HEAD^ HEAD)"
+          else
+            changed_files="$(git ls-files)"
+          fi
+
+          if echo "$changed_files" | grep -qE '^frontend/'; then
+            echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "frontend_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if echo "$changed_files" | grep -qE '^backend/'; then
+            echo "backend_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check workflow prerequisites
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.workflow_run.head_sha;
+            const triggerRunId = context.payload.workflow_run.id;
+            const frontendChanged = "${{ steps.changes.outputs.frontend_changed }}" === "true";
+            const backendChanged = "${{ steps.changes.outputs.backend_changed }}" === "true";
+
+            if (!frontendChanged && !backendChanged) {
+              core.notice(`No changes in frontend/ or backend/ for ${sha}; skipping fullstack build.`);
+              core.setOutput("ready", "false");
+              core.setOutput("reason", "no_relevant_changes");
+              return;
+            }
+
+            const required = [];
+            if (frontendChanged) required.push({ workflow_id: "build-and-test-frontend.yml", label: "frontend" });
+            if (backendChanged) required.push({ workflow_id: "test-and-analyze-backend.yml", label: "backend" });
+
+            const requiredRuns = [];
+            for (const wf of required) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: wf.workflow_id,
+                head_sha: sha,
+                per_page: 10,
+              });
+
+              const completedRun = (data.workflow_runs || []).find((r) => r.status === "completed");
+              if (!completedRun) {
+                core.notice(`No completed run for ${wf.workflow_id} on ${sha} yet.`);
+                core.setOutput("ready", "false");
+                core.setOutput("reason", "missing_prereq");
+                return;
+              }
+              if (completedRun.conclusion !== "success") {
+                core.notice(`${wf.workflow_id} on ${sha} concluded with ${completedRun.conclusion}.`);
+                core.setOutput("ready", "false");
+                core.setOutput("reason", "prereq_failed");
+                return;
+              }
+
+              requiredRuns.push({ ...wf, run: completedRun });
+            }
+
+            if (requiredRuns.length > 1) {
+              const latest = requiredRuns.reduce((a, b) =>
+                new Date(a.run.updated_at).getTime() > new Date(b.run.updated_at).getTime() ? a : b
+              );
+
+              if (triggerRunId !== latest.run.id) {
+                core.notice(
+                  `Both frontend and backend changed; waiting for the last prerequisite workflow to trigger the build (latest: ${latest.workflow_id}).`
+                );
+                core.setOutput("ready", "false");
+                core.setOutput("reason", "waiting_for_last_prereq");
+                return;
+              }
+            }
+
+            core.setOutput("ready", "true");
+            core.setOutput("reason", "ok");
+
   build-package:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Check workflow prerequisites
-      id: gate
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const workflows = [
-            'build-and-test-frontend.yml',
-            'test-and-analyze-backend.yml',
-          ];
-          const sha = context.payload.workflow_run.head_sha;
-          let ready = true;
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-          for (const workflowId of workflows) {
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowId,
-              head_sha: sha,
-              per_page: 5,
-            });
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            const hasSuccess = data.workflow_runs?.some((run) => run.conclusion === 'success');
-            if (!hasSuccess) {
-              ready = false;
-              core.notice(`No successful run for ${workflowId} on ${sha}.`);
-            }
-          }
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
 
-          core.setOutput('ready', ready ? 'true' : 'false');
-    - name: Stop if prerequisites not met
-      if: steps.gate.outputs.ready != 'true'
-      run: |
-        echo "Prerequisite workflows have not both succeeded for this commit; skipping."
-        exit 1
-    - name: Log in to GitHub Container Registry
-      if: steps.gate.outputs.ready == 'true'
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Extract metadata
-      if: steps.gate.outputs.ready == 'true'
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ github.repository }}
-        tags: |
-          type=raw,value=latest,enable={{is_default_branch}}
-    - name: Build and push Docker image
-      if: steps.gate.outputs.ready == 'true'
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile.fullstack
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.fullstack
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

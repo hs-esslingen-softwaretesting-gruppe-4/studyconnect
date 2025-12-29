@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -7,9 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../services/auth.service';
 import { ErrorBannerComponent } from '../../components/error-banner/error-banner.component';
 import { UsersServiceWrapper } from '../../services/wrapper-services/users.service.wrapper';
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-register',
@@ -22,14 +24,16 @@ import { UsersServiceWrapper } from '../../services/wrapper-services/users.servi
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     ErrorBannerComponent,
-  ],
+    MatIcon
+],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
   registerForm: FormGroup;
-  isLoading = false;
+  isLoading = signal(false);
   errorMessage = '';
 
   constructor(
@@ -50,7 +54,7 @@ export class RegisterComponent {
 
   async onSubmit(): Promise<void> {
     if (this.registerForm.valid) {
-      this.isLoading = true;
+      this.isLoading.set(true);
       this.errorMessage = '';
 
       try {
@@ -64,7 +68,7 @@ export class RegisterComponent {
       }
       finally {
         this.ngZone.run(() => {
-          this.isLoading = false;
+          this.isLoading.set(false);
         });
       }
 

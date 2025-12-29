@@ -171,7 +171,8 @@ public class KeycloakService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(getAccessToken());
 
-        Map<String, Object> body = Map.of("name", roleName);
+        Map<String, Object> body =
+            Map.of("name", roleName, "description", "Realm role for Studyconnect application");
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
         try {
