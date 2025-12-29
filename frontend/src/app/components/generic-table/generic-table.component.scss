@@ -1,0 +1,63 @@
+@use "sass:color";
+
+tr:nth-child(2n) {
+  background-color: #f0f0f0;
+}
+
+th {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+td {
+  white-space: normal;
+  word-wrap: break-word;
+  hyphens: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-column-actions {
+  width: 1%;
+  white-space: nowrap;
+}
+
+$color: #193058;
+
+// Data-Zeilen
+.mat-mdc-row {
+  background-color: #ffffff;
+  height: 48px;
+  border-bottom: 1px solid #e0e0e0;
+
+  &.selected {
+    // background-color: #ede7f6; // selected row color
+    background-color: color.adjust($color, $lightness: 60%); // selected row color
+  }
+
+  &:hover {
+    background-color: color.adjust($color, $lightness: 65%); // row hover color
+    cursor: pointer;
+  }
+
+  &.selected:hover {
+    background-color: color.adjust($color, $lightness: 55%); // selected row hover color
+  }
+}
+
+.mat-mdc-cell {
+  padding: 16px;
+}
+
+tr.mat-mdc-footer-row td {
+  font-weight: 600;
+  color: var(--color-he-darkblue);
+}
+
+tr.mat-mdc-header-row th {
+  font-weight: 600;
+}
