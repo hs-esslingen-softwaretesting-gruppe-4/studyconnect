@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormGroup } from '@angular/forms';
 
 import { FormComponent } from './form-component.component';
 
@@ -8,12 +9,15 @@ describe('FormComponentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormComponent]
-    })
-    .compileComponents();
+      imports: [FormComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
+
+    component.formGroup = new FormGroup({});
+    component.config = { fields: [] };
+
     fixture.detectChanges();
   });
 
