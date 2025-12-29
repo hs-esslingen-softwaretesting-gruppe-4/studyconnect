@@ -20,10 +20,15 @@ services:
       - proxy
     labels:
       - traefik.enable=true
+      - traefik.docker.network=proxy
       - traefik.http.routers.studyconnect.rule=Host(`${TRAEFIK_HOST}`)
       - traefik.http.routers.studyconnect.entrypoints=websecure
       - traefik.http.routers.studyconnect.tls=true
       - traefik.http.services.studyconnect.loadbalancer.server.port=8080
+      - traefik.http.routers.studyconnect-http.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.studyconnect-http.entrypoints=web
+      - traefik.http.routers.studyconnect-http.middlewares=studyconnect-https-redirect
+      - traefik.http.middlewares.studyconnect-https-redirect.redirectscheme.scheme=https
 
   db:
     image: postgres:16-alpine

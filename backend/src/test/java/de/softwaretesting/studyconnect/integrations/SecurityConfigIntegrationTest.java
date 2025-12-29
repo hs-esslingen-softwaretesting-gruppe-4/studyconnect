@@ -220,7 +220,7 @@ class SecurityConfigIntegrationTest {
   @Test
   void shouldValidateSecurityFilterChain_Configuration() throws Exception {
     // Test basic security filter chain functionality
-    mockMvc.perform(get("/health")).andExpect(status().isUnauthorized());
+    mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
   }
 
   @Test

@@ -15,7 +15,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,6 +30,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -60,22 +63,42 @@ public class SecurityConfig {
                   Optional.ofNullable(env.getProperty("allowed.origin"))
                       .orElse("http://localhost:4200");
 
-              // Allow POST /api/users only when the Origin header matches allowed.origin
+              // Public access to SPA assets and routes (served by Spring Boot static resources).
+              // Keep API + actuator protected (except health), everything else is a frontend route.
+              final RequestMatcher publicPaths =
+                  request -> {
+                    final String path = request.getRequestURI();
+                    return path != null
+                        && !path.startsWith("/api")
+                        && !path.startsWith("/actuator");
+                  };
+
               authorize
-                  .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users")
+                  // Let browsers perform CORS preflight without authentication
+                  .requestMatchers(HttpMethod.OPTIONS, "/**")
+                  .permitAll()
+                  // Docker healthcheck relies on this endpoint
+                  .requestMatchers("/actuator/health/**")
+                  .permitAll()
+                  // Frontend (index.html, assets, SPA routes)
+                  .requestMatchers(publicPaths)
+                  .permitAll()
+                  // Allow POST /api/users only when the Origin header matches allowed.origin
+                  .requestMatchers(HttpMethod.POST, "/api/users")
                   .access(
                       (authentication, requestContext) -> {
-                        String origin =
-                            requestContext
-                                .getRequest()
-                                .getHeader(org.springframework.http.HttpHeaders.ORIGIN);
+                        String origin = requestContext.getRequest().getHeader(HttpHeaders.ORIGIN);
                         boolean allowed = origin != null && origin.equals(allowedOrigin);
-                        return new org.springframework.security.authorization.AuthorizationDecision(
-                            allowed);
-                      });
-
-              // All other requests require the configured authority
-              authorize.anyRequest().hasAuthority(requiredAuthority);
+                        return new AuthorizationDecision(allowed);
+                      })
+                  // All API requests require the configured authority
+                  .requestMatchers("/api/**")
+                  .hasAuthority(requiredAuthority)
+                  // Keep actuator protected in general (except health above)
+                  .requestMatchers("/actuator/**")
+                  .hasAuthority(requiredAuthority)
+                  .anyRequest()
+                  .denyAll();
             });
 
     // Only configure OAuth2 if JwtDecoder is available
