@@ -24,15 +24,10 @@ export const authGuard: CanActivateFn = (
   }
 
   // Redirect to unauthorized page if not authenticated
-  if(!isAuthenticated) {
-    router.navigate(['/unauthorized']);
-    return false;
+  if (!isAuthenticated) {
+    return router.createUrlTree(['/unauthorized'], { queryParams: { returnUrl: state.url } });
   }
 
-  // Redirect to not allowed page if role is insufficient
-  if (!hasRequiredRole) {
-    router.navigate(['/not-allowed']);
-    return false;
-  }
-  return false;
+  // Authenticated but missing role, redirect to not-allowed page
+  return router.createUrlTree(['/not-allowed']);
 };

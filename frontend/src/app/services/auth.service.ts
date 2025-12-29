@@ -39,6 +39,22 @@ export class AuthService {
         this.setupTokenRefresh();
       }
 
+      if (environment.debugAuth) {
+        this.logRoles('init');
+      }
+
+      this.keycloak.onAuthSuccess = () => {
+        this.isAuthenticatedSubject.next(true);
+        if (environment.debugAuth) {
+          this.logRoles('onAuthSuccess');
+        }
+      };
+      this.keycloak.onAuthRefreshSuccess = () => {
+        if (environment.debugAuth) {
+          this.logRoles('onAuthRefreshSuccess');
+        }
+      };
+
       // Handle token expiration
       this.keycloak.onTokenExpired = () => {
         console.warn('Token expired, user will be logged out on next interaction');
@@ -136,8 +152,18 @@ export class AuthService {
       }
     }
 
-    const realmAccess = this.keycloak.realmAccess;
-    return realmAccess?.roles?.includes(role) || false;
+    // Support both realm-roles and client-roles (resource roles).
+    try {
+      return (
+        this.keycloak.hasRealmRole(role) ||
+        this.keycloak.hasResourceRole(role) ||
+        this.keycloak.hasResourceRole(role, environment.clientID)
+      );
+    } catch {
+      const realmRoles = this.keycloak.realmAccess?.roles ?? [];
+      const clientRoles = this.keycloak.resourceAccess?.[environment.clientID]?.roles ?? [];
+      return realmRoles.includes(role) || clientRoles.includes(role);
+    }
   }
 
   /**
@@ -190,5 +216,25 @@ export class AuthService {
   private getClaimString(claims: Record<string, unknown> | undefined, key: string): string | undefined {
     const value = claims?.[key];
     return typeof value === 'string' ? value : undefined;
+  }
+
+  private logRoles(context: string): void {
+    const realmRoles = this.keycloak.realmAccess?.roles ?? [];
+    const resourceAccess = this.keycloak.resourceAccess ?? {};
+    const resourceRoles: Record<string, string[]> = {};
+
+    for (const [client, access] of Object.entries(resourceAccess)) {
+      const roles = (access as { roles?: string[] } | undefined)?.roles;
+      resourceRoles[client] = Array.isArray(roles) ? roles : [];
+    }
+
+    console.info('[AuthService]', context, {
+      authenticated: this.keycloak.authenticated ?? false,
+      realm: environment.realmName,
+      clientId: environment.clientID,
+      requiredRole: environment.requiredRole,
+      realmRoles,
+      resourceRoles,
+    });
   }
 }

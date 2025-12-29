@@ -1,0 +1,17 @@
+<div class="not-allowed">
+  <mat-card class="not-allowed__card">
+    <mat-card-header>
+      <mat-card-title>Not allowed</mat-card-title>
+      <mat-card-subtitle>You are logged in, but you don’t have access to this page.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>If you think this is a mistake, ask an administrator to grant you the required role.</p>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="logout()">Logout</button>
+      <a mat-button routerLink="/register">Register</a>
+    </mat-card-actions>
+  </mat-card>
+</div>
