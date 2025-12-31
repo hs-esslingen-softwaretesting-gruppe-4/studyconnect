@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GroupResponse, TaskPriority, TaskStatus, UserResponse, TaskRequest } from '../../api-services/api';
+import { GroupResponse, TaskPriority, TaskStatus, UserResponse } from '../../api-services/api';
 import { GroupsServiceWrapper } from '../../services/wrapper-services/groups.service.wrapper';
 import { TaskResponseDisplayable } from '../../services/wrapper-services/tasks.service.wrapper';
 import { CreateTaskDialogComponent } from '../../components/create-task-dialog/create-task-dialog.component';

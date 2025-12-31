@@ -42,11 +42,10 @@ export class TasksServiceWrapper {
   /**
    * Retrieves all tasks for a specific group.
    * @param groupId The ID of the group.
-   * @returns A promise that resolves to an array of TaskResponseDisplayable objects.
+   * @returns A promise that resolves to an array of TaskResponse objects.
    */
-  public async getTasksForGroup(groupId: number) : Promise<TaskResponseDisplayable[]> {
-    const tasks = await lastValueFrom(this.tasksService.apiTasksGroupsGroupIdGet(groupId));
-    return tasks.map((task) => this.toDisplayable(task));
+  public async getTasksForGroup(groupId: number) : Promise<TaskResponse[]> {
+    return await lastValueFrom(this.tasksService.apiTasksGroupsGroupIdGet(groupId));
   }
 
   public async getTasksForGroupAsDisplayable(groupId: number) : Promise<TaskResponseDisplayable[]> {
