@@ -117,11 +117,12 @@ public class TaskService {
     Task existingTask =
         taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
 
-    Task updatedTask = taskRequestMapper.toEntity(taskRequestDTO);
-    updatedTask.setId(existingTask.getId());
-    updatedTask.setCreatedAt(existingTask.getCreatedAt());
-    updatedTask.setGroup(existingTask.getGroup());
-    updatedTask.setCreatedBy(existingTask.getCreatedBy());
+    existingTask.setTitle(taskRequestDTO.getTitle());
+    existingTask.setDescription(taskRequestDTO.getDescription());
+    existingTask.setDueDate(taskRequestDTO.getDueDate());
+    existingTask.setPriority(taskRequestDTO.getPriority());
+    existingTask.setStatus(taskRequestDTO.getStatus());
+    existingTask.setCategory(taskRequestDTO.getCategory());
 
     // Fetch all assignees in a single query to avoid N+1 problem
     Set<Long> assigneeIds = taskRequestDTO.getAssigneeIds();
@@ -129,12 +130,12 @@ public class TaskService {
     if (assignees.size() != assigneeIds.size()) {
       throw new NotFoundException("One or more assignee users not found");
     }
-    updatedTask.getAssignees().clear();
-    updatedTask.getAssignees().addAll(assignees);
-    updatedTask.getTags().clear();
-    updatedTask.getTags().addAll(taskRequestDTO.getTags());
+    existingTask.getAssignees().clear();
+    existingTask.getAssignees().addAll(assignees);
+    existingTask.getTags().clear();
+    existingTask.getTags().addAll(taskRequestDTO.getTags());
 
-    Task savedTask = taskRepository.save(updatedTask);
+    Task savedTask = taskRepository.save(existingTask);
     TaskResponseDTO taskResponseDTO = taskResponseMapper.toDto(savedTask);
     return ResponseEntity.ok(taskResponseDTO);
   }

@@ -39,13 +39,13 @@ class TaskIntegrationTest {
     // Set up users
     user1 = new User();
     user1.setEmail("creator@example.com");
-    user1.setSurname("Creator");
+    user1.setFirstname("Creator");
     user1.setLastname("User");
     userRepository.save(user1);
 
     user2 = new User();
     user2.setEmail("assignee1@example.com");
-    user2.setSurname("Assignee");
+    user2.setFirstname("Assignee");
     user2.setLastname("One");
     userRepository.save(user2);
 
@@ -151,7 +151,7 @@ class TaskIntegrationTest {
   void testAddAndRemoveAssignee() {
     User newUser = new User();
     newUser.setEmail("newuser@example.com");
-    newUser.setSurname("New");
+    newUser.setFirstname("New");
     newUser.setLastname("User");
     userRepository.save(newUser);
 

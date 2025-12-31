@@ -31,7 +31,7 @@ public class UpdateProgressSteps {
   public void theUserIsLoggedIn() {
     user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("Doe");
     assertNotNull(user, "User should be logged in");
   }

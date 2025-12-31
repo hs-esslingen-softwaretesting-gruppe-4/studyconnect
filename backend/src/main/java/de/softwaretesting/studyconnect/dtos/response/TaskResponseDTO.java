@@ -22,5 +22,6 @@ public class TaskResponseDTO implements Serializable {
   private Set<Long> assigneeIds;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private LocalDateTime lastStatusChangeAt;
   private Long groupId;
 }

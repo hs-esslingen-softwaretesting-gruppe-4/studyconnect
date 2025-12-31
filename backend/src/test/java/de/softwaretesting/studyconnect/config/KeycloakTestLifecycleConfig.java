@@ -30,8 +30,8 @@ public class KeycloakTestLifecycleConfig {
   @Value("${test.user.password}")
   private String testUserPassword;
 
-  @Value("${test.user.surname}")
-  private String testUserSurname;
+  @Value("${test.user.firstname}")
+  private String testUserFirstname;
 
   @Value("${test.user.lastname}")
   private String testUserLastname;
@@ -42,8 +42,8 @@ public class KeycloakTestLifecycleConfig {
   @Value("${test.admin.password}")
   private String testAdminPassword;
 
-  @Value("${test.admin.surname}")
-  private String testAdminSurname;
+  @Value("${test.admin.firstname}")
+  private String testAdminFirstname;
 
   @Value("${test.admin.lastname}")
   private String testAdminLastname;
@@ -68,7 +68,7 @@ public class KeycloakTestLifecycleConfig {
     try {
       UserCreateRequestDTO testUser =
           new UserCreateRequestDTO(
-              testUserSurname, testUserLastname, testUserPassword, testUserEmail);
+              testUserFirstname, testUserLastname, testUserPassword, testUserEmail);
       userService.createUser(testUser);
       logger.info("Test user created: {}", testUserEmail);
     } catch (Exception e) {
@@ -79,7 +79,7 @@ public class KeycloakTestLifecycleConfig {
     try {
       UserCreateRequestDTO testAdmin =
           new UserCreateRequestDTO(
-              testAdminSurname, testAdminLastname, testAdminPassword, testAdminEmail);
+              testAdminFirstname, testAdminLastname, testAdminPassword, testAdminEmail);
       userService.createAdmin(testAdmin);
       logger.info("Test admin created: {}", testAdminEmail);
     } catch (Exception e) {

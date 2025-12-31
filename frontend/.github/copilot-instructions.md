@@ -9,6 +9,7 @@
 - Always split components into separate files: `.ts`, `.html`, `.scss`
 - Use Angular's built-in directives and bindings for templates
 - Use control flow syntax: `@if`, `@else`, `@for`, `@switch`
+- When determining template renders based on conditions (e.g `@if`, `@else` etc.) prefer using signals to determine the state
 - **Do NOT** use legacy directives: `*ngIf`, `*ngFor`, `*ngSwitch`
 
 ## Angular 21 Features

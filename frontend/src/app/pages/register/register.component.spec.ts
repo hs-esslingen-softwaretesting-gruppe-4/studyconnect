@@ -32,7 +32,7 @@ describe('RegisterComponent', () => {
 
     component.registerForm.setValue({
       email: 'test@example.com',
-      surname: 'Test',
+      firstname: 'Test',
       lastname: 'User',
       password: 'Password1!',
     });

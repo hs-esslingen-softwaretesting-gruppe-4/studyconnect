@@ -15,7 +15,7 @@
         @case ('text') {
           <mat-form-field class="w-full">
             <mat-label>{{ field.label }}</mat-label>
-            <input matInput [formControlName]="field.name" [required]="field.required" />
+            <input matInput [formControlName]="field.name" [required]="field.required" placeholder="{{ field.placeholder }}" />
             @if (formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched) {
               <mat-error>Bitte gültigen Wert eingeben!</mat-error>
             }
@@ -301,6 +301,7 @@
               matInput
               [formControlName]="field.name"
               [required]="field.required"
+              placeholder="{{ field.placeholder }}"
             ></textarea>
             @if (formGroup.get(field.name)?.invalid && formGroup.get(field.name)?.touched) {
               <mat-error>Bitte gültigen Wert eingeben!</mat-error>

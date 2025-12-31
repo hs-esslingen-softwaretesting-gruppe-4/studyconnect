@@ -69,11 +69,11 @@ class UserServiceTest {
     testUser.setId(1L);
     testUser.setKeycloakUUID("keycloak-uuid-123");
     testUser.setEmail("test@example.com");
-    testUser.setSurname("Max");
+    testUser.setFirstname("Max");
     testUser.setLastname("Mustermann");
     testUser.setCreatedAt(LocalDateTime.now());
 
-    testUserResponseDTO = new UserResponseDTO(1L, "test@example.com", "Mustermann", "Max");
+    testUserResponseDTO = new UserResponseDTO(1L, "test@example.com", "Max", "Mustermann");
 
     testKeycloakUserResponseDTO =
         new KeycloakUserResponseDTO(
@@ -110,7 +110,7 @@ class UserServiceTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("test@example.com", response.getBody().getEmail());
-    assertEquals("Max", response.getBody().getSurname());
+    assertEquals("Max", response.getBody().getFirstname());
     assertEquals("Mustermann", response.getBody().getLastname());
     verify(userRepository).findById(1L);
     verify(userResponseMapper).toDto(testUser);
@@ -136,7 +136,7 @@ class UserServiceTest {
         new UserUpdateRequestDTO("test@example.com", "Updated", "Name");
     User updatedUser = new User();
     updatedUser.setId(1L);
-    updatedUser.setSurname("Updated");
+    updatedUser.setFirstname("Updated");
     updatedUser.setLastname("Name");
     updatedUser.setEmail("test@example.com");
 
@@ -144,13 +144,13 @@ class UserServiceTest {
     when(userRequestMapper.toEntity(any(UserUpdateRequestDTO.class))).thenReturn(updatedUser);
     when(userRepository.save(any(User.class))).thenReturn(updatedUser);
     when(userResponseMapper.toDto(any(User.class)))
-        .thenReturn(new UserResponseDTO(1L, "test@example.com", "Name", "Updated"));
+        .thenReturn(new UserResponseDTO(1L, "test@example.com", "Updated", "Name"));
 
     ResponseEntity<UserResponseDTO> response = userService.updateUserWithId(1L, updateRequest);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Updated", response.getBody().getSurname());
+    assertEquals("Updated", response.getBody().getFirstname());
     verify(userRepository).save(any(User.class));
   }
 
@@ -168,7 +168,7 @@ class UserServiceTest {
     UserUpdateRequestDTO updateRequest =
         new UserUpdateRequestDTO("newemail@example.com", "Updated", "Name");
     User mappedUser = new User();
-    mappedUser.setSurname("Updated");
+    mappedUser.setFirstname("Updated");
     mappedUser.setLastname("Name");
 
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -287,7 +287,7 @@ class UserServiceTest {
     when(keycloakService.retrieveUserByEmail("admin@example.com")).thenReturn(adminKeycloakUser);
     when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
     when(userResponseMapper.toDto(any(User.class)))
-        .thenReturn(new UserResponseDTO(2L, "admin@example.com", "User", "Admin"));
+        .thenReturn(new UserResponseDTO(2L, "admin@example.com", "Admin", "User"));
 
     ResponseEntity<UserResponseDTO> response = userService.createAdmin(createRequest);
 
@@ -470,13 +470,13 @@ class UserServiceTest {
     User userWithId = new User();
     userWithId.setId(10L);
     userWithId.setEmail("u10@example.com");
-    userWithId.setSurname("U10");
+    userWithId.setFirstname("U10");
     userWithId.setLastname("User");
 
     User userWithoutId = new User();
     userWithoutId.setId(null);
     userWithoutId.setEmail("noid@example.com");
-    userWithoutId.setSurname("No");
+    userWithoutId.setFirstname("No");
     userWithoutId.setLastname("Id");
 
     List<User> repositoryResult = new ArrayList<>();
@@ -527,16 +527,15 @@ class UserServiceTest {
   }
 
   @Test
-  void getUserByAccessToken_shouldThrowBadRequest_whenSubjectBlank() {
-    Jwt jwt =
-        Jwt.withTokenValue("token").header("alg", "none").subject(" ").claim("sub", " ").build();
+  void getUserByAccessToken_shouldThrowBadRequest_whenEmailBlank() {
+    Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").claim("email", " ").build();
     JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
     SecurityContextHolder.getContext().setAuthentication(auth);
 
     BadRequestException ex =
         assertThrows(BadRequestException.class, () -> userService.getUserByAccessToken());
 
-    assertEquals("Access token missing subject (sub)", ex.getMessage());
+    assertEquals("Access token missing email", ex.getMessage());
   }
 
   @Test
@@ -544,13 +543,12 @@ class UserServiceTest {
     Jwt jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
-            .subject("keycloak-uuid-123")
-            .claim("sub", "keycloak-uuid-123")
+            .claim("email", "test@example.com")
             .build();
     JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    when(userRepository.findByKeycloakUUID("keycloak-uuid-123")).thenReturn(Optional.of(testUser));
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
     when(userResponseMapper.toDto(testUser)).thenReturn(testUserResponseDTO);
 
     ResponseEntity<UserResponseDTO> response = userService.getUserByAccessToken();
@@ -558,7 +556,7 @@ class UserServiceTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("test@example.com", response.getBody().getEmail());
-    verify(userRepository).findByKeycloakUUID("keycloak-uuid-123");
+    verify(userRepository).findByEmail("test@example.com");
     verify(userResponseMapper).toDto(testUser);
   }
 
@@ -567,18 +565,17 @@ class UserServiceTest {
     Jwt jwt =
         Jwt.withTokenValue("token")
             .header("alg", "none")
-            .subject("missing-uuid")
-            .claim("sub", "missing-uuid")
+            .claim("email", "missing@example.com")
             .build();
     JwtAuthenticationToken auth = new JwtAuthenticationToken(jwt);
     SecurityContextHolder.getContext().setAuthentication(auth);
 
-    when(userRepository.findByKeycloakUUID("missing-uuid")).thenReturn(Optional.empty());
+    when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
 
     NotFoundException ex =
         assertThrows(NotFoundException.class, () -> userService.getUserByAccessToken());
 
     assertEquals("User not found", ex.getMessage());
-    verify(userRepository).findByKeycloakUUID("missing-uuid");
+    verify(userRepository).findByEmail("missing@example.com");
   }
 }

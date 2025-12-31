@@ -30,4 +30,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
   Optional<List<Group>> findByMembersId(Long userId);
 
   Optional<Group> findByInviteCode(String inviteCode);
+
+  @Query(
+      "select g from Group g where g.isPublic = true and lower(g.name) like lower(concat('%', :query, '%'))")
+  Optional<List<Group>> searchPublicGroupsByName(@Param("query") String query);
 }

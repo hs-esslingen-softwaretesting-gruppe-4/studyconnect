@@ -106,6 +106,33 @@ class GroupServiceTest {
   }
 
   @Test
+  void searchPublicGroups_returnsMappedList() {
+    String query = "Test";
+    when(groupRepository.searchPublicGroupsByName(query)).thenReturn(Optional.of(List.of(group)));
+    when(groupResponseMapper.toDtoList(List.of(group))).thenReturn(List.of(responseDto));
+
+    ResponseEntity<List<GroupResponseDTO>> result = groupService.searchPublicGroups(query);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(1, result.getBody().size());
+    verify(groupRepository).searchPublicGroupsByName(query);
+    verify(groupResponseMapper).toDtoList(List.of(group));
+  }
+
+  @Test
+  void searchPublicGroups_noMatches_returnsEmptyList() {
+    String query = "missing";
+    when(groupRepository.searchPublicGroupsByName(query)).thenReturn(Optional.empty());
+    when(groupResponseMapper.toDtoList(List.of())).thenReturn(List.of());
+
+    ResponseEntity<List<GroupResponseDTO>> result = groupService.searchPublicGroups(query);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(0, result.getBody().size());
+    verify(groupRepository).searchPublicGroupsByName(query);
+  }
+
+  @Test
   void getGroupById_existingGroup_returnsDto() {
     when(groupRepository.findById(10L)).thenReturn(Optional.of(group));
     when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
@@ -437,6 +464,49 @@ class GroupServiceTest {
     doThrow(new RuntimeException("Database error")).when(groupRepository).delete(group);
 
     assertThrows(InternalServerErrorException.class, () -> groupService.deleteGroup(group.getId()));
+  }
+
+  @Test
+  void joinGroupById_groupNotFound_throwsNotFoundException() {
+    when(groupRepository.findById(999L)).thenReturn(Optional.empty());
+
+    assertThrows(NotFoundException.class, () -> groupService.joinGroupById(999L, 1L));
+  }
+
+  @Test
+  void joinGroupById_groupFull_throwsBadRequest() {
+    group.setMemberCount(group.getMaxMembers());
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+
+    assertThrows(BadRequestException.class, () -> groupService.joinGroupById(group.getId(), 99L));
+    verify(groupRepository, never()).save(any(Group.class));
+  }
+
+  @Test
+  void joinGroupById_alreadyMember_throwsBadRequest() {
+    when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    when(userService.retrieveUserById(user1.getId())).thenReturn(user1);
+
+    assertThrows(
+        BadRequestException.class, () -> groupService.joinGroupById(group.getId(), user1.getId()));
+    verify(groupRepository, never()).save(any(Group.class));
+  }
+
+  @Test
+  void joinGroupById_successAddsMember() {
+    Group joinableGroup = new Group();
+    joinableGroup.setMaxMembers(5);
+    joinableGroup.setMemberCount(0);
+    when(groupRepository.findById(10L)).thenReturn(Optional.of(joinableGroup));
+    when(userService.retrieveUserById(user2.getId())).thenReturn(user2);
+    when(groupRepository.save(joinableGroup)).thenReturn(joinableGroup);
+
+    ResponseEntity<Void> result = groupService.joinGroupById(10L, user2.getId());
+
+    assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    verify(groupRepository).save(joinableGroup);
+    assertEquals(Set.of(user2), joinableGroup.getMembers());
+    assertEquals(1, joinableGroup.getMemberCount());
   }
 
   @Test

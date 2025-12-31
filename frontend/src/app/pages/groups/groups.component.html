@@ -1,1 +1,157 @@
-<p>groups.component works!</p>
+<section class="groups">
+  <header class="groups__header">
+    <div>
+      <h1>Groups</h1>
+      <p class="groups__subtitle">Track your memberships and discover public groups.</p>
+    </div>
+    <button mat-raised-button color="accent" type="button" (click)="createGroup()">
+      Create group
+    </button>
+  </header>
+
+  <mat-tab-group class="groups__tabs" animationDuration="250ms">
+    <mat-tab label="Joined groups">
+      <mat-card class="groups__panel">
+        <mat-card-header>
+          <mat-card-title>Joined groups</mat-card-title>
+          <mat-card-subtitle>Groups you are already part of.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!hasJoinedGroups()) {
+            <div class="groups__empty">You have not yet joined a group.</div>
+          } @else {
+            <div class="groups__list">
+              @for (group of userGroups(); track group.id) {
+                <div
+                  class="groups__item"
+                  role="button"
+                  tabindex="0"
+                  (click)="viewGroup(group)"
+                  (keydown.enter)="viewGroup(group)"
+                >
+                  <div class="groups__item-body">
+                    <div class="groups__item-title">{{ group.name }}</div>
+                    <p class="groups__item-description">
+                      {{ group.description ?? 'No description provided.' }}
+                    </p>
+                    <div class="groups__item-meta">
+                      {{ group.member_count }} / {{ group.max_members }} members
+                    </div>
+                  </div>
+                  <div class="groups__item-actions">
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      type="button"
+                      (click)="viewGroup(group); $event.stopPropagation()"
+                    >
+                      View group
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+
+    <mat-tab label="Discover groups">
+      <mat-card class="groups__panel">
+        <mat-card-header>
+          <mat-card-title>Discover groups</mat-card-title>
+          <mat-card-subtitle>Search public groups or browse suggestions.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="groups__search">
+            <mat-form-field appearance="outline" class="groups__search-field">
+              <mat-label>Search public groups</mat-label>
+              <input
+                matInput
+                type="search"
+                [value]="searchQuery()"
+                (input)="onSearchInput($event)"
+                (keydown.enter)="runSearch()"
+              />
+            </mat-form-field>
+            <button mat-raised-button color="primary" type="button" (click)="runSearch()">
+              Search
+            </button>
+            @if (hasSearched()) {
+              <button mat-button type="button" (click)="clearSearch()">Clear</button>
+            }
+          </div>
+
+          <mat-divider></mat-divider>
+
+          @if (!hasSearched()) {
+            <p class="groups__hint">Suggested public groups</p>
+            @if (!hasSuggestedGroups()) {
+              <div class="groups__empty">No public groups are available yet.</div>
+            } @else {
+              <div class="groups__list">
+                @for (group of suggestedGroups(); track group.id) {
+                  <div
+                    class="groups__item"
+                    role="button"
+                    tabindex="0"
+                    (click)="viewGroup(group)"
+                    (keydown.enter)="viewGroup(group)"
+                  >
+                    <div class="groups__item-body">
+                      <div class="groups__item-title">{{ group.name }}</div>
+                      <p class="groups__item-description">
+                        {{ group.description ?? 'No description provided.' }}
+                      </p>
+                      <div class="groups__item-meta">
+                        {{ group.member_count }} / {{ group.max_members }} members
+                      </div>
+                    </div>
+                    <div class="groups__item-actions">
+                      <button
+                        mat-stroked-button
+                        color="primary"
+                        type="button"
+                        (click)="viewGroup(group); $event.stopPropagation()"
+                      >
+                        View group
+                      </button>
+                      @if (canJoinGroup(group)) {
+                        <button
+                          mat-raised-button
+                          color="accent"
+                          type="button"
+                          [disabled]="isJoining(group.id)"
+                          (click)="joinGroup(group); $event.stopPropagation()"
+                        >
+                          Join
+                        </button>
+                      } @else {
+                        <span class="groups__pill">Joined</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            @if (isSearching()) {
+              <div class="groups__empty">Searching public groups...</div>
+            } @else if (showSearchEmptyState()) {
+              <div class="groups__empty">No groups found for "{{ lastSearchQuery() }}".</div>
+            } @else {
+              <div class="groups__table">
+                <app-generic-table
+                  [dataSource]="searchTableDataSource"
+                  [columns]="searchColumns"
+                  [actions]="searchActions"
+                  [pageSize]="10"
+                ></app-generic-table>
+              </div>
+            }
+          }
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</section>

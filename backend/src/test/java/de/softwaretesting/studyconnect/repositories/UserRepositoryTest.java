@@ -24,7 +24,7 @@ class UserRepositoryTest {
     // Arrange & Act
     User user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("Doe");
 
     User saved = userRepository.save(user);
@@ -32,7 +32,7 @@ class UserRepositoryTest {
     // Assert
     assertNotNull(saved.getId());
     assertEquals("test@example.com", saved.getEmail());
-    assertEquals("John", saved.getSurname());
+    assertEquals("John", saved.getFirstname());
     assertEquals("Doe", saved.getLastname());
   }
 
@@ -41,16 +41,16 @@ class UserRepositoryTest {
   void shouldFailToSaveUserWhenEmailIsNull() {
     // Arrange
     User user = new User();
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("Doe");
 
     // Act & Assert
     assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(user));
   }
 
-  /** Tests that saving a User with a null surname field fails due to the not-null constraint. */
+  /** Tests that saving a User with a null firstname field fails due to the not-null constraint. */
   @Test
-  void shouldFailToSaveUserWhenSurnameIsNull() {
+  void shouldFailToSaveUserWhenFirstnameIsNull() {
     // Arrange
     User user = new User();
     user.setEmail("test@example.com");
@@ -66,7 +66,7 @@ class UserRepositoryTest {
     // Arrange
     User user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("John");
+    user.setFirstname("John");
 
     // Act & Assert
     assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(user));
@@ -79,14 +79,14 @@ class UserRepositoryTest {
 
     User user1 = new User();
     user1.setEmail("user1@example.com");
-    user1.setSurname("John");
+    user1.setFirstname("John");
     user1.setLastname("Doe");
     user1.setKeycloakUUID(uniqueUUID);
     userRepository.saveAndFlush(user1);
 
     User user2 = new User();
     user2.setEmail("user2@example.com");
-    user2.setSurname("Jane");
+    user2.setFirstname("Jane");
     user2.setLastname("Doe");
     user2.setKeycloakUUID(uniqueUUID);
 
@@ -100,13 +100,13 @@ class UserRepositoryTest {
 
     User user1 = new User();
     user1.setEmail(duplicateEmail);
-    user1.setSurname("John");
+    user1.setFirstname("John");
     user1.setLastname("Doe");
     userRepository.saveAndFlush(user1);
 
     User user2 = new User();
     user2.setEmail(duplicateEmail);
-    user2.setSurname("Jane");
+    user2.setFirstname("Jane");
     user2.setLastname("Doe");
 
     assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(user2));
@@ -123,7 +123,7 @@ class UserRepositoryTest {
     // Arrange - create user with long field values
     User user = new User();
     user.setEmail("very.long.email.address.for.testing.purposes@example.com");
-    user.setSurname("VeryLongSurnameWithManyCharactersToTestBoundaries");
+    user.setFirstname("VeryLongFirstnameWithManyCharactersToTestBoundaries");
     user.setLastname("VeryLongLastnameWithManyCharactersToTestBoundaries");
 
     // Act
@@ -140,7 +140,7 @@ class UserRepositoryTest {
     // Arrange - single character names (boundary)
     User user = new User();
     user.setEmail("min@example.com");
-    user.setSurname("J");
+    user.setFirstname("J");
     user.setLastname("D");
 
     // Act
@@ -148,7 +148,7 @@ class UserRepositoryTest {
 
     // Assert
     assertNotNull(saved.getId());
-    assertEquals("J", saved.getSurname());
+    assertEquals("J", saved.getFirstname());
     assertEquals("D", saved.getLastname());
   }
 
@@ -163,7 +163,7 @@ class UserRepositoryTest {
     // Arrange - empty email (valid in database)
     User user = new User();
     user.setEmail("");
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("Doe");
 
     // Act
@@ -174,13 +174,13 @@ class UserRepositoryTest {
     assertEquals("", saved.getEmail());
   }
 
-  /** Tests that empty string values for surname are allowed. */
+  /** Tests that empty string values for firstname are allowed. */
   @Test
-  void shouldAllowEmptySurname() {
-    // Arrange - empty surname
+  void shouldAllowEmptyFirstname() {
+    // Arrange - empty firstname
     User user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("");
+    user.setFirstname("");
     user.setLastname("Doe");
 
     // Act
@@ -188,7 +188,7 @@ class UserRepositoryTest {
 
     // Assert
     assertNotNull(saved.getId());
-    assertEquals("", saved.getSurname());
+    assertEquals("", saved.getFirstname());
   }
 
   /** Tests that empty string values for lastname are allowed. */
@@ -197,7 +197,7 @@ class UserRepositoryTest {
     // Arrange - empty lastname
     User user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("");
 
     // Act
@@ -217,7 +217,7 @@ class UserRepositoryTest {
     // Arrange - NULL keycloakUUID is valid
     User user = new User();
     user.setEmail("nulluuid@example.com");
-    user.setSurname("Null");
+    user.setFirstname("Null");
     user.setLastname("UUID");
     user.setKeycloakUUID(null);
 
@@ -235,7 +235,7 @@ class UserRepositoryTest {
     // Arrange - empty string keycloakUUID
     User user = new User();
     user.setEmail("emptyuuid@example.com");
-    user.setSurname("Empty");
+    user.setFirstname("Empty");
     user.setLastname("UUID");
     user.setKeycloakUUID("");
 
@@ -255,7 +255,7 @@ class UserRepositoryTest {
     // Arrange - valid email with special chars
     User user = new User();
     user.setEmail("user+tag@sub.example.com");
-    user.setSurname("Special");
+    user.setFirstname("Special");
     user.setLastname("Email");
 
     // Act
@@ -272,7 +272,7 @@ class UserRepositoryTest {
     // Arrange - names with unicode and special characters
     User user = new User();
     user.setEmail("unicode@example.com");
-    user.setSurname("François");
+    user.setFirstname("François");
     user.setLastname("Müller-Schmidt");
 
     // Act
@@ -280,7 +280,7 @@ class UserRepositoryTest {
 
     // Assert
     assertNotNull(saved.getId());
-    assertEquals("François", saved.getSurname());
+    assertEquals("François", saved.getFirstname());
     assertEquals("Müller-Schmidt", saved.getLastname());
   }
 
@@ -290,7 +290,7 @@ class UserRepositoryTest {
     // Arrange
     User user = new User();
     user.setEmail("timestamp@example.com");
-    user.setSurname("Time");
+    user.setFirstname("Time");
     user.setLastname("Stamp");
 
     // Act
@@ -306,14 +306,14 @@ class UserRepositoryTest {
     // Arrange - names with whitespace
     User user = new User();
     user.setEmail("whitespace@example.com");
-    user.setSurname("John Paul");
+    user.setFirstname("John Paul");
     user.setLastname("Van Der Berg");
 
     // Act
     User saved = userRepository.saveAndFlush(user);
 
     // Assert
-    assertEquals("John Paul", saved.getSurname());
+    assertEquals("John Paul", saved.getFirstname());
     assertEquals("Van Der Berg", saved.getLastname());
   }
 }

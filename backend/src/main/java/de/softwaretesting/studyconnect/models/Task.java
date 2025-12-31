@@ -15,9 +15,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -89,7 +91,17 @@ public class Task {
   @JsonBackReference
   private Group group;
 
-  // Helper methods
+  @Column(name = "last_status_change_at", nullable = false)
+  private LocalDateTime lastStatusChangeAt;
+
+  // Helper methods and variables
+
+  @Transient private Status originalStatus;
+
+  @PostLoad
+  void onLoad() {
+    this.originalStatus = this.status;
+  }
 
   public void addAssignee(User user) {
     if (user == null) return;
@@ -113,12 +125,12 @@ public class Task {
 
   public void markComplete() {
     this.status = Status.COMPLETED;
-    this.updatedAt = LocalDateTime.now();
+    this.lastStatusChangeAt = LocalDateTime.now();
   }
 
   public void setInProgress() {
     this.status = Status.IN_PROGRESS;
-    this.onUpdate();
+    this.lastStatusChangeAt = LocalDateTime.now();
   }
 
   public boolean isOverdue() {
@@ -134,11 +146,17 @@ public class Task {
   void onCreate() {
     if (this.createdAt == null) this.createdAt = LocalDateTime.now();
     this.updatedAt = this.createdAt;
+    this.lastStatusChangeAt = this.createdAt;
   }
 
   @PreUpdate
   void onUpdate() {
     this.updatedAt = LocalDateTime.now();
+    // Update lastStatusChangeAt if status has changed
+    if (this.originalStatus != this.status) {
+      this.lastStatusChangeAt = this.updatedAt;
+      this.originalStatus = this.status; // avoid repeated updates on multiple flushes
+    }
   }
 
   // Inner enums for Priority and Status to keep them scoped with Task

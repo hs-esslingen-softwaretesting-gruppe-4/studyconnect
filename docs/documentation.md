@@ -288,9 +288,9 @@ Unit Tests testen einzelne Klassen oder Methoden auf ihre Funktion. Sie können 
 
 Die Klasse `UserRepositoryTest` enthält mehrere JPA-Tests für die `UserRepository`-Schnittstelle. Die Tests laufen mit dem Spring-Profile `test` (H2 In-Memory-DB) und verwenden `@DataJpaTest` zur Isolation der Repository-Ebene.
 
-- `shouldCreateAndSaveUserWithValidData` — prüft, dass ein gültiger `User` gespeichert werden kann und dass Felder wie `id`, `email`, `surname` und `lastname` korrekt gesetzt sind.
+- `shouldCreateAndSaveUserWithValidData` — prüft, dass ein gültiger `User` gespeichert werden kann und dass Felder wie `id`, `email`, `firstname` und `lastname` korrekt gesetzt sind.
 - `shouldFailToSaveUserWhenEmailIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `email` null ist (NOT NULL Constraint).
-- `shouldFailToSaveUserWhenSurnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `surname` null ist.
+- `shouldFailToSaveUserWhenFirstnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `firstname` null ist.
 - `shouldFailToSaveUserWhenLastnameIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `lastname` null ist.
 - `shouldFailToSaveUserWhenCreatedAtIsNull` — erwartet eine `DataIntegrityViolationException`, wenn `createdAt` null ist.
 - `shouldFailToSaveUserWithDuplicateKeycloakUUID` — legt einen User mit einer `keycloakUUID` an und prüft, dass das Anlegen eines zweiten Users mit derselben UUID aufgrund der Unique-Constraint fehlschlägt.

@@ -1,8 +1,10 @@
 package de.softwaretesting.studyconnect.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.request.UpdateGroupRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.GroupResponseDTO;
+import de.softwaretesting.studyconnect.exceptions.GlobalExceptionHandler;
 import de.softwaretesting.studyconnect.services.GroupService;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -44,7 +48,13 @@ class GroupControllerTest {
 
   @BeforeEach
   void setUp() {
-    mockMvc = MockMvcBuilders.standaloneSetup(new GroupController(groupService)).build();
+    LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+    validator.afterPropertiesSet();
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(new GroupController(groupService))
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .setValidator(validator)
+            .build();
     objectMapper = new ObjectMapper();
   }
 
@@ -137,6 +147,33 @@ class GroupControllerTest {
   }
 
   @Test
+  @DisplayName("Should search public groups by query")
+  void shouldSearchPublicGroups() throws Exception {
+    GroupResponseDTO dto = sampleGroupResponse();
+    given(groupService.searchPublicGroups("Machine Learning"))
+        .willReturn(ResponseEntity.ok(List.of(dto)));
+
+    mockMvc
+        .perform(get("/api/groups/search").param("query", "Machine Learning"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$[0].id").value(dto.getId()))
+        .andExpect(jsonPath("$[0].name").value(dto.getName()));
+
+    verify(groupService).searchPublicGroups("Machine Learning");
+  }
+
+  @Test
+  @DisplayName("Should reject blank search query")
+  void shouldRejectBlankSearchQuery() throws Exception {
+    mockMvc
+        .perform(get("/api/groups/search").param("query", "   "))
+        .andExpect(status().isBadRequest());
+
+    verify(groupService, never()).searchPublicGroups(anyString());
+  }
+
+  @Test
   @DisplayName("Should update group")
   void shouldUpdateGroup() throws Exception {
     UpdateGroupRequestDTO updateDto =
@@ -204,6 +241,18 @@ class GroupControllerTest {
         .andExpect(status().isNoContent());
 
     verify(groupService).joinGroupByInvitationCode("code", 3L);
+  }
+
+  @Test
+  @DisplayName("Should join group by id")
+  void shouldJoinGroupById() throws Exception {
+    given(groupService.joinGroupById(10L, 3L)).willReturn(ResponseEntity.noContent().build());
+
+    mockMvc
+        .perform(post("/api/groups/{groupId}/join", 10L).param("userId", "3"))
+        .andExpect(status().isNoContent());
+
+    verify(groupService).joinGroupById(10L, 3L);
   }
 
   @Test

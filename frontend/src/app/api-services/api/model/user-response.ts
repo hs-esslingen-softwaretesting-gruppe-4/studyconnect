@@ -12,6 +12,6 @@
 export interface UserResponse {
     id: number;
     email: string;
+    firstname: string;
     lastname: string;
-    surname: string;
 }

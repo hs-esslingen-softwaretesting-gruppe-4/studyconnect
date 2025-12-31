@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  min-width: 280px;
+}
+
+.status-dialog {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: start;
+  padding: 4px 0;
+}
+
+.status-dialog__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 167, 198, 0.15);
+  color: var(--sc-blue);
+}
+
+.status-dialog__icon mat-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+}
+
+.status-dialog__icon--success {
+  background: rgba(45, 176, 169, 0.15);
+  color: var(--sc-teal);
+}
+
+.status-dialog__icon--error {
+  background: rgba(213, 75, 75, 0.15);
+  color: #d54b4b;
+}
+
+.status-dialog__icon--info {
+  background: rgba(40, 167, 198, 0.15);
+  color: var(--sc-blue);
+}
+
+.status-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-dialog__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--sc-navy);
+}
+
+.status-dialog__message {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(17, 73, 106, 0.75);
+}
+
+.status-dialog__close {
+  margin-top: -4px;
+}
+
+.status-dialog__actions {
+  padding: 0 0 8px;
+}
+
+@media (max-width: 480px) {
+  .status-dialog {
+    grid-template-columns: auto 1fr;
+  }
+
+  .status-dialog__close {
+    grid-column: 2 / -1;
+    justify-self: end;
+  }
+}

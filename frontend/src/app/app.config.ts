@@ -7,6 +7,7 @@ import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthService } from './services/auth.service';
 import { provideApi } from './api-services/api/provide-api';
 import { environment } from '../environments/environment';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 
 /**
  * Initialize Keycloak before application starts
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideApi(environment.apiBasePath),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }, // Set date locale to German format (DD.MM.YYYY)
     {
       provide: APP_INITIALIZER,
       useFactory: initializeKeycloak,

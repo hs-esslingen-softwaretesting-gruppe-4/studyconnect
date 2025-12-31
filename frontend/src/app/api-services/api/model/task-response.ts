@@ -24,5 +24,6 @@ export interface TaskResponse {
     assignee_ids: Array<number>;
     created_at: string;
     updated_at: string;
+    last_status_change_at?: string;
     group_id: number;
 }
