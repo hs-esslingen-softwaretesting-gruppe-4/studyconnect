@@ -33,6 +33,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       LEFT JOIN FETCH t.createdBy
       LEFT JOIN FETCH t.group
       WHERE aFilter.id = :userId
+      ORDER BY t.dueDate ASC
       """)
   List<Task> findByAssigneesId(@Param("userId") Long userId);
 }

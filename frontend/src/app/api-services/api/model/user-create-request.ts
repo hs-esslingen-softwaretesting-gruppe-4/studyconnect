@@ -10,7 +10,7 @@
 
 
 export interface UserCreateRequest {
-    surname: string;
+    firstname: string;
     lastname: string;
     /**
      * Must include uppercase, lowercase, digit, and special character.

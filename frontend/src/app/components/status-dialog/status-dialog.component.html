@@ -1,0 +1,27 @@
+<mat-dialog-content class="status-dialog">
+  <div
+    class="status-dialog__icon"
+    [class.status-dialog__icon--success]="data.type === 'success'"
+    [class.status-dialog__icon--error]="data.type === 'error'"
+    [class.status-dialog__icon--info]="data.type === 'info'"
+  >
+    <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+  </div>
+  <div class="status-dialog__body">
+    <h2 class="status-dialog__title">{{ data.title }}</h2>
+    <p class="status-dialog__message">{{ data.message }}</p>
+  </div>
+  <button
+    mat-icon-button
+    type="button"
+    class="status-dialog__close"
+    aria-label="Dismiss dialog"
+    (click)="close()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-dialog-content>
+
+<mat-dialog-actions class="status-dialog__actions" align="end">
+  <button mat-button type="button" (click)="close()">Dismiss</button>
+</mat-dialog-actions>

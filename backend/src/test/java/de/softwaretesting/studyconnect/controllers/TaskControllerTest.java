@@ -240,6 +240,7 @@ class TaskControllerTest {
         Set.of(1L, 2L),
         LocalDateTime.now(),
         LocalDateTime.now(),
+        LocalDateTime.now(),
         1L);
   }
 
@@ -258,6 +259,7 @@ class TaskControllerTest {
             Set.of(1L),
             LocalDateTime.now(),
             LocalDateTime.now(),
+            LocalDateTime.now(),
             1L);
 
     TaskResponseDTO task2 =
@@ -272,6 +274,7 @@ class TaskControllerTest {
             Set.of("tag2"),
             2L,
             Set.of(2L),
+            LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),
             1L);

@@ -59,7 +59,7 @@ class UserControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.email").value("test@example.com"))
-        .andExpect(jsonPath("$.surname").value("John"))
+        .andExpect(jsonPath("$.firstname").value("John"))
         .andExpect(jsonPath("$.lastname").value("Doe"));
 
     verify(userService).getUserById(userId);
@@ -91,7 +91,7 @@ class UserControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.email").value("test@example.com"))
-        .andExpect(jsonPath("$.surname").value("John"))
+        .andExpect(jsonPath("$.firstname").value("John"))
         .andExpect(jsonPath("$.lastname").value("Doe"));
 
     verify(userService).createUser(any(UserCreateRequestDTO.class));
@@ -162,7 +162,7 @@ class UserControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.email").value("updated@example.com"))
-        .andExpect(jsonPath("$.surname").value("Jane"))
+        .andExpect(jsonPath("$.firstname").value("Jane"))
         .andExpect(jsonPath("$.lastname").value("Smith"));
 
     verify(userService).updateUserWithId(eq(userId), any(UserUpdateRequestDTO.class));
@@ -203,11 +203,11 @@ class UserControllerTest {
   // Helper methods
 
   private UserResponseDTO createUserResponseDTO() {
-    return new UserResponseDTO(1L, "test@example.com", "Doe", "John");
+    return new UserResponseDTO(1L, "test@example.com", "John", "Doe");
   }
 
   private UserResponseDTO createUpdatedUserResponseDTO() {
-    return new UserResponseDTO(1L, "updated@example.com", "Smith", "Jane");
+    return new UserResponseDTO(1L, "updated@example.com", "Jane", "Smith");
   }
 
   private UserCreateRequestDTO createValidUserCreateRequestDTO() {

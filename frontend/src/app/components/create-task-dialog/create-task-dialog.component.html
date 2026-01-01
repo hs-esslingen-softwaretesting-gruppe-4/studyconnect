@@ -1,0 +1,178 @@
+<h2 mat-dialog-title>Create task</h2>
+
+<mat-dialog-content class="create-task-dialog">
+  <form class="create-task-dialog__form" [formGroup]="taskForm" (ngSubmit)="submit()">
+    <div class="create-task-dialog__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" placeholder="Task title" />
+        @if (taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched) {
+          <mat-error>Title is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          <mat-option [value]="TaskPriority.Low">Low</mat-option>
+          <mat-option [value]="TaskPriority.Medium">Medium</mat-option>
+          <mat-option [value]="TaskPriority.High">High</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        rows="3"
+        formControlName="description"
+        placeholder="Describe the task"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <input matInput formControlName="category" placeholder="Optional category" />
+    </mat-form-field>
+
+    <div class="create-task-dialog__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Due date</mat-label>
+        <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #dueDatePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Due time</mat-label>
+        <input matInput [matTimepicker]="dueTimePicker" formControlName="dueTime" />
+        <mat-timepicker-toggle matIconSuffix [for]="dueTimePicker"></mat-timepicker-toggle>
+        <mat-timepicker #dueTimePicker></mat-timepicker>
+      </mat-form-field>
+    </div>
+
+    <section class="create-task-dialog__section">
+      <div class="create-task-dialog__section-header">
+        <div>
+          <h3>Assignees</h3>
+          <p class="create-task-dialog__section-subtitle">
+            Select members to assign this task.
+          </p>
+        </div>
+        <span class="create-task-dialog__count">{{ assigneeIds().length }}</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="create-task-dialog__field--full">
+        <mat-label>Add assignees</mat-label>
+        <input
+          matInput
+          type="text"
+          [formControl]="assigneeSearchControl"
+          [matAutocomplete]="assigneeAuto"
+          placeholder="Search by name or email"
+        />
+        <mat-autocomplete
+          #assigneeAuto="matAutocomplete"
+          [displayWith]="displayMember"
+          (optionSelected)="onAssigneeSelected($event)"
+        >
+          @for (member of filteredAssignees(); track member.id) {
+            <mat-option [value]="member">
+              {{ member.firstname }} {{ member.lastname }} ({{ member.email }})
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+
+      @if (assigneeCards().length > 0) {
+        <div class="create-task-dialog__cards">
+          @for (assignee of assigneeCards(); track assignee.id) {
+            <div class="create-task-dialog__user-card">
+              <img
+                class="create-task-dialog__avatar"
+                src="assets/profile_placeholder.png"
+                alt="Profile placeholder"
+              />
+              <div class="create-task-dialog__user-details">
+                <span class="create-task-dialog__user-name">{{ assignee.name }}</span>
+              </div>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Remove assignee"
+                (click)="removeAssignee(assignee.id)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="create-task-dialog__empty">No assignees added yet.</div>
+      }
+    </section>
+
+    <section class="create-task-dialog__section">
+      <div class="create-task-dialog__section-header">
+        <div>
+          <h3>Tags</h3>
+          <p class="create-task-dialog__section-subtitle">
+            Add tags one at a time.
+          </p>
+        </div>
+        <span class="create-task-dialog__count">{{ tags().length }}</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="create-task-dialog__field--full">
+        <mat-label>Add tag</mat-label>
+        <input
+          matInput
+          [formControl]="tagInputControl"
+          placeholder="Press enter or click add"
+          (keydown.enter)="$event.preventDefault(); addTag()"
+        />
+        <button mat-icon-button matSuffix type="button" (click)="addTag()" aria-label="Add tag">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-form-field>
+
+      @if (tags().length > 0) {
+        <div class="create-task-dialog__tags">
+          @for (tag of tags(); track tag) {
+            <div class="create-task-dialog__tag" [style.backgroundColor]="tagColor(tag)">
+              <span>{{ tag }}</span>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Remove tag"
+                (click)="removeTag(tag)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="create-task-dialog__empty">No tags added yet.</div>
+      }
+    </section>
+
+    @if (errorMessage()) {
+      <div class="create-task-dialog__error">{{ errorMessage() }}</div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="create-task-dialog__actions">
+  <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    [disabled]="taskForm.invalid || isSubmitting()"
+    (click)="submit()"
+  >
+    Create task
+  </button>
+</mat-dialog-actions>

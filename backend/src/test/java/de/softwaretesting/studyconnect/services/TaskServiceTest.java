@@ -67,19 +67,19 @@ class TaskServiceTest {
     creator = new User();
     creator.setId(1L);
     creator.setEmail("creator@example.com");
-    creator.setSurname("Creator");
+    creator.setFirstname("Creator");
     creator.setLastname("User");
 
     assignee1 = new User();
     assignee1.setId(2L);
     assignee1.setEmail("assignee1@example.com");
-    assignee1.setSurname("Assignee");
+    assignee1.setFirstname("Assignee");
     assignee1.setLastname("One");
 
     assignee2 = new User();
     assignee2.setId(3L);
     assignee2.setEmail("assignee2@example.com");
-    assignee2.setSurname("Assignee");
+    assignee2.setFirstname("Assignee");
     assignee2.setLastname("Two");
 
     // Set up group
@@ -123,7 +123,7 @@ class TaskServiceTest {
     savedTask.setStatus(Status.OPEN);
     savedTask.setCategory("Category");
     savedTask.setTags(tags);
-    savedTask.setAssignees(Set.of(assignee1, assignee2));
+    savedTask.setAssignees(new HashSet<>(Set.of(assignee1, assignee2)));
     savedTask.setCreatedBy(creator);
     savedTask.setGroup(group);
 
@@ -140,6 +140,7 @@ class TaskServiceTest {
             tags,
             1L,
             assigneeIds,
+            LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),
             100L);
@@ -280,6 +281,7 @@ class TaskServiceTest {
             Set.of(),
             1L,
             Set.of(2L),
+            LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),
             100L);
@@ -430,15 +432,6 @@ class TaskServiceTest {
             1L,
             assigneeIds);
 
-    Task updatedTask = new Task();
-    updatedTask.setTitle("Updated Task");
-    updatedTask.setDescription("Updated Description");
-    updatedTask.setPriority(Priority.LOW);
-    updatedTask.setStatus(Status.IN_PROGRESS);
-    updatedTask.setCategory("Updated Category");
-    updatedTask.setTags(new HashSet<>());
-    updatedTask.setAssignees(new HashSet<>());
-
     Task savedUpdatedTask = new Task();
     savedUpdatedTask.setId(1L);
     savedUpdatedTask.setTitle("Updated Task");
@@ -465,10 +458,10 @@ class TaskServiceTest {
             assigneeIds,
             LocalDateTime.now(),
             LocalDateTime.now(),
+            LocalDateTime.now(),
             100L);
 
     when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
-    when(taskRequestMapper.toEntity(updateRequestDTO)).thenReturn(updatedTask);
     when(userRepository.findAllById(assigneeIds)).thenReturn(List.of(assignee1, assignee2));
     when(taskRepository.save(any(Task.class))).thenReturn(savedUpdatedTask);
     when(taskResponseMapper.toDto(savedUpdatedTask)).thenReturn(updatedResponseDTO);
@@ -485,7 +478,6 @@ class TaskServiceTest {
     assertEquals(Status.IN_PROGRESS, response.getBody().getStatus());
 
     verify(taskRepository).findById(taskId);
-    verify(taskRequestMapper).toEntity(updateRequestDTO);
     verify(userRepository).findAllById(assigneeIds);
     verify(taskRepository).save(any(Task.class));
     verify(taskResponseMapper).toDto(savedUpdatedTask);
@@ -520,7 +512,6 @@ class TaskServiceTest {
     // Arrange
     Long taskId = 1L;
     when(taskRepository.findById(taskId)).thenReturn(Optional.of(savedTask));
-    when(taskRequestMapper.toEntity(taskRequestDTO)).thenReturn(task);
     // Return only one user when two are expected
     when(userRepository.findAllById(taskRequestDTO.getAssigneeIds()))
         .thenReturn(List.of(assignee1));

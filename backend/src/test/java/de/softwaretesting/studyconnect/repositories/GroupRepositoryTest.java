@@ -40,7 +40,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -83,7 +83,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("taskadmin@example.com");
-    admin.setSurname("Task");
+    admin.setFirstname("Task");
     admin.setLastname("Admin");
     savedAdmin = userRepository.save(admin);
 
@@ -137,7 +137,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("nullname@example.com");
-    admin.setSurname("NullName");
+    admin.setFirstname("NullName");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -158,7 +158,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("timestamp@example.com");
-    admin.setSurname("Timestamp");
+    admin.setFirstname("Timestamp");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -178,7 +178,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("publicdefault@example.com");
-    admin.setSurname("PublicDefault");
+    admin.setFirstname("PublicDefault");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -204,7 +204,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin
     User admin = new User();
     admin.setEmail("admin2@example.com");
-    admin.setSurname("Admin2");
+    admin.setFirstname("Admin2");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -219,7 +219,7 @@ class GroupRepositoryTest {
     for (int i = 0; i < 25; i++) { // more than default maxMembers=20
       User user = new User();
       user.setEmail("user" + i + "@example.com");
-      user.setSurname("User" + i);
+      user.setFirstname("User" + i);
       user.setLastname("Test");
       members.add(userRepository.save(user));
     }
@@ -238,13 +238,13 @@ class GroupRepositoryTest {
   void shouldInitializeInviteCodeAndMemberCountOnPersist() {
     User admin = new User();
     admin.setEmail("invite-membercount-admin@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("InviteMemberCount");
     User savedAdminUser = userRepository.save(admin);
 
     User member = new User();
     member.setEmail("invite-membercount-member@example.com");
-    member.setSurname("Member");
+    member.setFirstname("Member");
     member.setLastname("InviteMemberCount");
     User savedMember = userRepository.save(member);
 
@@ -266,19 +266,19 @@ class GroupRepositoryTest {
   void shouldUpdateMemberCountWhenRemovingMember() {
     User admin = new User();
     admin.setEmail("remove-member-admin@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("RemoveMember");
     User savedAdminUser = userRepository.save(admin);
 
     User member1 = new User();
     member1.setEmail("remove-member-1@example.com");
-    member1.setSurname("Member");
+    member1.setFirstname("Member");
     member1.setLastname("One");
     member1 = userRepository.save(member1);
 
     User member2 = new User();
     member2.setEmail("remove-member-2@example.com");
-    member2.setSurname("Member");
+    member2.setFirstname("Member");
     member2.setLastname("Two");
     member2 = userRepository.save(member2);
 
@@ -306,13 +306,13 @@ class GroupRepositoryTest {
   void shouldManageAdminsThroughAccessors() {
     User admin1 = new User();
     admin1.setEmail("admin-accessors-1@example.com");
-    admin1.setSurname("Admin");
+    admin1.setFirstname("Admin");
     admin1.setLastname("One");
     admin1 = userRepository.save(admin1);
 
     User admin2 = new User();
     admin2.setEmail("admin-accessors-2@example.com");
-    admin2.setSurname("Admin");
+    admin2.setFirstname("Admin");
     admin2.setLastname("Two");
     admin2 = userRepository.save(admin2);
 
@@ -352,7 +352,7 @@ class GroupRepositoryTest {
   void shouldRegenerateInviteCode() {
     User admin = new User();
     admin.setEmail("invite-code-regenerate@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("InviteCode");
     admin = userRepository.save(admin);
 
@@ -383,7 +383,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-maxname@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("MaxName");
     savedAdmin = userRepository.save(admin);
 
@@ -407,7 +407,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-minname@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("MinName");
     savedAdmin = userRepository.save(admin);
 
@@ -430,7 +430,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-maxdesc@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("MaxDesc");
     savedAdmin = userRepository.save(admin);
 
@@ -455,7 +455,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-zeromembers@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("ZeroMembers");
     savedAdmin = userRepository.save(admin);
 
@@ -475,7 +475,7 @@ class GroupRepositoryTest {
     // Arrange: try to add a member
     User member = new User();
     member.setEmail("nomember@example.com");
-    member.setSurname("No");
+    member.setFirstname("No");
     member.setLastname("Member");
     member = userRepository.save(member);
 
@@ -493,7 +493,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-largemax@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("LargeMax");
     savedAdmin = userRepository.save(admin);
 
@@ -519,7 +519,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-nulldesc@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("NullDesc");
     savedAdmin = userRepository.save(admin);
 
@@ -543,7 +543,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-emptydesc@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("EmptyDesc");
     savedAdmin = userRepository.save(admin);
 
@@ -567,7 +567,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-defaultmax@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("DefaultMax");
     savedAdmin = userRepository.save(admin);
 
@@ -594,14 +594,14 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-duplicate@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Duplicate");
     savedAdmin = userRepository.save(admin);
 
     // Arrange: create user and group
     User member = new User();
     member.setEmail("duplicate@example.com");
-    member.setSurname("Dup");
+    member.setFirstname("Dup");
     member.setLastname("Member");
     member = userRepository.save(member);
 
@@ -626,7 +626,7 @@ class GroupRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin-specialchars@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("SpecialChars");
     savedAdmin = userRepository.save(admin);
 
@@ -661,13 +661,13 @@ class GroupRepositoryTest {
     // Arrange: create and save users
     User admin = new User();
     admin.setEmail("admin-query@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Query");
     User savedAdminUser = userRepository.save(admin);
 
     User nonAdmin = new User();
     nonAdmin.setEmail("nonadmin-query@example.com");
-    nonAdmin.setSurname("Non");
+    nonAdmin.setFirstname("Non");
     nonAdmin.setLastname("Admin");
     User savedNonAdminUser = userRepository.save(nonAdmin);
 

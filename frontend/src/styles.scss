@@ -33,9 +33,21 @@ html {
   box-sizing: border-box;
 }
 
+:root {
+  /* StudyConnect palette (approx. from logo) */
+  --sc-bg: #e8f9fb;
+  --sc-navy: #11496a;
+  --sc-teal: #2db0a9;
+  --sc-blue: #28a7c6;
+  --sc-card-bg: #ffffff;
+  --sc-border: rgba(17, 73, 106, 0.18);
+  --sc-shadow: rgba(17, 73, 106, 0.12);
+}
+
 html, body {
   height: 100%;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--sc-bg);
 }
 
 /* Toast notification styles */

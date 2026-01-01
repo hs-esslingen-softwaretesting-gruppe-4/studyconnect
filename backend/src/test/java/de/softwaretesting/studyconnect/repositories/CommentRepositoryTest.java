@@ -36,7 +36,7 @@ class CommentRepositoryTest {
     // Arange User and Group
     User user = new User();
     user.setEmail("test@example.com");
-    user.setSurname("John");
+    user.setFirstname("John");
     user.setLastname("Doe");
 
     savedUser = userRepository.save(user);
@@ -44,7 +44,7 @@ class CommentRepositoryTest {
     // Arrange: create and save an admin user
     User admin = new User();
     admin.setEmail("admin@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -93,7 +93,7 @@ class CommentRepositoryTest {
     // Arrange: create and save an admin user for the group
     User admin = new User();
     admin.setEmail("admin-null-test@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("User");
     savedAdmin = userRepository.save(admin);
 
@@ -119,7 +119,7 @@ class CommentRepositoryTest {
     // Arrange: create and save a user
     User user = new User();
     user.setEmail("user-null-test@example.com");
-    user.setSurname("Test");
+    user.setFirstname("Test");
     user.setLastname("User");
     savedUser = userRepository.save(user);
 
@@ -141,13 +141,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("longcontent@example.com");
-    user.setSurname("Long");
+    user.setFirstname("Long");
     user.setLastname("Content");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-long@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Long");
     savedAdmin = userRepository.save(admin);
 
@@ -177,13 +177,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("minimalcontent@example.com");
-    user.setSurname("Min");
+    user.setFirstname("Min");
     user.setLastname("Content");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-min@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Min");
     savedAdmin = userRepository.save(admin);
 
@@ -214,13 +214,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("nullcontent@example.com");
-    user.setSurname("Null");
+    user.setFirstname("Null");
     user.setLastname("Content");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-nullcontent@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Null");
     savedAdmin = userRepository.save(admin);
 
@@ -249,13 +249,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("emptycontent@example.com");
-    user.setSurname("Empty");
+    user.setFirstname("Empty");
     user.setLastname("Content");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-empty@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Empty");
     savedAdmin = userRepository.save(admin);
 
@@ -286,13 +286,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("timestamp@example.com");
-    user.setSurname("Time");
+    user.setFirstname("Time");
     user.setLastname("Stamp");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-timestamp@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Time");
     savedAdmin = userRepository.save(admin);
 
@@ -321,13 +321,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("unicode@example.com");
-    user.setSurname("Unicode");
+    user.setFirstname("Unicode");
     user.setLastname("Test");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-unicode@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Unicode");
     savedAdmin = userRepository.save(admin);
 
@@ -356,13 +356,13 @@ class CommentRepositoryTest {
     // Arrange: setup user and group
     User user = new User();
     user.setEmail("whitespace@example.com");
-    user.setSurname("White");
+    user.setFirstname("White");
     user.setLastname("Space");
     savedUser = userRepository.save(user);
 
     User admin = new User();
     admin.setEmail("admin-whitespace@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("White");
     savedAdmin = userRepository.save(admin);
 
@@ -391,19 +391,19 @@ class CommentRepositoryTest {
     // Arrange: setup users and group
     User user1 = new User();
     user1.setEmail("user1@example.com");
-    user1.setSurname("User1");
+    user1.setFirstname("User1");
     user1.setLastname("Test");
     User savedUser1 = userRepository.save(user1);
 
     User user2 = new User();
     user2.setEmail("user2@example.com");
-    user2.setSurname("User2");
+    user2.setFirstname("User2");
     user2.setLastname("Test");
     User savedUser2 = userRepository.save(user2);
 
     User admin = new User();
     admin.setEmail("admin-multi@example.com");
-    admin.setSurname("Admin");
+    admin.setFirstname("Admin");
     admin.setLastname("Multi");
     savedAdmin = userRepository.save(admin);
 

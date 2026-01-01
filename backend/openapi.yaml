@@ -156,6 +156,30 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+  /api/groups/search:
+    parameters:
+      - in: query
+        name: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+    get:
+      tags: [Groups]
+      summary: Search public groups by name
+      responses:
+        '200':
+          description: Groups fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /api/groups/{groupId}:
     parameters:
       - in: path
@@ -338,6 +362,34 @@ paths:
       responses:
         '204':
           description: Admin removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/groups/{groupId}/join:
+    parameters:
+      - in: path
+        name: groupId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+    post:
+      tags: [Groups]
+      summary: Join group by id
+      responses:
+        '204':
+          description: Joined group
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -535,13 +587,13 @@ components:
           format: email
         lastname:
           type: string
-        surname:
+        firstname:
           type: string
-      required: [id, email, lastname, surname]
+      required: [id, email, lastname, firstname]
     UserCreateRequest:
       type: object
       properties:
-        surname:
+        firstname:
           type: string
           maxLength: 100
         lastname:
@@ -556,20 +608,20 @@ components:
         email:
           type: string
           format: email
-      required: [surname, lastname, password, email]
+      required: [firstname, lastname, password, email]
     UserUpdateRequest:
       type: object
       properties:
         email:
           type: string
           format: email
-        surname:
+        firstname:
           type: string
           maxLength: 100
         lastname:
           type: string
           maxLength: 100
-      required: [email, surname, lastname]
+      required: [email, firstname, lastname]
     GroupResponse:
       type: object
       properties:
@@ -696,6 +748,9 @@ components:
           type: string
           format: date-time
         updated_at:
+          type: string
+          format: date-time
+        last_status_change_at:
           type: string
           format: date-time
         group_id:

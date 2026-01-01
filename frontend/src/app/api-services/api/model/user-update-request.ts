@@ -11,6 +11,6 @@
 
 export interface UserUpdateRequest {
     email: string;
-    surname: string;
+    firstname: string;
     lastname: string;
 }

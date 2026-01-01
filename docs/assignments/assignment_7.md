@@ -35,7 +35,7 @@ The analysis systematically applied the following test design techniques from so
 **Application:**
 - **String Length Constraints:**
   - Task: title (max 200 chars), description (max 1000 chars)
-  - User: surname, lastname, email (testing min 1 char, very long values)
+  - User: firstname, lastname, email (testing min 1 char, very long values)
   - Group: name (max 100 chars), description (max 500 chars)
   - Comment: content (Text type - tested with 10,000+ characters)
 
@@ -59,7 +59,7 @@ void shouldHandleTitleAtMaxLength() {
 
 **Application:**
 - **NULL vs Empty String vs Valid Value:**
-  - User: email, surname, lastname (NULL fails, empty allowed, valid succeeds)
+  - User: email, firstname, lastname (NULL fails, empty allowed, valid succeeds)
   - User: keycloakUUID (NULL allowed, empty allowed, valid succeeds)
   - Task: dueDate (NULL allowed, past/future dates valid)
   - Comment: content (NULL allowed, empty allowed, valid succeeds)
@@ -132,10 +132,10 @@ void shouldHandleOverdueDecisionTable() {
 ```java
 @Test
 void shouldHandleNamesWithUnicodeAndSpecialChars() {
-    user.setSurname("François");
+    user.setfirstname("François");
     user.setLastname("Müller-Schmidt");
     User saved = userRepository.saveAndFlush(user);
-    assertEquals("François", saved.getSurname());
+    assertEquals("François", saved.getfirstname());
     assertEquals("Müller-Schmidt", saved.getLastname());
 }
 ```
@@ -220,7 +220,7 @@ All tests pass successfully on H2 in-memory database with test profile.
 
 **Added Tests (11):**
 - BVA: `shouldHandleLongFieldValues`, `shouldHandleMinimumLengthNames`
-- Equivalence: `shouldAllowEmptyEmail`, `shouldAllowEmptySurname`, `shouldAllowEmptyLastname`, `shouldAllowNullKeycloakUUID`, `shouldAllowEmptyKeycloakUUID`
+- Equivalence: `shouldAllowEmptyEmail`, `shouldAllowEmptyfirstname`, `shouldAllowEmptyLastname`, `shouldAllowNullKeycloakUUID`, `shouldAllowEmptyKeycloakUUID`
 - Edge Cases: `shouldHandleEmailWithSpecialCharacters`, `shouldHandleNamesWithUnicodeAndSpecialChars`, `shouldPreserveWhitespaceInNames`, `shouldFailToSaveUserWithNullLastname`
 
 ### 5.3 GroupRepositoryTest

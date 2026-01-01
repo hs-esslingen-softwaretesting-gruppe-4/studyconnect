@@ -110,8 +110,8 @@ public class KeycloakService {
             "realm", realmName,
             "enabled", true,
             "registrationEmailAsUsername", true, // use email as identifier instead of username
-            "duplicateEmailsAllowed", false // prevent duplicate emails
-            );
+            "duplicateEmailsAllowed", false, // prevent duplicate emails
+            "loginTheme", "studyconnect-theme");
 
     HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
@@ -257,11 +257,11 @@ public class KeycloakService {
    *
    * @param password the password for the new user
    * @param email the email of the new user
-   * @param surname the surname of the new user
+   * @param firstname the first name of the new user
    * @param lastname the last name of the new user
    * @return true if the user was created successfully, false otherwise
    */
-  public void createUserInRealm(String password, String email, String surname, String lastname) {
+  public void createUserInRealm(String password, String email, String firstname, String lastname) {
 
     String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
@@ -279,7 +279,7 @@ public class KeycloakService {
             "email",
             email,
             "firstName",
-            surname,
+            firstname,
             "lastName",
             lastname,
             "credentials",
@@ -291,7 +291,7 @@ public class KeycloakService {
       ResponseEntity<Void> response = restTemplate.postForEntity(userUrl, request, Void.class);
       LOGGER.info(
           "User '{}' '{}' created successfully in realm '{}', status code: {}",
-          surname,
+          firstname,
           lastname,
           realmName,
           response.getStatusCode());
@@ -340,12 +340,12 @@ public class KeycloakService {
    *
    * @param password the password for the new admin user
    * @param email the email of the new admin user
-   * @param surname the surname of the new admin user
+   * @param firstname the first name of the new admin user
    * @param lastname the last name of the new admin user
    * @return true if the admin user was created successfully, false otherwise
    */
   public boolean createAdminUserInRealm(
-      String password, String email, String surname, String lastname) {
+      String password, String email, String firstname, String lastname) {
     String userUrl = keycloakServerUrl + KEYCLOAK_REALM_PATH + realmName + "/users";
 
     HttpHeaders headers = new HttpHeaders();
@@ -362,7 +362,7 @@ public class KeycloakService {
             "email",
             email,
             "firstName",
-            surname,
+            firstname,
             "lastName",
             lastname,
             "credentials",
@@ -373,7 +373,10 @@ public class KeycloakService {
     try {
       ResponseEntity<Void> response = restTemplate.postForEntity(userUrl, request, Void.class);
       LOGGER.info(
-          "Admin user '{}' '{}' created successfully in realm '{}'", surname, lastname, realmName);
+          "Admin user '{}' '{}' created successfully in realm '{}'",
+          firstname,
+          lastname,
+          realmName);
 
       String createdUserId = extractUserIdFromLocation(response);
       LOGGER.info("Created admin user ID from Location: " + createdUserId);

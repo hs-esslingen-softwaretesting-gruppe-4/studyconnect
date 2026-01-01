@@ -273,7 +273,8 @@ public class GroupService {
     if (group.getMemberCount() == 0) {
       groupRepository.delete(group);
     } else {
-      // If no admins remain but there are still members, promote the first member to admin
+      // If no admins remain but there are still members, promote the first member to
+      // admin
       if (group.getAdmins().isEmpty() && group.getMemberCount() > 0) {
         try {
           User newAdmin = group.getMembers().iterator().next();
@@ -468,5 +469,28 @@ public class GroupService {
       LOGGER.error("Error deleting group with id {}: {}", groupId, e.getMessage());
       throw new InternalServerErrorException("Error deleting group with id: " + groupId);
     }
+  }
+
+  public ResponseEntity<List<GroupResponseDTO>> searchPublicGroups(String query) {
+    Optional<List<Group>> publicGroups = groupRepository.searchPublicGroupsByName(query);
+    List<GroupResponseDTO> dtoList = groupResponseMapper.toDtoList(publicGroups.orElse(List.of()));
+    return ResponseEntity.ok(dtoList);
+  }
+
+  public ResponseEntity<Void> joinGroupById(Long groupId, Long userId) {
+    Group group =
+        groupRepository
+            .findById(groupId)
+            .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
+    if (group.getMemberCount() >= group.getMaxMembers()) {
+      throw new BadRequestException("Group has reached its maximum member limit");
+    }
+    User user = userService.retrieveUserById(userId);
+    if (group.getMembers().contains(user)) {
+      throw new BadRequestException("User with id " + userId + " is already a member of the group");
+    }
+    group.addMember(user);
+    groupRepository.save(group);
+    return ResponseEntity.noContent().build();
   }
 }

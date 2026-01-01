@@ -86,7 +86,7 @@ public class UserService {
         User newUser = new User();
         newUser.setKeycloakUUID(user.getKeycloakUUID());
         newUser.setEmail(user.getEmail());
-        newUser.setSurname(user.getFirstName());
+        newUser.setFirstname(user.getFirstName());
         newUser.setLastname(user.getLastName());
         userRepository.save(newUser);
         LOGGER.info(
@@ -162,7 +162,7 @@ public class UserService {
       keycloakService.createUserInRealm(
           userCreateRequestDTO.getPassword(),
           userCreateRequestDTO.getEmail(),
-          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getFirstname(),
           userCreateRequestDTO.getLastname());
 
       // On successful creation in Keycloak, proceed with local user creation
@@ -174,7 +174,7 @@ public class UserService {
 
       newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
       newUser.setEmail(createdKeycloakUser.getEmail());
-      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setFirstname(createdKeycloakUser.getFirstName());
       newUser.setLastname(createdKeycloakUser.getLastName());
       userRepository.save(newUser);
       UserResponseDTO userResponseDTO = userResponseMapper.toDto(newUser);
@@ -204,7 +204,7 @@ public class UserService {
       this.keycloakService.createAdminUserInRealm(
           userCreateRequestDTO.getPassword(),
           userCreateRequestDTO.getEmail(),
-          userCreateRequestDTO.getSurname(),
+          userCreateRequestDTO.getFirstname(),
           userCreateRequestDTO.getLastname());
 
       // On successful creation in Keycloak, proceed with local user creation
@@ -213,7 +213,7 @@ public class UserService {
 
       newUser.setKeycloakUUID(createdKeycloakUser.getKeycloakUUID());
       newUser.setEmail(createdKeycloakUser.getEmail());
-      newUser.setSurname(createdKeycloakUser.getFirstName());
+      newUser.setFirstname(createdKeycloakUser.getFirstName());
       newUser.setLastname(createdKeycloakUser.getLastName());
       userRepository.save(newUser);
 
@@ -255,16 +255,16 @@ public class UserService {
     }
 
     Jwt jwt = jwtAuth.getToken();
-    String keycloakUuid = jwt.getSubject();
-    if (keycloakUuid == null || keycloakUuid.isBlank()) {
-      throw new BadRequestException("Access token missing subject (sub)");
+    String email = jwt.getClaimAsString("email");
+    if (email == null || email.isBlank()) {
+      throw new BadRequestException("Access token missing email");
     }
 
-    Optional<User> byUuid = userRepository.findByKeycloakUUID(keycloakUuid);
-    if (byUuid.isPresent()) {
-      return ResponseEntity.ok(userResponseMapper.toDto(byUuid.get()));
+    Optional<User> byEmail = userRepository.findByEmail(email);
+    if (byEmail.isPresent()) {
+      return ResponseEntity.ok(userResponseMapper.toDto(byEmail.get()));
     } else {
-      LOGGER.warn("User with Keycloak UUID {} not found locally.", keycloakUuid);
+      LOGGER.warn("User with email {} not found locally.", email);
       throw new NotFoundException("User not found");
     }
   }

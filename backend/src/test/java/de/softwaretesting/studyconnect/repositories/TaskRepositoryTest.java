@@ -34,7 +34,7 @@ class TaskRepositoryTest {
     // Arrange
     User creator = new User();
     creator.setEmail("creator@example.com");
-    creator.setSurname("Creator");
+    creator.setFirstname("Creator");
     creator.setLastname("User");
     User savedCreator = userRepository.save(creator);
 
@@ -76,19 +76,19 @@ class TaskRepositoryTest {
     // Arrange
     User creator = new User();
     creator.setEmail("c@example.com");
-    creator.setSurname("C");
+    creator.setFirstname("C");
     creator.setLastname("User");
     userRepository.saveAndFlush(creator);
 
     User assignee1 = new User();
     assignee1.setEmail("a1@example.com");
-    assignee1.setSurname("A1");
+    assignee1.setFirstname("A1");
     assignee1.setLastname("User");
     userRepository.saveAndFlush(assignee1);
 
     User assignee2 = new User();
     assignee2.setEmail("a2@example.com");
-    assignee2.setSurname("A2");
+    assignee2.setFirstname("A2");
     assignee2.setLastname("User");
     userRepository.saveAndFlush(assignee2);
 
@@ -425,7 +425,7 @@ class TaskRepositoryTest {
     // Edge case: adding the same assignee multiple times
     User user = new User();
     user.setEmail("assignee@example.com");
-    user.setSurname("Assignee");
+    user.setFirstname("Assignee");
     user.setLastname("User");
     User savedUser = userRepository.saveAndFlush(user);
 
@@ -481,19 +481,19 @@ class TaskRepositoryTest {
     // Edge case: many tags and assignees
     User u1 = new User();
     u1.setEmail("u1@example.com");
-    u1.setSurname("U1");
+    u1.setFirstname("U1");
     u1.setLastname("User");
     userRepository.saveAndFlush(u1);
 
     User u2 = new User();
     u2.setEmail("u2@example.com");
-    u2.setSurname("U2");
+    u2.setFirstname("U2");
     u2.setLastname("User");
     userRepository.saveAndFlush(u2);
 
     User u3 = new User();
     u3.setEmail("u3@example.com");
-    u3.setSurname("U3");
+    u3.setFirstname("U3");
     u3.setLastname("User");
     userRepository.saveAndFlush(u3);
 

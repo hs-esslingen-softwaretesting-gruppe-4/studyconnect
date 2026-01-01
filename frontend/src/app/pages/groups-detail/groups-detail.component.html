@@ -1,0 +1,198 @@
+<section class="group-detail">
+  <header class="group-detail__toolbar">
+    <button mat-stroked-button color="primary" type="button" (click)="backToGroups()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to groups
+    </button>
+  </header>
+
+  @if (group(); as group) {
+    @if (showPrivateBlocked()) {
+      <div class="group-detail__blocked">
+        <img
+          src="assets/stop.gif"
+          alt="Stop sign"
+          class="group-detail__blocked-image"
+        />
+        <p class="group-detail__blocked-text">
+          This group is private. You are not a member, so you cannot access it.
+        </p>
+      </div>
+    } @else if (showPublicJoin()) {
+      <mat-card class="group-detail__card">
+        <mat-card-header>
+          <mat-card-title>{{ group.name }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ group.description ?? 'No description provided.' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="group-detail__hint">
+            Join the group to see tasks and members.
+          </p>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="accent" type="button" (click)="joinGroup()">
+            Join group
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @else if (showGroupDetail()) {
+      <div class="group-detail__layout">
+        <div class="group-detail__main">
+          <mat-card class="group-detail__card">
+            <mat-card-header>
+              <mat-card-title>{{ group.name }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ group.description ?? 'No description provided.' }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="group-detail__section">
+                <div class="group-detail__section-header">
+                  <div class="group-detail__section-title">
+                    <h2>Tasks</h2>
+                    <p class="group-detail__section-subtitle">
+                      Track tasks assigned to the group.
+                    </p>
+                  </div>
+                  <div class="group-detail__section-actions">
+                    <span class="group-detail__pill">{{ groupTasks().length }} total</span>
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      type="button"
+                      class="group-detail__create-task"
+                      (click)="openCreateTaskDialog()"
+                    >
+                      <mat-icon>add</mat-icon>
+                      Create task
+                    </button>
+                  </div>
+                </div>
+                <mat-tab-group class="group-detail__tabs" animationDuration="250ms">
+                  @for (tab of taskStatusTabs; track tab.status) {
+                    <mat-tab [label]="tab.label">
+                      <div class="group-detail__task-panel">
+                        @if (getVisibleTasksForStatus(tab.status).length > 0) {
+                          <div class="group-detail__task-list">
+                            @for (task of getVisibleTasksForStatus(tab.status); track task.id) {
+                              <article class="group-detail__task-card">
+                                <div class="group-detail__task-header">
+                                  <h3 class="group-detail__task-title">{{ task.title }}</h3>
+                                  <span
+                                    class="group-detail__priority"
+                                    [class.group-detail__priority--high]="task.priority === TaskPriority.High"
+                                    [class.group-detail__priority--medium]="task.priority === TaskPriority.Medium"
+                                    [class.group-detail__priority--low]="task.priority === TaskPriority.Low"
+                                  >
+                                    {{ priorityLabel(task.priority) }}
+                                  </span>
+                                </div>
+                                <div class="group-detail__task-meta">
+                                  <div class="group-detail__task-field">
+                                    <span class="group-detail__task-label">Assignees</span>
+                                    <span class="group-detail__task-value">
+                                      {{ getAssigneeNames(task) }}
+                                    </span>
+                                  </div>
+                                  <div class="group-detail__task-field">
+                                    <span class="group-detail__task-label">Created</span>
+                                    <span class="group-detail__task-value">
+                                      {{ task.created_at | date: 'mediumDate' }}
+                                    </span>
+                                  </div>
+                                  <div class="group-detail__task-field">
+                                    <span class="group-detail__task-label">Last status change</span>
+                                    <span class="group-detail__task-value">
+                                      {{ (task.last_status_change_at ?? task.updated_at) | date: 'mediumDate' }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="group-detail__task-field">
+                                  <span class="group-detail__task-label">Tags</span>
+                                  @if (task.tags?.length) {
+                                    <div class="group-detail__tags">
+                                      @for (tag of task.tags; track tag) {
+                                        <span
+                                          class="group-detail__tag"
+                                          [style.backgroundColor]="getTagColor(task, tag)"
+                                        >
+                                          {{ tag }}
+                                        </span>
+                                      }
+                                    </div>
+                                  } @else {
+                                    <span class="group-detail__task-value">No tags</span>
+                                  }
+                                </div>
+                              </article>
+                            }
+                          </div>
+                          @if (hasMoreTasks(tab.status)) {
+                            <div class="group-detail__task-actions">
+                              <button
+                                mat-stroked-button
+                                color="primary"
+                                type="button"
+                                (click)="showMoreTasks(tab.status)"
+                              >
+                                Show more
+                              </button>
+                            </div>
+                          }
+                        } @else {
+                          <div class="group-detail__empty">
+                            No tasks in this status yet.
+                          </div>
+                        }
+                      </div>
+                    </mat-tab>
+                  }
+                </mat-tab-group>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <aside class="group-detail__sidebar">
+          <mat-card class="group-detail__card group-detail__card--compact">
+            <mat-card-header>
+              <mat-card-title>Admins</mat-card-title>
+              <mat-card-subtitle>
+                Showing {{ visibleAdmins().length }} of {{ groupAdmins().length }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (visibleAdmins().length > 0) {
+                <div class="group-detail__admin-list">
+                  @for (admin of visibleAdmins(); track admin.id) {
+                    <div class="group-detail__admin-card">
+                      <img
+                        src="assets/profile_placeholder.png"
+                        alt="Profile placeholder"
+                        class="group-detail__admin-avatar"
+                      />
+                      <div class="group-detail__admin-info">
+                        <span class="group-detail__admin-name">
+                          {{ admin.firstname }} {{ admin.lastname }}
+                        </span>
+                      </div>
+                      <span class="group-detail__badge">admin</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="group-detail__empty">No admins found.</div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </aside>
+      </div>
+    }
+  } @else {
+    <div class="group-detail__empty">
+      Group details could not be loaded.
+    </div>
+  }
+</section>

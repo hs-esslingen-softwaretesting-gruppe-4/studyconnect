@@ -63,14 +63,16 @@ public class AssignTaskSteps {
       String role = r.getOrDefault("role", "member").trim();
       String keycloakUUID = r.getOrDefault("keycloakUUID", "").trim();
 
-      // try to reuse existing user by keycloakUUID or surname
+      // try to reuse existing user by keycloakUUID or name
       Optional<User> existing = Optional.empty();
       if (!keycloakUUID.isEmpty()) {
         existing = userRepository.findByKeycloakUUID(keycloakUUID);
       }
       if (existing.isEmpty() && !name.isEmpty()) {
         existing =
-            userRepository.findAll().stream().filter(u -> name.equals(u.getSurname())).findFirst();
+            userRepository.findAll().stream()
+                .filter(u -> name.equals(u.getFirstname()))
+                .findFirst();
       }
 
       User user;
@@ -80,11 +82,11 @@ public class AssignTaskSteps {
         user = new User();
         // populate name, email, keycloakUUID
         if (!name.isEmpty()) {
-          user.setSurname(name);
+          user.setFirstname(name);
           user.setLastname(name);
           user.setEmail(name.replaceAll("\\s+", ".").toLowerCase() + "@example.local");
         } else {
-          user.setSurname("user");
+          user.setFirstname("user");
           user.setLastname("user");
           user.setEmail((keycloakUUID.isEmpty() ? "user" : keycloakUUID) + "@example.local");
         }
@@ -137,14 +139,14 @@ public class AssignTaskSteps {
    */
   @Given("I am logged in as {string} with keycloakUUID {string}")
   public void iAmLoggedInAs(String userName, String keycloakUUID) {
-    // Accept either a user name (surname) or a keycloakUUID
+    // Accept either a user name (firstname) or a keycloakUUID
     String identifier = userName;
 
     Optional<User> userOpt = userRepository.findByKeycloakUUID(keycloakUUID);
     if (userOpt.isEmpty()) {
       userOpt =
           userRepository.findAll().stream()
-              .filter(u -> identifier.equals(u.getSurname()))
+              .filter(u -> identifier.equals(u.getFirstname()))
               .findFirst();
     }
 
@@ -183,7 +185,7 @@ public class AssignTaskSteps {
       if (userOpt.isEmpty()) {
         userOpt =
             userRepository.findAll().stream()
-                .filter(u -> memberRaw.equals(u.getSurname()))
+                .filter(u -> memberRaw.equals(u.getFirstname()))
                 .findFirst();
       }
 
@@ -249,7 +251,7 @@ public class AssignTaskSteps {
             .map(m -> m.values().stream().findFirst().orElse("").trim())
             .toList();
 
-    List<String> actual = t.getAssignees().stream().map(User::getSurname).toList();
+    List<String> actual = t.getAssignees().stream().map(User::getFirstname).toList();
 
     if (!actual.containsAll(expected) || actual.size() != expected.size()) {
       throw new AssertionError(

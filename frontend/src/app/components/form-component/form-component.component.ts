@@ -50,6 +50,7 @@ export interface FormField {
   loadFromApi?: boolean;
   editable?: boolean;
   tooltip?: string;
+  placeholder?: string; // Placeholder text for input fields
   filterable?: boolean; // For autocomplete fields: whether the options should be filterable based on user input
   requireSelection?: boolean;
 }

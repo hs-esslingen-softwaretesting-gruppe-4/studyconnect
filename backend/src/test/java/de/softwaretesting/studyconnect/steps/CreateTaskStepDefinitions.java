@@ -45,7 +45,7 @@ public class CreateTaskStepDefinitions {
     // Erstelle einen Test-User mit eindeutiger UUID
     String uniqueSuffix = String.valueOf(System.currentTimeMillis());
     currentUser = new User();
-    currentUser.setSurname("Max");
+    currentUser.setFirstname("Max");
     currentUser.setLastname("Mustermann");
     currentUser.setEmail("max.mustermann." + uniqueSuffix + "@example.com");
     currentUser.setKeycloakUUID("test-uuid-" + uniqueSuffix);
@@ -82,7 +82,7 @@ public class CreateTaskStepDefinitions {
     // Erstelle User ohne Berechtigungen mit eindeutiger UUID
     String uniqueSuffix = String.valueOf(System.currentTimeMillis());
     currentUser = new User();
-    currentUser.setSurname("No");
+    currentUser.setFirstname("No");
     currentUser.setLastname("Permissions");
     currentUser.setEmail("noperm." + uniqueSuffix + "@example.com");
     currentUser.setKeycloakUUID("test-uuid-noperm-" + uniqueSuffix);

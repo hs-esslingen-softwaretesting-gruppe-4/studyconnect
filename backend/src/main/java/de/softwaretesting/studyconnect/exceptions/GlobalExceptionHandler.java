@@ -1,6 +1,7 @@
 package de.softwaretesting.studyconnect.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -59,6 +60,17 @@ public class GlobalExceptionHandler {
     String message =
         ex.getBindingResult().getFieldErrors().stream()
             .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+    return createResponseEntity(HttpStatus.BAD_REQUEST, "Validation Failed", message, request);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<Map<String, Object>> handleConstraintViolationException(
+      ConstraintViolationException ex, HttpServletRequest request) {
+    String message =
+        ex.getConstraintViolations().stream()
+            .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
             .collect(Collectors.joining(", "));
     return createResponseEntity(HttpStatus.BAD_REQUEST, "Validation Failed", message, request);
   }
