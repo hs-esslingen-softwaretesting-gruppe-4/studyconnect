@@ -11,5 +11,5 @@ export const environment = {
   requiredRole: 'studyconnect',
   realmName: realmName,
   clientID: 'studyconnect-frontend',
-  identityProviderUrl: `https://keycloakswt.duckdns.org`,
+  identityProviderUrl: `https://keycloak.knmod.de`,
 };
