@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  debugAuth: false,
+  production: true,
+  debugAuth: true,
   apiBasePath: 'http://localhost:8088',
   apiUrl: 'http://localhost:8088/api',
   registerUserEndpoint: 'http://localhost:8088/api/users',
@@ -8,6 +8,6 @@ export const environment = {
   // Keycloak configuration
   identityProviderUrl: 'https://keycloakswt.duckdns.org',
   requiredRole: 'studyconnect',
-  realmName: 'studyconnect-dev',
-  clientID: 'studyconnect-frontend-dev',
+  realmName: 'studyconnect',
+  clientID: 'studyconnect-frontend',
 };
