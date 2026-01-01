@@ -47,17 +47,21 @@ export const routes: Routes = [
   {
     path: 'not-allowed',
     component: NotAllowedComponent,
+    canActivate: [authGuard],
   },
   {
     path: 'not-found',
     component: NotFoundComponent,
+    canActivate: [authGuard],
   },
   {
     path: '',
     component: NotFoundComponent,
+    canActivate: [authGuard],
   },
   {
     path: '**',
     component: NotFoundComponent,
+    canActivate: [authGuard],
   },
 ];
