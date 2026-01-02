@@ -128,6 +128,8 @@ class KeycloakAdminTokenServiceTest {
     // Simulate token expiry by setting expiry time to past
     ReflectionTestUtils.setField(
         tokenService, "tokenExpiryTime", java.time.Instant.now().minusSeconds(100));
+    ReflectionTestUtils.setField(
+        tokenService, "tokenRefreshTime", java.time.Instant.now().minusSeconds(100));
 
     String token = tokenService.getAccessToken();
 
@@ -165,6 +167,7 @@ class KeycloakAdminTokenServiceTest {
     assertNull(ReflectionTestUtils.getField(tokenService, "accessToken"));
     assertNull(ReflectionTestUtils.getField(tokenService, "refreshToken"));
     assertNull(ReflectionTestUtils.getField(tokenService, "tokenExpiryTime"));
+    assertNull(ReflectionTestUtils.getField(tokenService, "tokenRefreshTime"));
     assertNull(ReflectionTestUtils.getField(tokenService, "refreshTokenExpiryTime"));
   }
 
@@ -213,6 +216,8 @@ class KeycloakAdminTokenServiceTest {
     // Simulate token expiry
     ReflectionTestUtils.setField(
         tokenService, "tokenExpiryTime", java.time.Instant.now().minusSeconds(100));
+    ReflectionTestUtils.setField(
+        tokenService, "tokenRefreshTime", java.time.Instant.now().minusSeconds(100));
 
     tokenService.scheduleTokenRefresh();
 
@@ -255,6 +260,8 @@ class KeycloakAdminTokenServiceTest {
     // Expire access token but keep refresh token valid
     ReflectionTestUtils.setField(
         tokenService, "tokenExpiryTime", java.time.Instant.now().minusSeconds(100));
+    ReflectionTestUtils.setField(
+        tokenService, "tokenRefreshTime", java.time.Instant.now().minusSeconds(100));
 
     String token = tokenService.getAccessToken();
 
@@ -277,6 +284,8 @@ class KeycloakAdminTokenServiceTest {
     // Expire both tokens
     ReflectionTestUtils.setField(
         tokenService, "tokenExpiryTime", java.time.Instant.now().minusSeconds(100));
+    ReflectionTestUtils.setField(
+        tokenService, "tokenRefreshTime", java.time.Instant.now().minusSeconds(100));
     ReflectionTestUtils.setField(
         tokenService, "refreshTokenExpiryTime", java.time.Instant.now().minusSeconds(100));
 

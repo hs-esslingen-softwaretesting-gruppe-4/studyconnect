@@ -223,7 +223,9 @@ public class SecurityConfig {
   @Bean
   AuthoritiesConverter realmRolesAuthoritiesConverter() {
     return claims -> {
+      @SuppressWarnings("unchecked")
       var realmAccess = Optional.ofNullable((Map<String, Object>) claims.get("realm_access"));
+      @SuppressWarnings("unchecked")
       var roles = realmAccess.flatMap(map -> Optional.ofNullable((List<String>) map.get("roles")));
       return roles
           .map(List::stream)

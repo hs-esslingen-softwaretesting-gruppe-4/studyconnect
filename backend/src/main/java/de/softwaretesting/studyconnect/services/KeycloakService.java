@@ -51,7 +51,7 @@ public class KeycloakService {
   @Value("${keycloak.development.client-id}")
   private String developmentClientId;
 
-  @Value("${ALLOWED_ORIGIN}")
+  @Value("${allowed.origin}")
   private String allowedOrigin;
 
   @PostConstruct
@@ -763,7 +763,7 @@ public class KeycloakService {
                 Map.entry("pkce.supported", "true"),
                 Map.entry("post.logout.redirect.uris", allowedOrigin + "/*"),
                 Map.entry("frontchannel.logout.session.required", "true"),
-                Map.entry("frontchannel.logout.url", allowedOrigin + "/logout"));
+                Map.entry("frontchannel.logout.url", allowedOrigin + "/unauthorized"));
 
         Map<String, Object> body =
             Map.ofEntries(
@@ -780,7 +780,7 @@ public class KeycloakService {
                 Map.entry("attributes", attributes),
                 Map.entry(
                     "defaultClientScopes", (Object) List.of("openid", "profile", "email", "roles")),
-                Map.entry("webOrigins", (Object) List.of(allowedOrigin)),
+                Map.entry("webOrigins", (Object) List.of(allowedOrigin, allowedOrigin + "/*")),
                 Map.entry("protocol", "openid-connect"));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
