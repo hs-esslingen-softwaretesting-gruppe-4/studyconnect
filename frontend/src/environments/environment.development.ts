@@ -8,6 +8,6 @@ export const environment = {
   // Keycloak configuration
   identityProviderUrl: 'https://keycloakswt.duckdns.org',
   requiredRole: 'studyconnect',
-  realmName: 'studyconnect',
-  clientID: 'studyconnect-frontend',
+  realmName: 'studyconnect-dev',
+  clientID: 'studyconnect-frontend-dev',
 };

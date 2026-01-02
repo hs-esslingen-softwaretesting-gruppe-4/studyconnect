@@ -33,6 +33,8 @@ public class KeycloakAdminTokenService {
    */
   private static final int REFRESH_BUFFER_SECONDS = 60;
 
+  private static final int MIN_REFRESH_BUFFER_SECONDS = 30;
+
   @Value("${KEYCLOAK_AUTH_SERVER_URL}")
   private String keycloakServerUrl;
 
@@ -48,6 +50,7 @@ public class KeycloakAdminTokenService {
   private String accessToken;
   private String refreshToken;
   private Instant tokenExpiryTime;
+  private Instant tokenRefreshTime;
   private Instant refreshTokenExpiryTime;
 
   public KeycloakAdminTokenService(RestTemplate restTemplate) {
@@ -106,7 +109,10 @@ public class KeycloakAdminTokenService {
     if (tokenExpiryTime == null) {
       return true;
     }
-    return Instant.now().isAfter(tokenExpiryTime.minusSeconds(REFRESH_BUFFER_SECONDS));
+    if (tokenRefreshTime == null) {
+      return Instant.now().isAfter(tokenExpiryTime.minusSeconds(REFRESH_BUFFER_SECONDS));
+    }
+    return Instant.now().isAfter(tokenRefreshTime);
   }
 
   /**
@@ -199,7 +205,11 @@ public class KeycloakAdminTokenService {
   private void updateTokens(KeycloakTokenResponseDTO tokenResponse) {
     this.accessToken = tokenResponse.getAccessToken();
     this.refreshToken = tokenResponse.getRefreshToken();
-    this.tokenExpiryTime = Instant.now().plusSeconds(tokenResponse.getExpiresIn());
+    long expiresInSeconds = tokenResponse.getExpiresIn();
+    long refreshBufferSeconds = resolveRefreshBufferSeconds(expiresInSeconds);
+    Instant now = Instant.now();
+    this.tokenExpiryTime = now.plusSeconds(expiresInSeconds);
+    this.tokenRefreshTime = this.tokenExpiryTime.minusSeconds(refreshBufferSeconds);
 
     if (tokenResponse.getRefreshExpiresIn() != null && tokenResponse.getRefreshExpiresIn() > 0) {
       this.refreshTokenExpiryTime = Instant.now().plusSeconds(tokenResponse.getRefreshExpiresIn());
@@ -207,6 +217,13 @@ public class KeycloakAdminTokenService {
       // Default refresh token expiry to 30 minutes if not provided
       this.refreshTokenExpiryTime = Instant.now().plusSeconds(1800);
     }
+  }
+
+  private long resolveRefreshBufferSeconds(long expiresInSeconds) {
+    long safeExpiresInSeconds = Math.max(1, expiresInSeconds);
+    long tenth = safeExpiresInSeconds / 10;
+    long buffer = Math.clamp(tenth, MIN_REFRESH_BUFFER_SECONDS, REFRESH_BUFFER_SECONDS);
+    return Math.clamp(safeExpiresInSeconds - 1, 0, buffer);
   }
 
   /**
@@ -239,6 +256,7 @@ public class KeycloakAdminTokenService {
       this.accessToken = null;
       this.refreshToken = null;
       this.tokenExpiryTime = null;
+      this.tokenRefreshTime = null;
       this.refreshTokenExpiryTime = null;
       LOGGER.info("Keycloak admin tokens invalidated");
     } finally {

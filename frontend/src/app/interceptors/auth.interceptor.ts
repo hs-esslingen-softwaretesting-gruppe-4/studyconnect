@@ -9,8 +9,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const toastService = inject(ToastService);
 
-  // Skip adding token for registration endpoint
-  if (req.url === environment.registerUserEndpoint) {
+  // Skip adding token only for registration POST requests
+  const requestPath = req.url.split('?')[0];
+  if (req.method === 'POST' && requestPath === environment.registerUserEndpoint) {
     return next(req);
   }
 
