@@ -113,7 +113,7 @@ export class AuthService {
     }
     this.isAuthenticatedSubject.next(false);
     await this.keycloak.logout({
-      redirectUri: globalThis.location.origin + '/login',
+      redirectUri: globalThis.location.origin + '/unauthorized',
     });
   }
 

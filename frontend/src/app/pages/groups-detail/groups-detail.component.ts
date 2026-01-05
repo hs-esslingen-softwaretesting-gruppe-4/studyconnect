@@ -38,7 +38,7 @@ export class GroupsDetailComponent implements OnInit {
   group = signal<GroupResponse | undefined>(undefined);
   groupTasks = signal<TaskResponseDisplayable[]>([]);
   groupIsPublic = signal<boolean>(false);
-  visibleAdmins = computed(() => this.groupAdmins().slice(0, 5));
+  visibleAdmins = computed(() => this.groupAdmins().slice(0, 5)); // Show only first 5 admins in the side panel
   showPublicJoin = computed(() => !this.isMember() && this.groupIsPublic());
   showPrivateBlocked = computed(() => !this.isMember() && !this.groupIsPublic());
   showGroupDetail = computed(() => this.isMember());

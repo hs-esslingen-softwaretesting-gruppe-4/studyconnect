@@ -150,6 +150,11 @@ export class CreateTaskDialogComponent {
       return;
     }
 
+    if (this.assigneeIds().length === 0) {
+      this.errorMessage.set('Please assign at least one member to the task.');
+      return;
+    }
+
     const dueDateValue = this.taskForm.get('dueDate')?.value ?? null;
     const dueTimeValue = this.taskForm.get('dueTime')?.value ?? null;
     const dueDate = this.buildDueDate(dueDateValue, dueTimeValue);

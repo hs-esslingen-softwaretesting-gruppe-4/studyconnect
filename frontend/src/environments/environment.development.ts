@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   debugAuth: true,
   apiBasePath: 'http://localhost:8088',
   apiUrl: 'http://localhost:8088/api',

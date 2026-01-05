@@ -111,7 +111,8 @@ public class KeycloakService {
             "enabled", true,
             "registrationEmailAsUsername", true, // use email as identifier instead of username
             "duplicateEmailsAllowed", false, // prevent duplicate emails
-            "loginTheme", "studyconnect-theme");
+            "loginTheme", "studyconnect" // custom theme for Studyconnect
+            );
 
     HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 

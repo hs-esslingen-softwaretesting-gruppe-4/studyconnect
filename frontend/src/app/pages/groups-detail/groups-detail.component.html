@@ -103,6 +103,16 @@
                                     </span>
                                   </div>
                                   <div class="group-detail__task-field">
+                                    <span class="group-detail__task-label">Due date</span>
+                                    <span class="group-detail__task-value">
+                                      @if (task.due_date) {
+                                        {{ task.due_date | date: 'mediumDate' }}
+                                      } @else {
+                                        -
+                                      }
+                                    </span>
+                                  </div>
+                                  <div class="group-detail__task-field">
                                     <span class="group-detail__task-label">Last status change</span>
                                     <span class="group-detail__task-value">
                                       {{ (task.last_status_change_at ?? task.updated_at) | date: 'mediumDate' }}

@@ -1,114 +1,120 @@
-<div class="register-container">
-      <mat-card class="register-card">
-        <mat-card-header>
-          <mat-card-title>Register</mat-card-title>
-          <mat-card-subtitle>Create a new account</mat-card-subtitle>
-        </mat-card-header>
+<section class="register">
+  <mat-card class="register__card">
+    <mat-card-header class="register__card-header">
+      <div class="register__brand">
+        <img
+          class="register__logo"
+          src="assets/studyconnect_logo.jpeg"
+          alt="StudyConnect logo"
+        />
+        <div class="register__brand-text">
+          <mat-card-title class="register__title">Create your account</mat-card-title>
+          <mat-card-subtitle class="register__subtitle">
+            Join StudyConnect and start collaborating.
+          </mat-card-subtitle>
+        </div>
+      </div>
+    </mat-card-header>
 
-        <mat-card-content>
-          <app-error-banner
-            [errorMessage]="errorMessage"
-            (dismissed)="errorMessage = ''">
-          </app-error-banner>
+    <mat-card-content>
+      <app-error-banner [errorMessage]="errorMessage" (dismissed)="errorMessage = ''">
+      </app-error-banner>
 
-          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
-              <input
-                matInput
-                type="email"
-                formControlName="email"
-                placeholder="Enter your email"
-                required
-              />
-              <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-                Email is required
-              </mat-error>
-              <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-                Please enter a valid email
-              </mat-error>
-            </mat-form-field>
+      <form class="register__form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            required
+          />
+          @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          } @else if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
+            <mat-error>Please enter a valid email</mat-error>
+          }
+        </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>First Name</mat-label>
-              <input
-                matInput
-                type="text"
-                formControlName="firstname"
-                placeholder="Enter your first name"
-                required
-              />
-              <mat-error *ngIf="registerForm.get('firstname')?.hasError('required')">
-                First name is required
-              </mat-error>
-            </mat-form-field>
+        <div class="register__grid">
+          <mat-form-field appearance="outline">
+            <mat-label>First name</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="firstname"
+              placeholder="Enter your first name"
+              required
+            />
+            @if (registerForm.get('firstname')?.hasError('required') && registerForm.get('firstname')?.touched) {
+              <mat-error>First name is required</mat-error>
+            }
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Last Name</mat-label>
-              <input
-                matInput
-                type="text"
-                formControlName="lastname"
-                placeholder="Enter your last name"
-                required
-              />
-              <mat-error *ngIf="registerForm.get('lastname')?.hasError('required')">
-                Last name is required
-              </mat-error>
-            </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Last name</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="lastname"
+              placeholder="Enter your last name"
+              required
+            />
+            @if (registerForm.get('lastname')?.hasError('required') && registerForm.get('lastname')?.touched) {
+              <mat-error>Last name is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Password</mat-label>
-              <input
-                matInput
-                type="password"
-                formControlName="password"
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                mat-icon-button
-                matSuffix
-                matTooltip="Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
-                matTooltipPosition="above"
-                type="button"
-                aria-label="Mehr Informationen"
-                class="tooltip-icon"
-              >
-                <mat-icon style="color: rgb(58, 126, 229)">help</mat-icon>
-              </button>
-              <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-                Password is required
-              </mat-error>
-              <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-                Password must be at least 8 characters
-              </mat-error>
-              <mat-error *ngIf="registerForm.get('password')?.hasError('pattern')">
-                Password must contain uppercase, lowercase, number, and special character
-              </mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            matTooltip="Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+            matTooltipPosition="above"
+            type="button"
+            aria-label="Mehr Informationen"
+          >
+            <mat-icon style="color: rgb(58, 126, 229)">help</mat-icon>
+          </button>
+          @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+            <mat-error>Password is required</mat-error>
+          } @else if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+            <mat-error>Password must be at least 8 characters</mat-error>
+          } @else if (registerForm.get('password')?.hasError('pattern') && registerForm.get('password')?.touched) {
+            <mat-error>Password must contain uppercase, lowercase, number, and special character</mat-error>
+          }
+        </mat-form-field>
 
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="full-width submit-button"
-              [disabled]="registerForm.invalid || isLoading()"
-            >
-              @if(!isLoading()){
-              <span>Register</span>
-              }
-              @if(isLoading()){
-              <span>Registering...</span>
-              <mat-spinner diameter="20"></mat-spinner>
-              }
-            </button>
-          </form>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="register__submit"
+          [disabled]="registerForm.invalid || isLoading()"
+        >
+          @if (!isLoading()) {
+            <span>Register</span>
+          } @else {
+            <span>Registering...</span>
+            <mat-spinner diameter="20"></mat-spinner>
+          }
+        </button>
+      </form>
 
-          <div class="login-link">
-            Already have an account?
-            <a (click)="handleLogin()">Login here</a>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+      <div class="register__link">
+        Already have an account?
+        <a (click)="handleLogin()">Login here</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</section>
