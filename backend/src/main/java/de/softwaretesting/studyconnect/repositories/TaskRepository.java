@@ -36,4 +36,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       ORDER BY t.dueDate ASC
       """)
   List<Task> findByAssigneesId(@Param("userId") Long userId);
+
+  @Query("select t from Task t where t.group.id = :groupId and :userId member of t.assignees")
+  List<Task> findByGroupIdAndAssigneesId(Long groupId, Long userId);
 }

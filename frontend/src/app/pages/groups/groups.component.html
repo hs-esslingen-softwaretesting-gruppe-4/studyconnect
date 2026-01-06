@@ -4,10 +4,44 @@
       <h1>Groups</h1>
       <p class="groups__subtitle">Track your memberships and discover public groups.</p>
     </div>
-    <button mat-raised-button color="accent" type="button" (click)="createGroup()">
-      Create group
-    </button>
+    <div class="groups__header-actions">
+      <button mat-stroked-button color="primary" type="button" (click)="toggleInviteJoinForm()">
+        Join with invite code
+      </button>
+      <button mat-raised-button color="accent" type="button" (click)="createGroup()">
+        Create group
+      </button>
+    </div>
   </header>
+
+  @if (showInviteJoinForm()) {
+    <mat-card class="groups__invite-card">
+      <mat-card-content>
+        <div class="groups__invite-form">
+          <mat-form-field appearance="outline" class="groups__invite-field">
+            <mat-label>Invite code</mat-label>
+            <input
+              matInput
+              type="text"
+              [value]="inviteCodeInput()"
+              (input)="onInviteCodeInput($event)"
+              (keydown.enter)="joinGroupByInviteCode(inviteCodeInput())"
+            />
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            [disabled]="joinByInviteLoading() || !inviteCodeInput().trim()"
+            (click)="joinGroupByInviteCode(inviteCodeInput())"
+          >
+            Join group
+          </button>
+          <button mat-button type="button" (click)="toggleInviteJoinForm()">Cancel</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <mat-tab-group class="groups__tabs" animationDuration="250ms">
     <mat-tab label="Joined groups">

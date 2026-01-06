@@ -2,6 +2,7 @@ package de.softwaretesting.studyconnect.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import de.softwaretesting.studyconnect.dtos.request.CreateGroupRequestDTO;
@@ -39,6 +40,8 @@ class GroupServiceTest {
   @Mock private GroupRepository groupRepository;
 
   @Mock private UserService userService;
+
+  @Mock private TaskService taskService;
 
   @Mock private CreateGroupRequestMapper groupRequestMapper;
 
@@ -263,7 +266,7 @@ class GroupServiceTest {
     group.setMemberCount(5);
     group.setMaxMembers(5);
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, Set.of(3L), null);
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(3L), null, 20);
     Long groupId = group.getId();
     when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
@@ -271,31 +274,44 @@ class GroupServiceTest {
   }
 
   @Test
-  void updateGroup_memberAlreadyPresent_throwsBadRequest() {
+  void updateGroup_memberAlreadyPresent_isIgnored() {
     group.setMaxMembers(5);
     group.setMemberCount(1);
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, Set.of(1L), null);
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(1L), null, 20);
     Long groupId = group.getId();
     when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+    when(groupRepository.save(group)).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
 
-    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
+    ResponseEntity<GroupResponseDTO> result = groupService.updateGroup(groupId, updateDto);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(Set.of(user1), group.getMembers());
+    assertEquals(1, group.getMemberCount());
+    verify(userService, never()).retrieveUserById(anyLong());
   }
 
   @Test
-  void updateGroup_adminAlreadyAdmin_throwsBadRequest() {
+  void updateGroup_adminAlreadyAdmin_isIgnored() {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(1L));
+        new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(1L), 20);
     Long groupId = group.getId();
     when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+    when(groupRepository.save(group)).thenReturn(group);
+    when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
 
-    assertThrows(BadRequestException.class, () -> groupService.updateGroup(groupId, updateDto));
+    ResponseEntity<GroupResponseDTO> result = groupService.updateGroup(groupId, updateDto);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(Set.of(user1), group.getAdmins());
+    verify(userService, never()).retrieveUserById(anyLong());
   }
 
   @Test
   void updateGroup_adminNotMember_throwsBadRequest() {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(2L));
+        new UpdateGroupRequestDTO("New", "desc", false, null, Set.of(2L), 20);
     Long groupId = group.getId();
     when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
 
@@ -305,7 +321,7 @@ class GroupServiceTest {
   @Test
   void updateGroup_successfullyAppliesPatch() {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New Name", "New Desc", true, Set.of(2L), Set.of(2L));
+        new UpdateGroupRequestDTO("New Name", "New Desc", true, Set.of(2L), Set.of(2L), 20);
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
     when(userService.retrieveUserById(2L)).thenReturn(user2);
     when(groupRepository.save(group)).thenReturn(group);
@@ -620,7 +636,8 @@ class GroupServiceTest {
 
   @Test
   void updateGroup_nullMemberIds_doesNotValidate() {
-    UpdateGroupRequestDTO updateDto = new UpdateGroupRequestDTO("New", "desc", false, null, null);
+    UpdateGroupRequestDTO updateDto =
+        new UpdateGroupRequestDTO("New", "desc", false, null, null, 15);
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
     when(groupRepository.save(group)).thenReturn(group);
     when(groupResponseMapper.toDto(group)).thenReturn(responseDto);
@@ -634,7 +651,7 @@ class GroupServiceTest {
   @Test
   void updateGroup_nullAdminIds_doesNotValidate() {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), null);
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), null, 15);
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
     when(userService.retrieveUserById(2L)).thenReturn(user2);
     when(groupRepository.save(group)).thenReturn(group);
@@ -648,7 +665,8 @@ class GroupServiceTest {
 
   @Test
   void updateGroup_groupNotFound_throwsNotFoundException() {
-    UpdateGroupRequestDTO updateDto = new UpdateGroupRequestDTO("New", "desc", false, null, null);
+    UpdateGroupRequestDTO updateDto =
+        new UpdateGroupRequestDTO("New", "desc", false, null, null, 15);
     when(groupRepository.findById(999L)).thenReturn(Optional.empty());
 
     assertThrows(NotFoundException.class, () -> groupService.updateGroup(999L, updateDto));
@@ -676,7 +694,7 @@ class GroupServiceTest {
   @Test
   void updateGroup_adminBecomingMemberInSameRequest_succeeds() {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), Set.of(2L));
+        new UpdateGroupRequestDTO("New", "desc", false, Set.of(2L), Set.of(2L), 25);
     when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
     when(userService.retrieveUserById(2L)).thenReturn(user2);
     when(groupRepository.save(group)).thenReturn(group);

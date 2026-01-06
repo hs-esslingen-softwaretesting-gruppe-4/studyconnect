@@ -37,6 +37,7 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
   private final UserService userService;
+  private final TaskService taskService;
   private final CreateGroupRequestMapper groupRequestMapper;
   private final GroupResponseMapper groupResponseMapper;
 
@@ -139,6 +140,7 @@ public class GroupService {
             .findById(groupId)
             .orElseThrow(() -> new NotFoundException(GROUP_NOT_FOUND_MESSAGE + groupId));
 
+    validateMaxMembersUpdate(patchGroup, dto);
     validateMemberUpdate(patchGroup, dto);
     validateAdminUpdate(patchGroup, dto);
     applyPatch(patchGroup, dto);
@@ -149,32 +151,49 @@ public class GroupService {
   }
 
   /**
-   * Validates that new members in the update request do not exceed the group's maximum member limit
-   * and are not already members.
+   * Validates that the new maximum members in the update request is not less than the current
+   * member count.
    *
    * @param group the group being updated
    * @param dto the update request DTO
-   * @throws BadRequestException if adding new members would exceed the limit or if any new member
-   *     is already a member
+   * @throws BadRequestException if the new maximum members is less than the current member count
+   */
+  private void validateMaxMembersUpdate(Group group, UpdateGroupRequestDTO dto) {
+    if (dto.getMaxMembers() != null) {
+      int newMaxMembers = dto.getMaxMembers();
+      if (newMaxMembers < group.getMemberCount()) {
+        throw new BadRequestException(
+            "New maximum members "
+                + newMaxMembers
+                + " is less than current member count "
+                + group.getMemberCount());
+      }
+    }
+  }
+
+  /**
+   * Validates that new members in the update request do not exceed the group's maximum member
+   * limit.
+   *
+   * @param group the group being updated
+   * @param dto the update request DTO
+   * @throws BadRequestException if adding new members would exceed the limit
    */
   private void validateMemberUpdate(Group group, UpdateGroupRequestDTO dto) {
     if (dto.getMemberIds() == null) {
       return;
     }
 
-    if (group.getMemberCount() + dto.getMemberIds().size() > group.getMaxMembers()) {
-      throw new BadRequestException(
-          "Adding these member(s) would exceed the group's maximum member limit");
-    }
-
     Set<Long> existingMemberIds =
         group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
+    Set<Long> newMemberIds =
+        dto.getMemberIds().stream()
+            .filter(memberId -> !existingMemberIds.contains(memberId))
+            .collect(Collectors.toSet());
 
-    for (Long memberId : dto.getMemberIds()) {
-      if (existingMemberIds.contains(memberId)) {
-        throw new BadRequestException(
-            "User with id " + memberId + " is already a member of the group");
-      }
+    if (group.getMemberCount() + newMemberIds.size() > group.getMaxMembers()) {
+      throw new BadRequestException(
+          "Adding these member(s) would exceed the group's maximum member limit");
     }
   }
 
@@ -199,12 +218,12 @@ public class GroupService {
 
     Set<Long> existingAdminIds =
         group.getAdmins().stream().map(User::getId).collect(Collectors.toSet());
+    Set<Long> newAdminIds =
+        dto.getAdminIds().stream()
+            .filter(adminId -> !existingAdminIds.contains(adminId))
+            .collect(Collectors.toSet());
 
-    for (Long adminId : dto.getAdminIds()) {
-      if (existingAdminIds.contains(adminId)) {
-        throw new BadRequestException(
-            "User with id " + adminId + " is already an admin of the group");
-      }
+    for (Long adminId : newAdminIds) {
       if (!prospectiveMemberIds.contains(adminId)) {
         throw new BadRequestException(
             "User with id " + adminId + " must be a member to be an admin of the group");
@@ -229,13 +248,23 @@ public class GroupService {
       group.setPublic(dto.getIsPublic());
     }
     if (dto.getMemberIds() != null) {
+      Set<Long> existingMemberIds =
+          group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
       for (Long memberId : dto.getMemberIds()) {
+        if (existingMemberIds.contains(memberId)) {
+          continue;
+        }
         User member = userService.retrieveUserById(memberId);
         group.addMember(member);
       }
     }
     if (dto.getAdminIds() != null) {
+      Set<Long> existingAdminIds =
+          group.getAdmins().stream().map(User::getId).collect(Collectors.toSet());
       for (Long adminId : dto.getAdminIds()) {
+        if (existingAdminIds.contains(adminId)) {
+          continue;
+        }
         User admin = userService.retrieveUserById(adminId);
         group.addAdmin(admin);
       }
@@ -267,7 +296,8 @@ public class GroupService {
       throw new BadRequestException("User with id " + userId + " is not a member of the group");
     }
 
-    // ! ToDo: Remove user from tasks he is assigned to as well
+    // Remove user from tasks he is assigned to as well
+    this.taskService.unassignUserFromAllTasksInGroup(userId, groupId);
 
     // Check if the group still has any members after removal
     if (group.getMemberCount() == 0) {
@@ -334,6 +364,7 @@ public class GroupService {
    * @throws NotFoundException if the group with the specified invite code does not exist
    * @throws BadRequestException if the group is full or the user is already a member
    */
+  @Transactional
   public ResponseEntity<Void> joinGroupByInvitationCode(String inviteCode, Long userId) {
     Group group =
         groupRepository

@@ -1,3 +1,4 @@
+import { TaskResolver } from './resolver/task.resolver';
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { RegisterComponent } from './pages/register/register.component';
@@ -11,6 +12,12 @@ import { GroupsDetailComponent } from './pages/groups-detail/groups-detail.compo
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { AllUserResolver } from './resolver/all-user.resolver';
 import { CreateGroupComponent } from './pages/create-group/create-group.component';
+import { TaskDetailComponent } from './pages/task-detail/task-detail';
+import { GroupMemberResolver } from './resolver/group-member.resolver';
+import { TaskEditComponent } from './pages/task-edit/task-edit';
+import { UserTaskResolver } from './resolver/user-task.resolver';
+import { UserGroupResolver } from './resolver/user-group.resolver';
+import { GroupsEditComponent } from './pages/groups-edit/groups-edit.component';
 
 export const routes: Routes = [
   {
@@ -21,6 +28,7 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [authGuard],
+    resolve: {userTasks: UserTaskResolver, userGroups: UserGroupResolver},
   },
   {
     path: 'groups/create',
@@ -29,10 +37,28 @@ export const routes: Routes = [
     resolve: {userId: UserResolver, users: AllUserResolver},
   },
   {
+    path: 'groups/:groupId/tasks/:taskId/edit',
+    component: TaskEditComponent,
+    canActivate: [authGuard],
+    resolve: {task: TaskResolver, userId: UserResolver, groupMembers: GroupMemberResolver},
+  },
+  {
+    path: 'groups/:groupId/tasks/:taskId',
+    component: TaskDetailComponent,
+    canActivate: [authGuard],
+    resolve: {task: TaskResolver, userId: UserResolver, groupMembers: GroupMemberResolver},
+  },
+  {
+    path: 'groups/:groupId/edit',
+    component: GroupsEditComponent,
+    canActivate: [authGuard],
+    resolve: {userId: UserResolver, groupResolvedData: GroupResolver, users: AllUserResolver},
+  },
+  {
     path: 'groups/:groupId',
     component: GroupsDetailComponent,
     canActivate: [authGuard],
-    resolve: {userId: UserResolver, groupResolvedData: GroupResolver, users: AllUserResolver},
+    resolve: {userId: UserResolver, groupResolvedData: GroupResolver},
   },
   {
     path: 'groups',

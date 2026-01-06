@@ -1,0 +1,135 @@
+<section class="task-detail">
+  <header class="task-detail__toolbar">
+    <button mat-stroked-button color="primary" type="button" (click)="backToGroupsDetail()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to groups
+    </button>
+    @if (task() && !showNotAMember()) {
+      <div class="task-detail__toolbar-actions">
+        <button mat-stroked-button color="warn" type="button" (click)="deleteTask()">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+        <button mat-raised-button color="primary" type="button" (click)="toEditTask()">
+          <mat-icon>edit</mat-icon>
+          Edit task
+        </button>
+      </div>
+    }
+  </header>
+
+  @if (task(); as task) {
+    @if (showNotAMember()) {
+      <div class="task-detail__blocked">
+        <img
+          src="assets/stop.gif"
+          alt="Stop sign"
+          class="task-detail__blocked-image"
+        />
+        <p class="task-detail__blocked-text">
+          You are not a member of this group and therefore cannot view any tasks.
+        </p>
+      </div>
+    } @else {
+      <mat-card class="task-detail__card">
+        <mat-card-header class="task-detail__card-header">
+          <div class="task-detail__header">
+            <div class="task-detail__title-block">
+              <mat-card-title class="task-detail__title">{{ task.title }}</mat-card-title>
+              <mat-card-subtitle class="task-detail__subtitle">
+                {{ task.description ?? 'No description provided.' }}
+              </mat-card-subtitle>
+            </div>
+            <div class="task-detail__badges">
+              <span class="task-detail__badge task-detail__badge--status">
+                {{ formatStatus(task.status) }}
+              </span>
+              <span
+                class="task-detail__badge task-detail__badge--priority"
+                [class.task-detail__badge--high]="task.priority === TaskPriority.High"
+                [class.task-detail__badge--medium]="task.priority === TaskPriority.Medium"
+                [class.task-detail__badge--low]="task.priority === TaskPriority.Low"
+              >
+                {{ formatPriority(task.priority) }}
+              </span>
+            </div>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="task-detail__grid">
+            <div class="task-detail__field">
+              <span class="task-detail__label">Task ID</span>
+              <span class="task-detail__value">{{ task.id }}</span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Category</span>
+              <span class="task-detail__value">{{ task.category ?? '-' }}</span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Due date</span>
+              <span class="task-detail__value">
+                @if (task.due_date) {
+                  {{ task.due_date }}
+                } @else {
+                  -
+                }
+              </span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Created by</span>
+              <span class="task-detail__value">{{ getCreatorLabel(task) }}</span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Created</span>
+              <span class="task-detail__value">{{ task.created_at }}</span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Updated</span>
+              <span class="task-detail__value">{{ task.updated_at }}</span>
+            </div>
+            <div class="task-detail__field">
+              <span class="task-detail__label">Last status change</span>
+              <span class="task-detail__value">
+                @if (task.last_status_change_at) {
+                  {{ task.last_status_change_at }}
+                } @else {
+                  -
+                }
+              </span>
+            </div>
+          </div>
+
+          <div class="task-detail__field task-detail__field--full">
+            <span class="task-detail__label">Assignees</span>
+            @if (getAssigneeLabels(task).length > 0) {
+              <div class="task-detail__chips">
+                @for (assignee of getAssigneeLabels(task); track assignee) {
+                  <span class="task-detail__chip">{{ assignee }}</span>
+                }
+              </div>
+            } @else {
+              <span class="task-detail__value">Unassigned</span>
+            }
+          </div>
+
+          <div class="task-detail__field task-detail__field--full">
+            <span class="task-detail__label">Tags</span>
+            @if (task.tags?.length) {
+              <div class="task-detail__tags">
+                @for (tag of task.tags; track tag) {
+                  <span class="task-detail__tag" [style.backgroundColor]="tagColor(tag)">
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            } @else {
+              <span class="task-detail__value">No tags</span>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  } @else {
+    <div class="task-detail__empty">Task details could not be loaded.</div>
+  }
+</section>
