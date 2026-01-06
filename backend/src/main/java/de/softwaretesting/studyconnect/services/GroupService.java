@@ -247,6 +247,9 @@ public class GroupService {
     if (dto.getIsPublic() != null) {
       group.setPublic(dto.getIsPublic());
     }
+    if (dto.getMaxMembers() != null) {
+      group.setMaxMembers(dto.getMaxMembers());
+    }
     if (dto.getMemberIds() != null) {
       Set<Long> existingMemberIds =
           group.getMembers().stream().map(User::getId).collect(Collectors.toSet());
