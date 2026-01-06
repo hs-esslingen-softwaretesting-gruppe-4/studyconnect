@@ -120,18 +120,4 @@ export class TasksServiceWrapper {
     const task = tasks.find(task => task.id === taskId) as TaskResponseDisplayable;
     return this.toDisplayable(task);
   }
-
-  private mapDisplayableTaskToRequest(task: TaskResponseDisplayable): TaskRequest {
-    return {
-      title: task.title,
-      description: task.description,
-      due_date: task.due_date ?? undefined,
-      priority: task.priority,
-      status: task.status,
-      category: task.category,
-      tags: task.tags,
-      assignee_ids: task.assignee_ids,
-      created_by_id: task.created_by_id,
-    };
-  }
 }

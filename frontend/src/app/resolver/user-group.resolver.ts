@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { GroupNameAndId, GroupsServiceWrapper } from "../services/wrapper-services/groups.service.wrapper";
 import { UsersServiceWrapper } from "../services/wrapper-services/users.service.wrapper";
-import { GroupResponse } from "../api-services/api";
 import { Resolve } from "@angular/router";
 
 /**
@@ -24,7 +23,7 @@ export class UserGroupResolver implements Resolve<GroupNameAndId[] | undefined> 
       return await this.groupsService.getGroupNamesAndIdsForCurrentUser(userId);
     }
     catch (error){
-      console.error(error)
+      console.error(error);
       return undefined;
     }
   }
