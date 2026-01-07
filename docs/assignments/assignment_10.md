@@ -16,6 +16,9 @@
 - Implementation can be found [here](../../backend/src/test/java/de/softwaretesting/studyconnect/controllers/)
 - Documentation regarding the API Tests can be found [here](../documentation.md#automated-api-tests)
 
+## 10.4 Load and Performance Testing
+- Implementation can be found [here](../../backend/src/test/java/de/softwaretesting/studyconnect/load/) 
+- Documentation regarding Load and Performance Tests can be found [here](../documentation.md#Last-und-Performance-Tests)
 
 ## 10.5 CI Integration
 
