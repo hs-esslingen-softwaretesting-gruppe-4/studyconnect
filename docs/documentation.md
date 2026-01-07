@@ -796,7 +796,7 @@ Die Tests wurden mit dem Framework Gatling (Java SDK) realisiert. Es wurden zwei
 #### Setup-Prozess
 Der Testaufbau erfolgte in einer lokalen Entwicklungsumgebung:
 
-- Backend: Spring Boot Applikation (Java 21), angebunden an eine lokale Datenbank.
+- Backend: Spring Boot Applikation (Java 21), angebunden an eine lokale Datenbank. Die Tests sind im Ordner `\backend\src\test\java\de\softwaretesting\studyconnect\load` zu finden.
 - Tooling: Maven mit dem gatling-maven-plugin.
 - Ausführung: Zuerst wird das Backend gestartet. Danach start der Tests über das Terminal mittels: `.\mvnw.cmd clean gatling:test`. Danach dann den entsprechenden Test auswählen, `0` für den Constant Load und `1` für den Ramp Up Test
 - Reporting: Automatische Generierung von HTML-Reports zur grafischen Analyse der Latenzen und Fehlerraten.
