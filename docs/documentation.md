@@ -807,7 +807,7 @@ Es wurden zwei komplementäre Strategien verfolgt, um ein vollständiges Bild de
 **A: Constant Load (Dauerlast)**
 
 - **Ziel:** Bewertung der Stabilität über einen längeren Zeitraum (Steady-State Performance).
-- **Profil:** Konstante Last von 150 Usern/Sekunde über 5 Minuten.
+- **Profil:** Konstante Last von 100 Usern/Sekunde über 5 Minuten.
 - **Vorteil**: Nachweis, dass das System unter hoher, aber sicherer Last keine Speicherlecks oder schleichende Performance-Einbußen zeigt.
 
 **B: Ramp-up Load (Stufentest)**
@@ -821,6 +821,7 @@ Es wurden zwei komplementäre Strategien verfolgt, um ein vollständiges Bild de
 **Key Observations (Messwerte)**
 
 - **Baseline:** Bei geringer Last (bis 200 req/s) reagiert das System extrem schnell mit einer durchschnittlichen Response Time von ca. 6ms - 10ms.
+- **Constant Load**: Im Constant Load Test zeigte sich, dass das System 150 req/s verarbeiten kann. Jedoch trat nach ca. 160 Sekunden ein Infrastruktur-Limit (Port Exhaustion) auf. Dies beweist, dass für einen dauerhaften Hochlastbetrieb über 150 req/s auf Client-Seite Optimierungen am TCP-Stack oder der Einsatz mehrerer Test-Clients notwendig wären.
 - **Skalierbarkeit:** Das System skaliert linear bis zu einer Last von ca. 260 Anfragen pro Sekunde.
 
 **Performance Bottlenecks (Engpässe)**
@@ -833,4 +834,4 @@ Durch den Ramp-up Test wurde ein kritischer Bottleneck identifiziert:
 - **Latenz-Explosion:** Kurz vor Erreichen der Fehlerschwelle stieg das 95. Perzentil der Antwortzeit auf über 1000ms an, da das System versuchte, die Anfragen in eine Warteschlange zu stellen.
 
 ### Fazit
-Das System ist für den vorgesehenen Betrieb sehr performant. Für Lasten bis zu 200 Usern/Sekunde ist die Performance exzellent. Um die identifizierte Grenze von 260 req/s zu überschreiten, müssten Optimierungen auf Betriebssystemebene (Port-Tuning) oder ein Load-Balancer-Setup in Betracht gezogen werden.
+Das System ist für den vorgesehenen Betrieb sehr performant. Für Lasten bis zu 100 Usern/Sekunde ist die Performance exzellent. Um die identifizierte Grenze von 260 req/s zu überschreiten, müssten Optimierungen auf Betriebssystemebene (Port-Tuning) oder ein Load-Balancer-Setup in Betracht gezogen werden. Bei konstanter Last liegt die Grenze bei ungefähr 100 Usern/Sekunde.
