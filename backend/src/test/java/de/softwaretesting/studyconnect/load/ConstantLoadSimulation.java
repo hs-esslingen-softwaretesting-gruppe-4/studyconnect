@@ -29,8 +29,8 @@ public class ConstantLoadSimulation extends Simulation {
     setUp(
             scn.injectOpen(
                 // 150 users per second, who request simultaneously
-                // This over a period of 60 seconds
-                constantUsersPerSec(150).during(60)))
+                // This over a period of 300 seconds (5 minutes)
+                constantUsersPerSec(150).during(300)))
         .protocols(httpProtocol);
   }
 }
