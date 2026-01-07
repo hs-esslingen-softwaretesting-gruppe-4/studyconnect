@@ -788,3 +788,50 @@ Die CI/CD-Pipeline besteht aus **vier koordinierten GitHub Actions Workflows**, 
 - **Effizienz:** Keine redundanten SonarQube-Läufe auf Feature-Branches
 - **Qualität:** Vollständige Analyse vor Production-Deployment
 - **Sicherheit:** Docker-Images nur bei bestandenen Tests und Code-Quality-Checks
+
+### Last und Performance Tests
+#### Testkonfiguration (Gatling)
+Die Tests wurden mit dem Framework Gatling (Java SDK) realisiert. Es wurden zwei unterschiedliche Simulations-Profile erstellt, um sowohl die Grundstabilität als auch die Skalierbarkeit zu prüfen.
+
+#### Setup-Prozess
+Der Testaufbau erfolgte in einer lokalen Entwicklungsumgebung:
+
+- Backend: Spring Boot Applikation (Java 21), angebunden an eine lokale Datenbank. Die Tests sind im Ordner `\backend\src\test\java\de\softwaretesting\studyconnect\load` zu finden.
+- Tooling: Maven mit dem gatling-maven-plugin.
+- Ausführung: Zuerst wird das Backend gestartet. Danach start der Tests über das Terminal mittels: `.\mvnw.cmd clean gatling:test`. Danach dann den entsprechenden Test auswählen, `0` für den Constant Load und `1` für den Ramp Up Test
+- Reporting: Automatische Generierung von HTML-Reports zur grafischen Analyse der Latenzen und Fehlerraten.
+
+#### Verwendete Lastprofile (Load Profiles)
+Es wurden zwei komplementäre Strategien verfolgt, um ein vollständiges Bild der Systemperformance zu erhalten:
+
+**A: Constant Load (Dauerlast)**
+
+- **Ziel:** Bewertung der Stabilität über einen längeren Zeitraum (Steady-State Performance).
+- **Profil:** Konstante Last von 100 Usern/Sekunde über 5 Minuten.
+- **Vorteil**: Nachweis, dass das System unter hoher, aber sicherer Last keine Speicherlecks oder schleichende Performance-Einbußen zeigt.
+
+**B: Ramp-up Load (Stufentest)**
+
+- **Ziel:** Identifikation von Skalierungsgrenzen (Identify Scalability Limits).
+- **Profil:** Lineare Steigerung von 1 auf 1000 User/Sekunde innerhalb von 60 Sekunden.
+- **Vorteil:** Ermittlung des exakten Punktes, an dem die Antwortzeiten steigen oder Fehler auftreten.
+
+#### Beobachtungen und Identifizierte Bottlenecks
+
+**Key Observations (Messwerte)**
+
+- **Baseline:** Bei geringer Last (bis 200 req/s) reagiert das System extrem schnell mit einer durchschnittlichen Response Time von ca. 6ms - 10ms.
+- **Constant Load**: Im Constant Load Test zeigte sich, dass das System 150 req/s verarbeiten kann. Jedoch trat nach ca. 160 Sekunden ein Infrastruktur-Limit (Port Exhaustion) auf. Dies beweist, dass für einen dauerhaften Hochlastbetrieb über 150 req/s auf Client-Seite Optimierungen am TCP-Stack oder der Einsatz mehrerer Test-Clients notwendig wären.
+- **Skalierbarkeit:** Das System skaliert linear bis zu einer Last von ca. 260 Anfragen pro Sekunde.
+
+**Performance Bottlenecks (Engpässe)**
+
+Durch den Ramp-up Test wurde ein kritischer Bottleneck identifiziert:
+
+- **Breaking Point:** Bei ca. 260 req/s bricht die Verbindung ab.
+- **Fehleranalyse:** Es traten vermehrt j.n.BindException: Address already in use auf.
+- **Ursache:** Dies deutet nicht auf einen Software-Fehler im Java-Code hin, sondern auf ein Ressourcen-Limit des Betriebssystems (Erschöpfung der verfügbaren Ports/Ephemeral Ports).
+- **Latenz-Explosion:** Kurz vor Erreichen der Fehlerschwelle stieg das 95. Perzentil der Antwortzeit auf über 1000ms an, da das System versuchte, die Anfragen in eine Warteschlange zu stellen.
+
+### Fazit
+Das System ist für den vorgesehenen Betrieb sehr performant. Für Lasten bis zu 100 Usern/Sekunde ist die Performance exzellent. Um die identifizierte Grenze von 260 req/s zu überschreiten, müssten Optimierungen auf Betriebssystemebene (Port-Tuning) oder ein Load-Balancer-Setup in Betracht gezogen werden. Bei konstanter Last liegt die Grenze bei ungefähr 100 Usern/Sekunde.
