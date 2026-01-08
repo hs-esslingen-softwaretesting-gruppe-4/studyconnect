@@ -177,7 +177,7 @@ class GroupControllerTest {
   @DisplayName("Should update group")
   void shouldUpdateGroup() throws Exception {
     UpdateGroupRequestDTO updateDto =
-        new UpdateGroupRequestDTO("Updated", "desc", false, Set.of(2L), Set.of(2L));
+        new UpdateGroupRequestDTO("Updated", "desc", false, Set.of(2L), Set.of(2L), 25);
     GroupResponseDTO dto = sampleGroupResponse();
     given(groupService.updateGroup(eq(10L), any(UpdateGroupRequestDTO.class)))
         .willReturn(ResponseEntity.ok(dto));

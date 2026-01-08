@@ -713,6 +713,8 @@ components:
           items:
             type: integer
             format: int64
+        max_members:
+          type: integer
     TaskResponse:
       type: object
       properties:

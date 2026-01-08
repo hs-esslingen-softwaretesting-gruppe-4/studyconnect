@@ -1,32 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-
-import { GroupsDetailComponent } from './groups-detail.component';
 import { GroupsServiceWrapper } from '../../services/wrapper-services/groups.service.wrapper';
-import { TasksServiceWrapper } from '../../services/wrapper-services/tasks.service.wrapper';
+import { GroupsEditComponent } from './groups-edit.component';
 
-describe('GroupsDetailComponent', () => {
-  let component: GroupsDetailComponent;
-  let fixture: ComponentFixture<GroupsDetailComponent>;
+describe('GroupsEditComponent', () => {
+  let component: GroupsEditComponent;
+  let fixture: ComponentFixture<GroupsEditComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GroupsDetailComponent],
+      imports: [GroupsEditComponent],
       providers: [
         provideRouter([]),
         {
           provide: GroupsServiceWrapper,
           useValue: {
-            joinGroup: () => Promise.resolve(),
-            getGroupMembers: () => Promise.resolve([]),
-            leaveGroup: () => Promise.resolve(),
-          },
-        },
-        {
-          provide: TasksServiceWrapper,
-          useValue: {
-            updateTask: () => Promise.resolve(),
+            updateGroupDetails: () => Promise.resolve(),
           },
         },
         {
@@ -39,8 +29,20 @@ describe('GroupsDetailComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
+              paramMap: {
+                get: (key: string) => {
+                  if (key === 'groupId') {
+                    return '5';
+                  }
+                  return null;
+                },
+              },
               data: {
                 userId: 1,
+                users: [
+                  { value: 1, label: 'Test User (test@example.com)' },
+                  { value: 2, label: 'Sample User (sample@example.com)' },
+                ],
                 groupResolvedData: {
                   group: {
                     id: 5,
@@ -70,25 +72,7 @@ describe('GroupsDetailComponent', () => {
                       lastname: 'User',
                     },
                   ],
-                  tasks: [
-                    {
-                      id: 2,
-                      title: 'Write tests',
-                      description: 'Add coverage for task detail',
-                      due_date: '2024-06-15T12:30:00',
-                      priority: 'HIGH',
-                      status: 'OPEN',
-                      category: 'Testing',
-                      tags: ['frontend', 'priority'],
-                      created_by_id: 1,
-                      assignee_ids: [1],
-                      created_at: '2024-06-10T09:00:00',
-                      updated_at: '2024-06-12T10:00:00',
-                      last_status_change_at: '2024-06-11T08:00:00',
-                      group_id: 5,
-                      tagsHashColor: '#22d3ee',
-                    },
-                  ],
+                  tasks: [],
                 },
               },
             },
@@ -98,7 +82,7 @@ describe('GroupsDetailComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GroupsDetailComponent);
+    fixture = TestBed.createComponent(GroupsEditComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

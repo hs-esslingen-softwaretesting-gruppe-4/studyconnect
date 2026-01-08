@@ -113,6 +113,7 @@ public class TaskService {
    * @return a ResponseEntity containing the updated task's response DTO
    * @throws NotFoundException if the task or any user is not found
    */
+  @Transactional
   public ResponseEntity<TaskResponseDTO> updateTask(Long taskId, TaskRequestDTO taskRequestDTO) {
     Task existingTask =
         taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
@@ -138,5 +139,21 @@ public class TaskService {
     Task savedTask = taskRepository.save(existingTask);
     TaskResponseDTO taskResponseDTO = taskResponseMapper.toDto(savedTask);
     return ResponseEntity.ok(taskResponseDTO);
+  }
+
+  /**
+   * Unassigns a user from all tasks within a specific group.
+   *
+   * @param userId the ID of the user to unassign
+   * @param groupId the ID of the group
+   */
+  @Transactional
+  public void unassignUserFromAllTasksInGroup(Long userId, Long groupId) {
+    List<Task> tasks = taskRepository.findByGroupIdAndAssigneesId(groupId, userId);
+    User user =
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+    for (Task task : tasks) {
+      task.getAssignees().remove(user);
+    }
   }
 }

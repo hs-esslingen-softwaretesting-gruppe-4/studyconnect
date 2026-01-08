@@ -1,0 +1,227 @@
+<section class="task-edit">
+  <header class="task-edit__toolbar">
+    <div class="task-edit__title">
+      @if (task(); as task) {
+        <h1>Edit task — {{ task.title }}</h1>
+        <p>Update task details for the group.</p>
+      } @else {
+        <h1>Edit task</h1>
+      }
+    </div>
+    <button mat-stroked-button color="primary" type="button" (click)="backToTaskDetail()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to task
+    </button>
+  </header>
+
+  @if (task(); as task) {
+    @if (showNotAMember()) {
+      <div class="task-edit__blocked">
+        <img
+          src="assets/stop.gif"
+          alt="Stop sign"
+          class="task-edit__blocked-image"
+        />
+        <p class="task-edit__blocked-text">
+          You are not a member of this group and therefore cannot edit tasks.
+        </p>
+      </div>
+    } @else {
+      <mat-card class="task-edit__card">
+        <mat-card-content>
+          <form class="task-edit__form" [formGroup]="taskForm" (ngSubmit)="submit()">
+            <div class="task-edit__grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" placeholder="Task title" />
+                @if (taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched) {
+                  <mat-error>Title is required.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (option of statusOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="task-edit__grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Priority</mat-label>
+                <mat-select formControlName="priority">
+                  @for (option of priorityOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <input matInput formControlName="category" placeholder="Optional category" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                formControlName="description"
+                placeholder="Describe the task"
+              ></textarea>
+            </mat-form-field>
+
+            <div class="task-edit__grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Due date</mat-label>
+                <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+                <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #dueDatePicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Due time</mat-label>
+                <input matInput [matTimepicker]="dueTimePicker" formControlName="dueTime" />
+                <mat-timepicker-toggle matIconSuffix [for]="dueTimePicker"></mat-timepicker-toggle>
+                <mat-timepicker #dueTimePicker></mat-timepicker>
+              </mat-form-field>
+            </div>
+
+            <section class="task-edit__section">
+              <div class="task-edit__section-header">
+                <div>
+                  <h3>Assignees</h3>
+                  <p class="task-edit__section-subtitle">
+                    Assign members responsible for this task.
+                  </p>
+                </div>
+                <span class="task-edit__count">{{ assigneeIds().length }}</span>
+              </div>
+
+              <mat-form-field appearance="outline" class="task-edit__field--full">
+                <mat-label>Add assignees</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  [formControl]="assigneeSearchControl"
+                  [matAutocomplete]="assigneeAuto"
+                  placeholder="Search by name or email"
+                />
+                <mat-autocomplete
+                  #assigneeAuto="matAutocomplete"
+                  [displayWith]="displayMember"
+                  (optionSelected)="onAssigneeSelected($event)"
+                >
+                  @for (member of filteredAssignees(); track member.id) {
+                    <mat-option [value]="member">
+                      {{ member.firstname }} {{ member.lastname }} ({{ member.email }})
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+              @if (assigneeCards().length > 0) {
+                <div class="task-edit__cards">
+                  @for (assignee of assigneeCards(); track assignee.id) {
+                    <div class="task-edit__user-card">
+                      <img
+                        class="task-edit__avatar"
+                        src="assets/profile_placeholder.png"
+                        alt="Profile placeholder"
+                      />
+                      <div class="task-edit__user-details">
+                        <span class="task-edit__user-name">{{ assignee.name }}</span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        type="button"
+                        aria-label="Remove assignee"
+                        (click)="removeAssignee(assignee.id)"
+                      >
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="task-edit__empty">No assignees added yet.</div>
+              }
+            </section>
+
+            <section class="task-edit__section">
+              <div class="task-edit__section-header">
+                <div>
+                  <h3>Tags</h3>
+                  <p class="task-edit__section-subtitle">
+                    Add tags one at a time.
+                  </p>
+                </div>
+                <span class="task-edit__count">{{ tags().length }}</span>
+              </div>
+
+              <mat-form-field appearance="outline" class="task-edit__field--full">
+                <mat-label>Add tag</mat-label>
+                <input
+                  matInput
+                  [formControl]="tagInputControl"
+                  placeholder="Press enter or click add"
+                  (keydown.enter)="$event.preventDefault(); addTag()"
+                />
+                <button mat-icon-button matSuffix type="button" (click)="addTag()" aria-label="Add tag">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </mat-form-field>
+
+              @if (tags().length > 0) {
+                <div class="task-edit__tags">
+                  @for (tag of tags(); track tag) {
+                    <div class="task-edit__tag" [style.backgroundColor]="tagColor(tag)">
+                      <span>{{ tag }}</span>
+                      <button
+                        mat-icon-button
+                        type="button"
+                        aria-label="Remove tag"
+                        (click)="removeTag(tag)"
+                      >
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="task-edit__empty">No tags added yet.</div>
+              }
+            </section>
+
+            @if (errorMessage()) {
+              <div class="task-edit__error">{{ errorMessage() }}</div>
+            }
+
+            <div class="task-edit__actions">
+              <button mat-stroked-button color="warn" type="button" (click)="deleteTask()">
+                Delete task
+              </button>
+              <button mat-stroked-button type="button" (click)="backToTaskDetail()">
+                Cancel
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="taskForm.invalid || isSubmitting()"
+              >
+                Save changes
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+  } @else {
+    <div class="task-edit__empty">Task details could not be loaded.</div>
+  }
+</section>

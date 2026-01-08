@@ -1,17 +1,132 @@
-<div class="dashboard-container">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Dashboard</mat-card-title>
-          <mat-card-subtitle>Welcome to StudyConnect</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>This is a placeholder dashboard component.</p>
-          <p>You are successfully authenticated!</p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-raised-button color="warn" (click)="logout()">
-            Logout
-          </button>
-        </mat-card-actions>
-      </mat-card>
+<section class="dashboard">
+  <header class="dashboard__header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="dashboard__subtitle">Track your tasks across all groups.</p>
     </div>
+    <span class="dashboard__pill">{{ userTasks()?.length ?? 0 }} tasks</span>
+  </header>
+
+  <mat-card class="dashboard__panel">
+    <mat-card-header>
+      <mat-card-title>Your tasks</mat-card-title>
+      <mat-card-subtitle>Grouped by status with the most urgent first.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (!hasTasks()) {
+        <div class="dashboard__empty">No tasks assigned yet.</div>
+      } @else {
+        <mat-tab-group class="dashboard__tabs" animationDuration="250ms">
+          @for (tab of taskStatusTabs; track tab.status) {
+            @let tasksForStatus = getTasksForStatus(tab.status);
+            <mat-tab [label]="tab.label">
+              <div class="dashboard__task-panel">
+                @if (tasksForStatus.length > 0) {
+                  <div class="dashboard__task-list">
+                    @for (task of tasksForStatus; track task.id) {
+                      <article
+                        class="dashboard__task-card"
+                        role="button"
+                        tabindex="0"
+                        (click)="navigateToTask(task.group_id, task.id)"
+                        (keydown.enter)="navigateToTask(task.group_id, task.id)"
+                      >
+                        <div class="dashboard__task-header">
+                          <h3 class="dashboard__task-title">{{ task.title }}</h3>
+                          <div class="dashboard__badges">
+                            <mat-form-field
+                              appearance="outline"
+                              class="dashboard__status-field"
+                              (click)="$event.stopPropagation()"
+                            >
+                              <mat-label>Status</mat-label>
+                              <mat-select
+                                [value]="task.status"
+                                [disabled]="isUpdatingTask(task.id)"
+                                (click)="$event.stopPropagation()"
+                                (selectionChange)="onStatusChange(task, $event.value)"
+                              >
+                                @for (option of taskStatusTabs; track option.status) {
+                                  <mat-option [value]="option.status">
+                                    {{ option.label }}
+                                  </mat-option>
+                                }
+                              </mat-select>
+                            </mat-form-field>
+                            <span
+                              class="dashboard__priority"
+                              [class.dashboard__priority--high]="task.priority === TaskPriority.High"
+                              [class.dashboard__priority--medium]="task.priority === TaskPriority.Medium"
+                              [class.dashboard__priority--low]="task.priority === TaskPriority.Low"
+                            >
+                              {{ priorityLabel(task.priority) }}
+                            </span>
+                            @if (isOverdue(task)) {
+                              <span class="dashboard__overdue">Overdue</span>
+                            }
+                          </div>
+                        </div>
+                        @if (task.description) {
+                          <p class="dashboard__task-description">{{ task.description }}</p>
+                        }
+                        <div class="dashboard__task-meta">
+                          <div class="dashboard__task-field">
+                            <span class="dashboard__task-label">Group</span>
+                            <span class="dashboard__task-value">
+                              {{ groupName(task.group_id) }}
+                            </span>
+                          </div>
+                          <div class="dashboard__task-field">
+                            <span class="dashboard__task-label">Created</span>
+                            <span class="dashboard__task-value">
+                              {{ task.created_at }}
+                            </span>
+                          </div>
+                          <div class="dashboard__task-field">
+                            <span class="dashboard__task-label">Due date</span>
+                            <span class="dashboard__task-value">
+                              @if (task.due_date) {
+                                {{ task.due_date }}
+                              } @else {
+                                No due date
+                              }
+                            </span>
+                          </div>
+                          <div class="dashboard__task-field">
+                            <span class="dashboard__task-label">Last status change</span>
+                            <span class="dashboard__task-value">
+                              {{ task.last_status_change_at ?? task.updated_at }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="dashboard__task-field">
+                          <span class="dashboard__task-label">Tags</span>
+                          @if (task.tags?.length) {
+                            <div class="dashboard__tags">
+                              @for (tag of task.tags; track tag) {
+                                <span
+                                  class="dashboard__tag"
+                                  [style.backgroundColor]="tagColor(tag)"
+                                >
+                                  {{ tag }}
+                                </span>
+                              }
+                            </div>
+                          } @else {
+                            <span class="dashboard__task-value">No tags</span>
+                          }
+                        </div>
+                      </article>
+                    }
+                  </div>
+                } @else {
+                  <div class="dashboard__empty">No tasks in this status yet.</div>
+                }
+              </div>
+            </mat-tab>
+          }
+        </mat-tab-group>
+      }
+    </mat-card-content>
+  </mat-card>
+</section>

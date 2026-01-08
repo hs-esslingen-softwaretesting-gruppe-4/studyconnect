@@ -14,10 +14,31 @@ export class TasksServiceWrapper {
 
   private static readonly categoryFallbackColor = "#9aa0a6";
 
+  private formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString('de-DE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }
+
   private toDisplayable(task: TaskResponse): TaskResponseDisplayable {
+    const formattedTask = { ...task };
+    formattedTask.created_at = this.formatDate(formattedTask.created_at);
+    formattedTask.updated_at = this.formatDate(formattedTask.updated_at);
+    if (formattedTask.last_status_change_at) {
+      formattedTask.last_status_change_at = this.formatDate(formattedTask.last_status_change_at);
+    }
+    if (formattedTask.due_date) {
+      formattedTask.due_date = this.formatDate(formattedTask.due_date);
+    }
     return {
-      ...task,
-      tagsHashColor: this.hashCategoryToColor(task.tags?.[0]),
+      ...formattedTask,
+      tagsHashColor: this.hashCategoryToColor(formattedTask.tags?.[0]),
     };
   }
 
@@ -71,6 +92,7 @@ export class TasksServiceWrapper {
    * @returns A promise that resolves to the updated TaskResponseDisplayable object.
    */
   public async updateTask(taskId: number, taskRequest: TaskRequest) : Promise<TaskResponseDisplayable> {
+
     const task = await lastValueFrom(this.tasksService.apiTasksTaskIdPut(taskId, taskRequest));
     return this.toDisplayable(task);
   }
@@ -91,5 +113,11 @@ export class TasksServiceWrapper {
   public async getTaskForUser(userId: number) : Promise<TaskResponseDisplayable[]> {
     const tasks = await lastValueFrom(this.tasksService.apiTasksUsersUserIdGet(userId));
     return tasks.map((task) => this.toDisplayable(task));
+  }
+
+  public async getTaskById(groupId: number, taskId: number) : Promise<TaskResponseDisplayable> {
+    const tasks = await lastValueFrom(this.tasksService.apiTasksGroupsGroupIdGet(groupId));
+    const task = tasks.find(task => task.id === taskId) as TaskResponseDisplayable;
+    return this.toDisplayable(task);
   }
 }

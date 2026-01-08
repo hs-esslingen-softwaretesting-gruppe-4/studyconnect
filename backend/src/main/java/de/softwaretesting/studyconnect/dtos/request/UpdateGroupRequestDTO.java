@@ -19,4 +19,6 @@ public class UpdateGroupRequestDTO {
   private Set<Long> memberIds;
 
   private Set<Long> adminIds;
+
+  private Integer maxMembers;
 }

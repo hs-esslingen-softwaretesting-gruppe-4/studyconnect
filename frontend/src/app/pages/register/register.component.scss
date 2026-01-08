@@ -1,47 +1,112 @@
-.register-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-color: #f5f5f5;
-      padding: 16px;
-    }
+.register {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--sc-bg);
+}
 
-    .register-card {
-      max-width: 450px;
-      width: 100%;
-    }
+.register__card {
+  width: min(520px, 100%);
+  border-radius: 24px;
+  border: 1px solid var(--sc-border);
+  background: var(--sc-card-bg);
+  box-shadow: 0 12px 24px var(--sc-shadow);
+}
 
-    mat-card-header {
-      margin-bottom: 24px;
-    }
+.register__card-header {
+  margin-bottom: 20px;
+}
 
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
+.register__brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-    .submit-button {
-      height: 48px;
-      margin-top: 8px;
-    }
+.register__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid var(--sc-border);
+  box-shadow: 0 8px 16px var(--sc-shadow);
+}
 
-    .submit-button mat-spinner {
-      margin: 0 auto;
-    }
+.register__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-    .login-link {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 14px;
-    }
+.register__title {
+  color: var(--sc-navy);
+  letter-spacing: 0.2px;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
 
-    .login-link a {
-      color: #3f51b5;
-      text-decoration: none;
-      font-weight: 500;
-    }
+.register__subtitle {
+  color: rgba(17, 73, 106, 0.7);
+}
 
-    .login-link a:hover {
-      text-decoration: underline;
-    }
+.register__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.register__form mat-form-field {
+  width: 100%;
+}
+
+.register__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.register__submit {
+  width: 100%;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.register__submit mat-spinner {
+  margin: 0;
+}
+
+.register__link {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: rgba(17, 73, 106, 0.7);
+}
+
+.register__link a {
+  color: var(--sc-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register__link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .register {
+    padding: 16px;
+  }
+
+  .register__card {
+    border-radius: 20px;
+  }
+
+  .register__brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

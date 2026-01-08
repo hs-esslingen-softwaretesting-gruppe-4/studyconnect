@@ -12,6 +12,70 @@
   justify-content: flex-start;
 }
 
+.group-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.group-detail__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.group-detail__invite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.group-detail__invite-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(17, 73, 106, 0.6);
+  font-weight: 600;
+}
+
+.group-detail__invite-code {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(40, 167, 198, 0.12);
+  color: var(--sc-blue);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.group-detail__invite-code mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.group-detail__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.group-detail__admin-trigger,
+.group-detail__leave-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .group-detail__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -124,6 +188,19 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.group-detail__task-card:hover {
+  border-color: var(--sc-blue);
+  box-shadow: 0 12px 24px var(--sc-shadow);
+  transform: translateY(-2px);
+}
+
+.group-detail__task-card:focus {
+  outline: 2px solid var(--sc-blue);
+  outline-offset: 2px;
 }
 
 .group-detail__task-header {
@@ -131,6 +208,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.group-detail__task-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.group-detail__status-field {
+  width: 160px;
 }
 
 .group-detail__task-title {
@@ -292,6 +381,10 @@
 
   .group-detail__sidebar {
     position: static;
+  }
+
+  .group-detail__status-field {
+    width: 100%;
   }
 }
 

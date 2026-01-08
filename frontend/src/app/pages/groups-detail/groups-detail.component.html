@@ -41,11 +41,65 @@
       <div class="group-detail__layout">
         <div class="group-detail__main">
           <mat-card class="group-detail__card">
-            <mat-card-header>
-              <mat-card-title>{{ group.name }}</mat-card-title>
-              <mat-card-subtitle>
-                {{ group.description ?? 'No description provided.' }}
-              </mat-card-subtitle>
+            <mat-card-header class="group-detail__header">
+              <div class="group-detail__header-text">
+                <mat-card-title>{{ group.name }}</mat-card-title>
+                <mat-card-subtitle>
+                  {{ group.description ?? 'No description provided.' }}
+                </mat-card-subtitle>
+                <div class="group-detail__invite">
+                  <span class="group-detail__invite-label">Invite code</span>
+                  <button
+                    mat-button
+                    type="button"
+                    class="group-detail__invite-code"
+                    (click)="copyInviteCode()"
+                  >
+                    {{ group.invite_code }}
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="group-detail__header-actions">
+                @if(!isAdmin()) {
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    type="button"
+                    class="group-detail__leave-group"
+                    (click)="confirmLeaveGroup()"
+                  >
+                    <mat-icon>exit_to_app</mat-icon>
+                    Leave group
+                  </button>
+                }
+                @if(isAdmin()) {
+                  <button
+                    mat-stroked-button
+                    color="primary"
+                    type="button"
+                    class="group-detail__admin-trigger"
+                    [matMenuTriggerFor]="adminMenu"
+                  >
+                    <mat-icon>more_vert</mat-icon>
+                    Manage group
+                  </button>
+                  <mat-menu #adminMenu="matMenu">
+                    <button mat-menu-item type="button" (click)="goToEditGroup()">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit group</span>
+                    </button>
+                    <button mat-menu-item type="button" (click)="confirmLeaveGroup()">
+                      <mat-icon>exit_to_app</mat-icon>
+                      <span>Leave group</span>
+                    </button>
+                    <button mat-menu-item type="button" (click)="confirmDeleteGroup()">
+                      <mat-icon>delete</mat-icon>
+                      <span>Delete group</span>
+                    </button>
+                  </mat-menu>
+                }
+              </div>
             </mat-card-header>
             <mat-card-content>
               <div class="group-detail__section">
@@ -77,17 +131,44 @@
                         @if (getVisibleTasksForStatus(tab.status).length > 0) {
                           <div class="group-detail__task-list">
                             @for (task of getVisibleTasksForStatus(tab.status); track task.id) {
-                              <article class="group-detail__task-card">
+                              <article
+                                class="group-detail__task-card"
+                                role="button"
+                                tabindex="0"
+                                (click)="openTask(task.id)"
+                                (keydown.enter)="openTask(task.id)"
+                              >
                                 <div class="group-detail__task-header">
                                   <h3 class="group-detail__task-title">{{ task.title }}</h3>
-                                  <span
-                                    class="group-detail__priority"
-                                    [class.group-detail__priority--high]="task.priority === TaskPriority.High"
-                                    [class.group-detail__priority--medium]="task.priority === TaskPriority.Medium"
-                                    [class.group-detail__priority--low]="task.priority === TaskPriority.Low"
-                                  >
-                                    {{ priorityLabel(task.priority) }}
-                                  </span>
+                                  <div class="group-detail__task-header-actions">
+                                    <mat-form-field
+                                      appearance="outline"
+                                      class="group-detail__status-field"
+                                      (click)="$event.stopPropagation()"
+                                    >
+                                      <mat-label>Status</mat-label>
+                                      <mat-select
+                                        [value]="task.status"
+                                        [disabled]="isUpdatingTask(task.id)"
+                                        (click)="$event.stopPropagation()"
+                                        (selectionChange)="onStatusChange(task, $event.value)"
+                                      >
+                                        @for (option of taskStatusTabs; track option.status) {
+                                          <mat-option [value]="option.status">
+                                            {{ option.label }}
+                                          </mat-option>
+                                        }
+                                      </mat-select>
+                                    </mat-form-field>
+                                    <span
+                                      class="group-detail__priority"
+                                      [class.group-detail__priority--high]="task.priority === TaskPriority.High"
+                                      [class.group-detail__priority--medium]="task.priority === TaskPriority.Medium"
+                                      [class.group-detail__priority--low]="task.priority === TaskPriority.Low"
+                                    >
+                                      {{ priorityLabel(task.priority) }}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div class="group-detail__task-meta">
                                   <div class="group-detail__task-field">
@@ -99,13 +180,23 @@
                                   <div class="group-detail__task-field">
                                     <span class="group-detail__task-label">Created</span>
                                     <span class="group-detail__task-value">
-                                      {{ task.created_at | date: 'mediumDate' }}
+                                      {{ task.created_at }}
+                                    </span>
+                                  </div>
+                                  <div class="group-detail__task-field">
+                                    <span class="group-detail__task-label">Due date</span>
+                                    <span class="group-detail__task-value">
+                                      @if (task.due_date) {
+                                        {{ task.due_date }}
+                                      } @else {
+                                        -
+                                      }
                                     </span>
                                   </div>
                                   <div class="group-detail__task-field">
                                     <span class="group-detail__task-label">Last status change</span>
                                     <span class="group-detail__task-value">
-                                      {{ (task.last_status_change_at ?? task.updated_at) | date: 'mediumDate' }}
+                                      {{ (task.last_status_change_at ?? task.updated_at) }}
                                     </span>
                                   </div>
                                 </div>

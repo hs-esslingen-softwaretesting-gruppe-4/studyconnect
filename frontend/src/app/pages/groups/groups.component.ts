@@ -41,6 +41,9 @@ export class GroupsComponent implements OnInit {
   searchResults = signal<GroupResponse[]>([]);
   isSearching = signal(false);
   joiningGroupIds = signal<Set<number>>(new Set<number>());
+  showInviteJoinForm = signal(false);
+  inviteCodeInput = signal('');
+  joinByInviteLoading = signal(false);
 
   hasJoinedGroups = computed(() => this.userGroups().length > 0);
   hasSuggestedGroups = computed(() => this.suggestedGroups().length > 0);
@@ -140,6 +143,18 @@ export class GroupsComponent implements OnInit {
     this.router.navigate(['/groups/create']);
   }
 
+  toggleInviteJoinForm(): void {
+    this.showInviteJoinForm.update(current => !current);
+    if (!this.showInviteJoinForm()) {
+      this.inviteCodeInput.set('');
+    }
+  }
+
+  onInviteCodeInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.inviteCodeInput.set(target?.value ?? '');
+  }
+
   canJoinGroup(group: GroupResponse): boolean {
     const userId = this.userId();
     if (userId === undefined) {
@@ -220,5 +235,44 @@ export class GroupsComponent implements OnInit {
     }
 
     return `${baseMessage} Please try again.`;
+  }
+
+  joinGroupByInviteCode(inviteCode: string): void {
+    const trimmed = inviteCode.trim();
+    const userId = this.userId();
+    if (!trimmed || userId === undefined || this.joinByInviteLoading()) {
+      if (userId === undefined) {
+        this.openStatusDialog({
+          title: 'Join unavailable',
+          message: 'Please sign in before joining a group.',
+          type: 'error',
+          autoCloseMs: 5000,
+        });
+      }
+      return;
+    }
+
+    this.joinByInviteLoading.set(true);
+
+    this.groupsService.joinGroupByInviteCode(trimmed, userId).then(() => {
+      this.loadAllData();
+      this.inviteCodeInput.set('');
+      this.showInviteJoinForm.set(false);
+      this.openStatusDialog({
+        title: 'Joined group',
+        message: `You have successfully joined the group.`,
+        type: 'success',
+        autoCloseMs: 5000,
+      });
+    }).catch((error) => {
+      this.openStatusDialog({
+        title: 'Join failed',
+        message: this.getJoinGroupErrorMessage(error, 'the group'),
+        type: 'error',
+        autoCloseMs: 5000,
+      });
+    }).finally(() => {
+      this.joinByInviteLoading.set(false);
+    });
   }
 }

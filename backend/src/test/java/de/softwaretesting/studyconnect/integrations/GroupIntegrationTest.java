@@ -12,6 +12,7 @@ import de.softwaretesting.studyconnect.models.User;
 import de.softwaretesting.studyconnect.repositories.GroupRepository;
 import de.softwaretesting.studyconnect.repositories.UserRepository;
 import de.softwaretesting.studyconnect.services.GroupService;
+import de.softwaretesting.studyconnect.services.TaskService;
 import de.softwaretesting.studyconnect.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ class GroupIntegrationTest {
         new GroupService(
             groupRepository,
             userService,
+            mock(TaskService.class),
             mock(CreateGroupRequestMapper.class),
             mock(GroupResponseMapper.class));
 

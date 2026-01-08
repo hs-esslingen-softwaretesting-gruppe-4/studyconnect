@@ -27,6 +27,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
   Optional<Group> findByName(String name);
 
+  @Query("select g from Group g join g.members m where m.id = :userId order by g.updatedAt desc")
   Optional<List<Group>> findByMembersId(Long userId);
 
   Optional<Group> findByInviteCode(String inviteCode);

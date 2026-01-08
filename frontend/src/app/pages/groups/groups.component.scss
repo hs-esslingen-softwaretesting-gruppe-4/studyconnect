@@ -16,6 +16,13 @@
   gap: 16px;
 }
 
+.groups__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .groups__header h1 {
   color: var(--sc-navy);
   letter-spacing: 0.3px;
@@ -29,6 +36,24 @@
 
 .groups__tabs {
   background: transparent;
+}
+
+.groups__invite-card {
+  border: 1px solid var(--sc-border);
+  background: var(--sc-card-bg);
+  box-shadow: 0 12px 24px var(--sc-shadow);
+}
+
+.groups__invite-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.groups__invite-field {
+  flex: 1 1 320px;
+  min-width: 220px;
 }
 
 .groups__panel {

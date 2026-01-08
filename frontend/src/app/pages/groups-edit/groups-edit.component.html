@@ -1,0 +1,225 @@
+<section class="groups-edit">
+  <header class="groups-edit__header">
+    <div>
+      <h1>Edit Group {{ group()?.name }}</h1>
+      <p class="groups-edit__subtitle">
+        Update the group's settings, members, and admins.
+      </p>
+    </div>
+    <button mat-stroked-button color="primary" type="button" (click)="backToGroupDetail()">
+      Back to group
+    </button>
+  </header>
+
+  @if (!isAdmin()) {
+    <div class="groups-edit__blocked">
+      <img
+        src="assets/stop.gif"
+        alt="Stop sign"
+        class="groups-edit__blocked-image"
+      />
+      <p class="groups-edit__blocked-text">
+        You are not an admin for this group, so you cannot access this page.
+      </p>
+    </div>
+  } @else if (group(); as group) {
+    <mat-card class="groups-edit__card">
+      <mat-card-content>
+        <form class="groups-edit__form" [formGroup]="editGroupForm" (ngSubmit)="onSubmit()">
+          <div class="groups-edit__grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Group name</mat-label>
+              <input
+                matInput
+                formControlName="name"
+                placeholder="e.g. Software Testing Crew"
+              />
+              @if (editGroupForm.get('name')?.hasError('required') && editGroupForm.get('name')?.touched) {
+                <mat-error>Group name is required.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Visibility</mat-label>
+              <mat-select formControlName="is_public">
+                <mat-option [value]="true">Public</mat-option>
+                <mat-option [value]="false">Private</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Max members</mat-label>
+              <input
+                matInput
+                type="number"
+                min="2"
+                formControlName="max_members"
+                placeholder="e.g. 20"
+              />
+              <mat-hint>Minimum 2 members.</mat-hint>
+              @if (editGroupForm.get('max_members')?.hasError('required') && editGroupForm.get('max_members')?.touched) {
+                <mat-error>Max members is required.</mat-error>
+              } @else if (editGroupForm.get('max_members')?.hasError('min') && editGroupForm.get('max_members')?.touched) {
+                <mat-error>Enter a number of at least 2.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="groups-edit__field--full">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              formControlName="description"
+              placeholder="Share what this group is about (max. 255 characters)."
+              maxlength="255"
+            ></textarea>
+          </mat-form-field>
+
+          <section class="groups-edit__section">
+            <div class="groups-edit__section-header">
+              <div>
+                <h2>Members</h2>
+                <p class="groups-edit__section-subtitle">
+                  Manage who can access this group.
+                </p>
+              </div>
+              <span class="groups-edit__count">{{ members().length }}</span>
+            </div>
+
+            <mat-form-field appearance="outline" class="groups-edit__field--full">
+              <mat-label>Add members</mat-label>
+              <input
+                matInput
+                type="text"
+                [formControl]="memberSearchControl"
+                [matAutocomplete]="memberAuto"
+                placeholder="Search by name or email"
+              />
+              <mat-autocomplete
+                #memberAuto="matAutocomplete"
+                [displayWith]="displayAutocompleteLabel"
+                (optionSelected)="onMemberSelected($event)"
+              >
+                @for (option of filteredMemberOptions(); track option.value) {
+                  <mat-option [value]="option">{{ option.label }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-hint>Select a person to add them.</mat-hint>
+            </mat-form-field>
+
+            @if (memberCards().length > 0) {
+              <div class="groups-edit__cards">
+                @for (member of memberCards(); track member.id) {
+                  <div class="groups-edit__user-card">
+                    <img
+                      class="groups-edit__avatar"
+                      src="assets/profile_placeholder.png"
+                      alt="Profile placeholder"
+                    />
+                    <div class="groups-edit__user-details">
+                      <span class="groups-edit__user-name">{{ member.name }}</span>
+                    </div>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      aria-label="Remove member"
+                      (click)="removeMember(member.id)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="groups-edit__empty">No members added yet.</div>
+            }
+          </section>
+
+          <section class="groups-edit__section">
+            <div class="groups-edit__section-header">
+              <div>
+                <h2>Admins</h2>
+                <p class="groups-edit__section-subtitle">
+                  Assign who can manage this group.
+                </p>
+              </div>
+              <span class="groups-edit__count">{{ admins().length }}</span>
+            </div>
+
+            <mat-form-field appearance="outline" class="groups-edit__field--full">
+              <mat-label>Add admins</mat-label>
+              <input
+                matInput
+                type="text"
+                [formControl]="adminSearchControl"
+                [matAutocomplete]="adminAuto"
+                placeholder="Search by name or email"
+              />
+              <mat-autocomplete
+                #adminAuto="matAutocomplete"
+                [displayWith]="displayAutocompleteLabel"
+                (optionSelected)="onAdminSelected($event)"
+              >
+                @for (option of filteredAdminOptions(); track option.value) {
+                  <mat-option [value]="option">{{ option.label }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-hint>Select a person to add them.</mat-hint>
+            </mat-form-field>
+
+            @if (adminCards().length > 0) {
+              <div class="groups-edit__cards">
+                @for (admin of adminCards(); track admin.id) {
+                  <div class="groups-edit__user-card">
+                    <img
+                      class="groups-edit__avatar"
+                      src="assets/profile_placeholder.png"
+                      alt="Profile placeholder"
+                    />
+                    <div class="groups-edit__user-details">
+                      <span class="groups-edit__user-name">{{ admin.name }}</span>
+                    </div>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      aria-label="Remove admin"
+                      (click)="removeAdmin(admin.id)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="groups-edit__empty">No admins added yet.</div>
+            }
+          </section>
+
+          <div class="groups-edit__actions">
+            <button
+              mat-stroked-button
+              color="primary"
+              type="button"
+              (click)="backToGroupDetail()"
+            >
+              Cancel
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="editGroupForm.invalid || isSubmitting()"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="groups-edit__empty">
+      Group details could not be loaded.
+    </div>
+  }
+</section>

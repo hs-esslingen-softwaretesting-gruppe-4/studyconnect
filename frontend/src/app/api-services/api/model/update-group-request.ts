@@ -15,4 +15,5 @@ export interface UpdateGroupRequest {
     is_public?: boolean;
     member_ids?: Array<number>;
     admin_ids?: Array<number>;
+    max_members?: number;
 }
