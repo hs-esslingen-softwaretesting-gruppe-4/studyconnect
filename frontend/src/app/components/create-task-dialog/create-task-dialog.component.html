@@ -68,10 +68,9 @@
         <input
           matInput
           type="text"
-          required
           [formControl]="assigneeSearchControl"
           [matAutocomplete]="assigneeAuto"
-          placeholder="Search by name or email"
+          placeholder="Add atleast 1 assignee, search by name or email"
         />
         <mat-autocomplete
           #assigneeAuto="matAutocomplete"
