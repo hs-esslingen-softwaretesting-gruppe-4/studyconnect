@@ -220,7 +220,7 @@ export class GroupsComponent implements OnInit {
   }
 
   private getJoinGroupErrorMessage(error: unknown, groupName: string): string {
-    const baseMessage = `We could not join "${groupName}".`;
+    const baseMessage = `Could not join "${groupName}".`;
     if (!error || typeof error !== 'object') {
       return `${baseMessage} Please try again.`;
     }
