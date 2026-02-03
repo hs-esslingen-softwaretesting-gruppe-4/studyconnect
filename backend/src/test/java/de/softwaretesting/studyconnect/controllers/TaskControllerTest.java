@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UpdateTaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;
 import de.softwaretesting.studyconnect.models.Task;
 import de.softwaretesting.studyconnect.services.TaskService;
@@ -141,9 +142,9 @@ class TaskControllerTest {
   void shouldUpdateTaskSuccessfully() throws Exception {
     // Given
     Long taskId = 1L;
-    TaskRequestDTO requestDTO = createValidTaskRequestDTO();
+    UpdateTaskRequestDTO requestDTO = createValidUpdateTaskRequestDTO();
     TaskResponseDTO responseDTO = createTaskResponseDTO();
-    given(taskService.updateTask(eq(taskId), any(TaskRequestDTO.class)))
+    given(taskService.updateTask(eq(taskId), any(UpdateTaskRequestDTO.class)))
         .willReturn(ResponseEntity.ok(responseDTO));
 
     // When & Then
@@ -157,7 +158,7 @@ class TaskControllerTest {
         .andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("Test Task 1"));
 
-    verify(taskService).updateTask(eq(taskId), any(TaskRequestDTO.class));
+    verify(taskService).updateTask(eq(taskId), any(UpdateTaskRequestDTO.class));
   }
 
   @Test
@@ -165,7 +166,7 @@ class TaskControllerTest {
   void shouldFailToUpdateTaskWithInvalidData() throws Exception {
     // Given
     Long taskId = 1L;
-    TaskRequestDTO invalidRequestDTO = createInvalidTaskRequestDTO();
+    UpdateTaskRequestDTO invalidRequestDTO = createInvalidUpdateTaskRequestDTO();
 
     // When & Then
     mockMvc
@@ -213,6 +214,19 @@ class TaskControllerTest {
         Set.of(1L, 2L));
   }
 
+  private UpdateTaskRequestDTO createValidUpdateTaskRequestDTO() {
+    return new UpdateTaskRequestDTO(
+        "Updated Task Title",
+        "Updated Description",
+        LocalDateTime.now().plusDays(2),
+        Task.Priority.MEDIUM,
+        Task.Status.IN_PROGRESS,
+        "Updated Category",
+        Set.of("tag3"),
+        1L,
+        Set.of(2L, 3L));
+  }
+
   private TaskRequestDTO createInvalidTaskRequestDTO() {
     return new TaskRequestDTO(
         "", // Invalid: blank title
@@ -222,6 +236,19 @@ class TaskControllerTest {
         Task.Status.OPEN,
         "Test Category",
         Set.of("tag1"),
+        null, // Invalid: null creator ID
+        Set.of()); // Invalid: empty assignee set
+  }
+
+  private UpdateTaskRequestDTO createInvalidUpdateTaskRequestDTO() {
+    return new UpdateTaskRequestDTO(
+        "", // Invalid: blank title
+        "Updated Description",
+        LocalDateTime.now().minusDays(1), // Invalid: past due date
+        null, // Invalid: null priority
+        Task.Status.IN_PROGRESS,
+        "Updated Category",
+        Set.of("tag3"),
         null, // Invalid: null creator ID
         Set.of()); // Invalid: empty assignee set
   }

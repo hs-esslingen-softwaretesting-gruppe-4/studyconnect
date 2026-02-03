@@ -1,9 +1,11 @@
 package de.softwaretesting.studyconnect.services;
 
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UpdateTaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.mappers.request.TaskRequestMapper;
+import de.softwaretesting.studyconnect.mappers.request.UpdateTaskRequestMapper;
 import de.softwaretesting.studyconnect.mappers.response.TaskResponseMapper;
 import de.softwaretesting.studyconnect.models.Task;
 import de.softwaretesting.studyconnect.models.User;
@@ -28,6 +30,7 @@ public class TaskService {
   private final GroupRepository groupRepository;
   private final TaskRequestMapper taskRequestMapper;
   private final TaskResponseMapper taskResponseMapper;
+  private final UpdateTaskRequestMapper updateTaskRequestMapper;
 
   /**
    * Creates a new task in the specified group.
@@ -114,7 +117,8 @@ public class TaskService {
    * @throws NotFoundException if the task or any user is not found
    */
   @Transactional
-  public ResponseEntity<TaskResponseDTO> updateTask(Long taskId, TaskRequestDTO taskRequestDTO) {
+  public ResponseEntity<TaskResponseDTO> updateTask(
+      Long taskId, UpdateTaskRequestDTO taskRequestDTO) {
     Task existingTask =
         taskRepository.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
 
@@ -135,7 +139,6 @@ public class TaskService {
     existingTask.getAssignees().addAll(assignees);
     existingTask.getTags().clear();
     existingTask.getTags().addAll(taskRequestDTO.getTags());
-
     Task savedTask = taskRepository.save(existingTask);
     TaskResponseDTO taskResponseDTO = taskResponseMapper.toDto(savedTask);
     return ResponseEntity.ok(taskResponseDTO);

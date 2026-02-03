@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UpdateTaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;
 import de.softwaretesting.studyconnect.exceptions.NotFoundException;
 import de.softwaretesting.studyconnect.mappers.request.TaskRequestMapper;
@@ -53,6 +54,7 @@ class TaskServiceTest {
   @InjectMocks private TaskService taskService;
 
   private TaskRequestDTO taskRequestDTO;
+  private UpdateTaskRequestDTO updateTaskRequestDTO;
   private Task task;
   private Task savedTask;
   private TaskResponseDTO taskResponseDTO;
@@ -92,6 +94,19 @@ class TaskServiceTest {
     Set<String> tags = new HashSet<>(Set.of("urgent", "homework"));
     taskRequestDTO =
         new TaskRequestDTO(
+            "Test Task",
+            "Test Description",
+            LocalDateTime.now().plusDays(7),
+            Priority.HIGH,
+            Status.OPEN,
+            "Category",
+            tags,
+            1L,
+            assigneeIds);
+
+    // Set up update task request DTO
+    updateTaskRequestDTO =
+        new UpdateTaskRequestDTO(
             "Test Task",
             "Test Description",
             LocalDateTime.now().plusDays(7),
@@ -420,8 +435,8 @@ class TaskServiceTest {
     Long taskId = 1L;
     Set<Long> assigneeIds = new HashSet<>(Set.of(2L, 3L));
     Set<String> updatedTags = new HashSet<>(Set.of("updated", "important"));
-    TaskRequestDTO updateRequestDTO =
-        new TaskRequestDTO(
+    UpdateTaskRequestDTO updateRequestDTO =
+        new UpdateTaskRequestDTO(
             "Updated Task",
             "Updated Description",
             LocalDateTime.now().plusDays(14),
@@ -495,7 +510,7 @@ class TaskServiceTest {
         assertThrows(
             NotFoundException.class,
             () -> {
-              taskService.updateTask(taskId, taskRequestDTO);
+              taskService.updateTask(taskId, updateTaskRequestDTO);
             });
 
     assertEquals("Task not found", exception.getMessage());
@@ -521,7 +536,7 @@ class TaskServiceTest {
         assertThrows(
             NotFoundException.class,
             () -> {
-              taskService.updateTask(taskId, taskRequestDTO);
+              taskService.updateTask(taskId, updateTaskRequestDTO);
             });
 
     assertEquals("One or more assignee users not found", exception.getMessage());

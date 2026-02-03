@@ -1,6 +1,7 @@
 package de.softwaretesting.studyconnect.controllers;
 
 import de.softwaretesting.studyconnect.dtos.request.TaskRequestDTO;
+import de.softwaretesting.studyconnect.dtos.request.UpdateTaskRequestDTO;
 import de.softwaretesting.studyconnect.dtos.response.TaskResponseDTO;
 import de.softwaretesting.studyconnect.services.TaskService;
 import jakarta.validation.Valid;
@@ -43,7 +44,7 @@ public class TaskController {
 
   @PutMapping("/tasks/{taskId}")
   public ResponseEntity<TaskResponseDTO> updateTask(
-      @PathVariable("taskId") Long taskId, @Valid @RequestBody TaskRequestDTO task) {
+      @PathVariable("taskId") Long taskId, @Valid @RequestBody UpdateTaskRequestDTO task) {
     return taskService.updateTask(taskId, task);
   }
 
