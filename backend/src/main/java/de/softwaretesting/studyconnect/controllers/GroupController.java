@@ -80,16 +80,36 @@ public class GroupController {
     return groupService.updateGroup(groupId, dto);
   }
 
+  /**
+   * Deletes a group by its ID.
+   *
+   * @param groupId the ID of the group to delete
+   * @return a ResponseEntity with no content
+   */
   @DeleteMapping("/{groupId}")
   ResponseEntity<Void> deleteGroup(@PathVariable Long groupId) {
     return groupService.deleteGroup(groupId);
   }
 
+  /**
+   * Get members of a group by group ID.
+   *
+   * @param groupId the ID of the group
+   * @return a ResponseEntity containing a set of UserResponseDTOs representing the members of the
+   *     group
+   */
   @GetMapping("/{groupId}/members")
   ResponseEntity<Set<UserResponseDTO>> getMembersByGroupId(@PathVariable Long groupId) {
     return groupService.getMembersByGroupId(groupId);
   }
 
+  /**
+   * Get admins of a group by group ID.
+   *
+   * @param groupId the ID of the group
+   * @return a ResponseEntity containing a set of UserResponseDTOs representing the admins of the
+   *     group
+   */
   @GetMapping("/{groupId}/admins")
   ResponseEntity<Set<UserResponseDTO>> getAdminsByGroupId(@PathVariable Long groupId) {
     return groupService.getAdminsByGroupId(groupId);
